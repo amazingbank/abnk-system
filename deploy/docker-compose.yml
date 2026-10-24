@@ -1,0 +1,97 @@
+# Amazing Bank IT 系统 — 基础设施编排
+#
+# 阶段一：仅 PostgreSQL（Fineract 通过 gradle devRun 在宿主运行，便于断点调试）
+# 后续接入的系统（Kafka / Keycloak / 自有业务服务）在此追加 service，
+# 并同步登记到 .asdm/toolsets/abnk-harness-toolset/config.json 的 processes[]。
+#
+# 用法：
+#   cd abnk-system/deploy
+#   docker compose up -d          # 启动
+#   docker compose ps             # 查看状态
+#   docker compose logs -f abnk-pg
+#   docker compose down           # 停止并移除容器（数据卷保留）
+#   docker compose down -v        # 连数据卷一起删（危险：会清空数据库）
+
+# ⚠️ 必须显式固定项目名。
+# compose 默认以 compose 文件所在目录名（此处是 deploy）作为项目名，
+# 而 AOS 等其他项目也有 deploy/ 目录 —— 同名会导致 docker compose 把它们识别为
+# "本项目孤儿容器"，一旦执行 down / --remove-orphans 就会误停人家的服务。
+name: abnk-system
+
+services:
+  abnk-pg:
+    container_name: abnk-pg
+    image: postgres:${ABNK_PG_IMAGE_TAG:-18.3}
+    restart: unless-stopped
+
+    ports:
+      # 宿主 5432 → 容器 5432。若宿主已装有本地 PostgreSQL，改 ABNK_PG_PORT 规避。
+      - "${ABNK_PG_PORT:-5432}:5432"
+
+    environment:
+      # 账号刻意与 Fineract 代码默认值三方对齐，实现零环境变量覆盖：
+      #   1) application.properties 的 hikari 默认值
+      #   2) fineract-provider/build.gradle 中 createPGDB 任务的 pgUser / pgPassword
+      #   3) 本文件
+      POSTGRES_USER: ${ABNK_PG_USER:-root}
+      POSTGRES_PASSWORD: ${ABNK_PG_PASSWORD:-postgres}
+      POSTGRES_DB: ${ABNK_PG_DB:-root}
+      TZ: ${ABNK_TZ:-Asia/Shanghai}
+      # 不设 PGDATA —— PostgreSQL 18+ 镜像会自动使用版本化子目录 /var/lib/postgresql/18/data
+
+    # 开启 PostgreSQL 服务端日志收集，直接写到宿主的 logs/postgres.log。
+    # 这样 abnk-debugger 读 logs/postgres.log 就能看到真实的服务端日志
+    # （慢查询、连接异常、checkpoint 等），而不必去 docker compose logs。
+    # 覆盖 command 时必须保留首元素 postgres。
+    command:
+      - postgres
+      - -c
+      - logging_collector=on
+      - -c
+      - log_directory=/host-logs
+      - -c
+      - log_filename=postgres.log
+      - -c
+      - log_rotation_age=1d
+      - -c
+      - log_rotation_size=50MB
+      - -c
+      - log_min_messages=WARNING
+
+    volumes:
+      # ⚠️ PostgreSQL 18+ 约定：必须挂载到 /var/lib/postgresql（父目录），
+      # 而非旧的 /var/lib/postgresql/data。挂错会直接启动失败：
+      #   "Error: in 18+, these Docker images are configured to store database data
+      #    in a format which is compatible with pg_ctlcluster ..."
+      # 详见 https://github.com/docker-library/postgres/pull/1259
+      - abnk-pg-data:/var/lib/postgresql
+      # 宿主 logs/ 目录（相对 compose 文件位置解析：abnk-system/deploy/../../logs）
+      # 让 PostgreSQL 的日志落盘到工作区统一的日志目录
+      - ${ABNK_LOGS_DIR:-../../logs}:/host-logs
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${ABNK_PG_USER:-root}"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 20s
+
+volumes:
+  abnk-pg-data:
+    # 用 name 固定卷名，避免 compose 加上 abnk-system_ 项目前缀，
+    # 从而与 config.json / abnk-debugger 中记录的 abnk-pg-data 保持一致
+    name: abnk-pg-data
+
+# ─────────────────────────────────────────────────────────────
+# 后续系统接入模板（阶段二及以后按需启用）
+#
+#  kafka:
+#    container_name: abnk-kafka
+#    image: bitnami/kafka:latest
+#    ports: ["9092:9092"]
+#
+#  keycloak:
+#    container_name: abnk-keycloak
+#    image: quay.io/keycloak/keycloak:latest
+#    ports: ["8080:8080"]
+# ─────────────────────────────────────────────────────────────
