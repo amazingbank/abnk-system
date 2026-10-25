@@ -1,50 +1,52 @@
-# abnk-system
+# abnk-system — Amazing Bank 工程单体仓（Monorepo）
 
-Amazing Bank（ABNK）IT 系统的**基础设施编排**——容器化中间件与支撑服务的配置仓库。
+ABNK 的**全部工程交付物与中间产出物**都放本仓库，单一事实源、统一版本线。
 
-Fineract 核心账务引擎不在此仓库：它以 `gradle devRun` 运行在宿主（便于断点调试），代码在 `amazingbank/fineract`。本仓库只管**它依赖的中间件**。
+```
+amazingbank-ws/                      # 工作区（非 git 仓库）
+├── abnk-system/    ← 本仓库          # 交付物 + 中间产出物（monorepo）
+├── fineract/                         # Fineract fork（独立仓库，git@github.com:amazingbank/fineract）
+├── .asdm/                            # 工作区元数据：工具集 + 规划文档（独立仓库）
+└── logs/                             # 运行时日志（自动生成，不入库）
+```
 
-## 当前内容
+## 为什么 fineract 不是本仓的子目录
 
-| 服务 | 镜像 | 端口 | 用途 |
+Fineract fork 必须与上游 `develop` 保持**季度级 rebase**（ADR-001/002）。它作为独立仓库 + 独立版本线，rebase 面最小；若并入本仓，monorepo 的每次演进都会与上游合并冲突纠缠。**本仓 ↔ fineract 仓的唯一契约面**：API（603 端点）与 `custom/` 扩展点（见 `custom/README.md`）。
+
+## 目录结构
+
+| 目录 | 用途 | 引入阶段 | 状态 |
 |---|---|---|---|
-| `abnk-pg` | `postgres:18.3` | 5432 | 全系统唯一数据库宿主 |
+| `deploy/` | 基础设施编排（中间件容器运行配置） | Phase 0 | ✅ 活跃 |
+| `scripts/` | 工程脚本：API 封装库 + Phase 1 端到端冒烟 | Phase 1 | ✅ **当前活跃** |
+| `artifacts/` | 中间产出物：数据快照、行为基线报告（可复现的小文件入库） | Phase 1 | ✅ 活跃 |
+| `custom/` | `custom/abnk` 定制模块的**源**（与 fineract 仓的同步机制见其 README） | Phase 2 | 占位 |
+| `frontend/` | 三套前端（管理后台→柜面→网银/手机，ADR-005） | Phase 3 | 占位 |
+| `services/` | 外围服务（支付适配/通知/风控订阅，`event-bus` 落点） | Phase 4 | 占位 |
+
+## 入库纪律
+
+- **交付物**（代码/脚本/配置）：一律入库
+- **中间产出物**：可复现、可 diff 的小文件（JSON 快照/报告）入库到 `artifacts/`；大文件与本地路径相关产物由 `.gitignore` 排除
+- 产物目录按阶段命名：`artifacts/phase1/`、`artifacts/phase2/`...
+- **数据不入库**：数据库内容只存快照（导出 JSON），不存 dump
+
+## 与其他仓库的分工
+
+| 关注点 | 仓库 |
+|---|---|
+| 怎么起、怎么连、怎么排障（环境单一事实源） | `.asdm/toolsets/abnk-harness-toolset/config.json` |
+| 设计文档、决策记录 | `.asdm/workspace/docs/planning/abnk-design/` |
+| 核心引擎代码（fork，需 rebae 上游） | `fineract/` |
+| **其余一切工程产物** | **本仓库** |
+
+## 快速开始
 
 ```bash
+# 1) 起基础设施
 cd deploy && docker compose up -d
+# 2) 起 Fineract（宿主 devRun，见 .asdm 的环境基线文档）
+# 3) 跑 Phase 1 冒烟（12 步端到端）
+cd ../scripts/phase1 && python3 smoke_test.py
 ```
-
-详细命令、验证方法与踩坑说明见 [`deploy/README.md`](deploy/README.md)。
-
-## ⚠️ 克隆位置有要求
-
-`deploy/.env` 里的 `ABNK_LOGS_DIR=../../logs`，是**相对于 compose 文件位置**解析的，它把 PostgreSQL 服务端日志写到工作区统一的 `logs/postgres.log`（与 Fineract 的 `logs/fineract.log` 并列，`abnk-debugger` 依赖这个布局）。
-
-因此本仓库应克隆到工作区的 `abnk-system/` 位置：
-
-```
-amazingbank-ws/
-├── .asdm/          # git@github.com:amazingbank/amazingbank-asdm
-├── abnk-system/    # ← 本仓库，克隆到这里
-├── fineract/       # git@github.com:amazingbank/fineract（develop）
-└── logs/
-```
-
-若放在其他位置，改 `ABNK_LOGS_DIR` 为绝对路径即可：
-
-```bash
-# deploy/.env
-ABNK_LOGS_DIR=/Users/leixu/source/asdm/amazingbank-ws/logs
-```
-
-## 接入新系统
-
-后续系统（Kafka、Keycloak、自有业务服务……）在 `deploy/docker-compose.yml` 追加 service，并同步登记到 `.asdm/toolsets/abnk-harness-toolset/config.json` 的 `environments.local.processes[]`——`abnk-debugger` 的 action / spec 文档无需改动。
-
-## 与其他仓库的关系
-
-- 本仓库：中间件的**运行配置**（怎么起、怎么连）
-- `.asdm` 仓库：环境的**单一事实源**（进程清单、端口、鉴权、端点），引用本仓库的 compose 文件
-- `fineract` 仓库：业务代码
-
-三者独立演进。改动本仓库的容器名 / 卷名 / 端口时，**必须同步更新 `.asdm` 的 `config.json`**。

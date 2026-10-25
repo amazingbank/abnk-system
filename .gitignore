@@ -1,1 +1,17 @@
 .DS_Store
+
+# 环境与本地覆盖
+deploy/.env.local
+**/.env.local
+
+# 产物：只入库小 JSON 报告，排除运行中产物与临时文件
+artifacts/**/*.log
+artifacts/**/tmp/
+artifacts/**/*.dump
+
+# 数据快照默认入库（小 JSON）；大体积导出按需显式排除：
+# artifacts/**/*.csv
+
+# IDE
+.idea/
+.vscode/

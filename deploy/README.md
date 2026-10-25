@@ -1,12 +1,12 @@
 # abnk-system/deploy — 基础设施编排
 
-Amazing Bank IT 系统的基础设施配置。阶段一仅 PostgreSQL；Fineract 通过 `gradle devRun` 在宿主运行（便于断点调试），不进容器。
+> 2026-10-25 起本仓库升级为 **ABNK 工程单体仓**（见仓库根 README）。本目录职责收窄为：**中间件容器的运行配置**。工程脚本已移至 `../scripts/`，未来前端/外围服务/定制模块源分别有独立目录。
 
 ## 文件
 
 | 文件 | 作用 |
 |---|---|
-| `docker-compose.yml` | 服务编排（当前：`abnk-pg`） |
+| `docker-compose.yml` | 服务编排（当前：`abnk-pg`；预留 Kafka / Keycloak 接入模板） |
 | `.env` | 环境变量默认值（compose 自动读取） |
 | `.gitignore` | 排除 `.env.local` 与备份产物 |
 
@@ -18,7 +18,8 @@ cd abnk-system/deploy
 docker compose up -d          # 启动
 docker compose ps             # 查看状态（healthy 才可用）
 docker compose logs -f abnk-pg
-docker compose down           # 停止并移除容器（数据卷保留）
+docker compose stop           # 日常停止（容器保留）
+docker compose down           # 移除容器（数据卷保留）
 docker compose down -v        # 连数据卷一起删 ⚠️ 会清空数据库
 ```
 
@@ -55,9 +56,9 @@ Error: in 18+, these Docker images are configured to store database data
        in a format which is compatible with "pg_ctlcluster" ...
 ```
 
-**② 卷名用 `name:` 固定为 `abnk-pg-data`**
+**② compose 项目名与卷名固定**
 
-否则 compose 会加上项目前缀变成 `abnk-system_abnk-pg-data`，与 `.asdm/toolsets/abnk-harness-toolset/config.json` 及 `abnk-debugger` 中记录的名称不一致。
+`name: abnk-system`（防止与其他项目的 `deploy/` 目录撞名导致 `down` 误停他人容器）；卷名 `abnk-pg-data`（与 `.asdm` 的 config.json 记录一致）。
 
 ## 账号为什么是 root / postgres
 
@@ -69,6 +70,14 @@ Fineract 三处默认值原本就一致：
 
 这样本地调试**零环境变量覆盖**即可跑通。仓库自带的 `docker-compose-postgresql.yml` 用的是随机密码串，本地调试不采用。
 
-## 接入新系统
+## 日志布局
+
+容器开启 `logging_collector`，服务端日志直写工作区统一的 `logs/postgres.log`（按天轮转 / 50MB 切分），与 `logs/fineract.log` 并列——`abnk-debugger` 依赖该布局。**因此本仓库应克隆到 `amazingbank-ws/abnk-system/`**；放其他位置时把 `deploy/.env` 的 `ABNK_LOGS_DIR` 改为绝对路径。
+
+## 接入新中间件
 
 在 `docker-compose.yml` 的 services 追加一项 → 同步登记到 `.asdm/toolsets/abnk-harness-toolset/config.json` 的 `processes[]` → 从 `extensions.planned` 移除该项。**`abnk-debugger` 的 action / spec 文档无需改动。**
+
+## ⚠️ 运维警示（2026-10-25 实际发生）
+
+Docker 虚拟磁盘写满时，PG 会进入**崩溃循环**（日志反复出现 `PANIC: could not write to file "pg_logical/replorigin_checkpoint.tmp": No space left on device` + `all server processes terminated; reinitializing`），容器显示 `running (unhealthy)`。处置：`docker builder prune -f` + `docker image prune -f` 释放空间后 `docker compose restart abnk-pg`——数据可恢复（WAL 回放完整）。监控：`docker system df` 的 RECLAIMABLE 列。
