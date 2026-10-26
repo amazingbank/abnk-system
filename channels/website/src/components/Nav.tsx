@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ArrowUpRight, Landmark, Menu, X } from 'lucide-react';
+import { ArrowUpRight, Menu, X } from 'lucide-react';
 
 export const NAV_ITEMS = [
   { id: 'identity', label: '双重身份' },
@@ -9,11 +9,29 @@ export const NAV_ITEMS = [
   { id: 'principles', label: '理念' },
 ];
 
+// ASDM 官方 logo 图形（来源 asdm-ai-2026 public/images/logo——旋转矩形叠层）
+function AsdmMark({ className = '' }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 128 128" aria-hidden className={className} fill="none" stroke="currentColor">
+      <rect width="82" height="82" x="23" y="23" strokeWidth="5.5" opacity=".95" rx="13" transform="rotate(-24 64 64)" />
+      <rect width="72" height="72" x="28" y="28" strokeWidth="4.4" opacity=".88" rx="11.5" transform="rotate(-18 64 64)" />
+      <rect width="62" height="62" x="33" y="33" strokeWidth="3.4" opacity=".8" rx="10.5" transform="rotate(-12 64 64)" />
+      <rect width="54" height="54" x="37" y="37" strokeWidth="2.6" opacity=".72" rx="9.5" transform="rotate(-6 64 64)" />
+      <rect width="46" height="46" x="41" y="41" strokeWidth="1.9" opacity=".64" rx="8.5" />
+      <rect width="39" height="39" x="44.5" y="44.5" strokeWidth="1.35" opacity=".55" rx="7.5" transform="rotate(6 64 64)" />
+      <rect width="33" height="33" x="47.5" y="47.5" strokeWidth=".95" opacity=".46" rx="6.5" transform="rotate(12 64 64)" />
+      <rect width="27" height="27" x="50.5" y="50.5" strokeWidth=".65" opacity=".37" rx="5.5" transform="rotate(19 64 64)" />
+      <rect width="22" height="22" x="53" y="53" strokeWidth=".42" opacity=".27" rx="5" transform="rotate(27 64 64)" />
+      <rect width="17" height="17" x="55.5" y="55.5" strokeWidth=".26" opacity=".18" rx="4" transform="rotate(36 64 64)" />
+    </svg>
+  );
+}
+
 export function Logo({ className = '' }: { className?: string }) {
   return (
     <a href="#top" className={`group flex items-center gap-3 ${className}`} aria-label="Amazing Bank 首页">
       <span className="flex h-8 w-8 items-center justify-center border border-copper/70 transition-colors duration-500 group-hover:border-amber group-hover:bg-amber/10">
-        <Landmark className="h-4 w-4 text-amber" strokeWidth={1.5} />
+        <AsdmMark className="h-5 w-5 text-amber" />
       </span>
       <span className="flex flex-col leading-none">
         <span className="text-[15px] font-semibold tracking-[0.08em] text-warmwhite">ABNK</span>
