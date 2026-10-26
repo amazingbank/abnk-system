@@ -1,7 +1,15 @@
 .DS_Store
 
+# Python
+**/__pycache__/
+*.pyc
+
+# Node（channels/website 等前端）
+node_modules/
+dist/
+
 # 环境与本地覆盖
-deploy/.env.local
+deploy/compose/.env.local
 **/.env.local
 
 # 产物：只入库小 JSON 报告，排除运行中产物与临时文件

@@ -1,0 +1,135 @@
+import { useEffect, useState } from 'react';
+import { ArrowUpRight, Landmark, Menu, X } from 'lucide-react';
+
+export const NAV_ITEMS = [
+  { id: 'identity', label: '双重身份' },
+  { id: 'global', label: '全球路径' },
+  { id: 'asdm', label: 'ASDM 体系' },
+  { id: 'open', label: '开源范本' },
+  { id: 'principles', label: '理念' },
+];
+
+export function Logo({ className = '' }: { className?: string }) {
+  return (
+    <a href="#top" className={`group flex items-center gap-3 ${className}`} aria-label="Amazing Bank 首页">
+      <span className="flex h-8 w-8 items-center justify-center border border-copper/70 transition-colors duration-500 group-hover:border-amber group-hover:bg-amber/10">
+        <Landmark className="h-4 w-4 text-amber" strokeWidth={1.5} />
+      </span>
+      <span className="flex flex-col leading-none">
+        <span className="text-[15px] font-semibold tracking-[0.08em] text-warmwhite">ABNK</span>
+        <span className="mt-1 font-mono text-[9px] uppercase tracking-[0.28em] text-taupe-300">Amazing Bank</span>
+      </span>
+    </a>
+  );
+}
+
+export function Nav() {
+  const [scrolled, setScrolled] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [active, setActive] = useState('');
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 24);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  useEffect(() => {
+    const els = NAV_ITEMS.map((i) => document.getElementById(i.id)).filter(Boolean) as HTMLElement[];
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) setActive(e.target.id);
+        });
+      },
+      { rootMargin: '-45% 0px -50% 0px' },
+    );
+    els.forEach((el) => io.observe(el));
+    return () => io.disconnect();
+  }, []);
+
+  useEffect(() => {
+    document.body.style.overflow = open ? 'hidden' : '';
+  }, [open]);
+
+  return (
+    <header
+      className={`fixed inset-x-0 top-0 z-50 transition-all duration-500 ${
+        scrolled || open ? 'border-b border-copper/20 bg-char-900/95 backdrop-blur-md' : 'border-b border-transparent bg-transparent'
+      }`}
+    >
+      <div className="page-x flex h-[72px] items-center justify-between">
+        <Logo />
+
+        <nav className="hidden items-center gap-10 lg:flex" aria-label="主导航">
+          {NAV_ITEMS.map((item) => (
+            <a
+              key={item.id}
+              href={`#${item.id}`}
+              className={`group relative py-2 text-[13px] tracking-[0.06em] transition-colors duration-300 ${
+                active === item.id ? 'text-amber' : 'text-taupe-200 hover:text-warmwhite'
+              }`}
+            >
+              {item.label}
+              <span
+                className={`absolute -bottom-0.5 left-0 h-px bg-amber transition-all duration-500 ${
+                  active === item.id ? 'w-full' : 'w-0 group-hover:w-full'
+                }`}
+              />
+            </a>
+          ))}
+        </nav>
+
+        <div className="flex items-center gap-4">
+          <a
+            href="https://asdm.ai"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group hidden items-center gap-2 border border-copper/60 px-4 py-2 text-[12px] tracking-[0.12em] text-warmwhite transition-all duration-300 hover:border-amber hover:bg-amber hover:text-char md:flex"
+          >
+            了解 ASDM
+            <ArrowUpRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+          </a>
+          <button
+            type="button"
+            onClick={() => setOpen((v) => !v)}
+            className="flex h-10 w-10 items-center justify-center border border-copper/40 text-warmwhite lg:hidden"
+            aria-label={open ? '关闭菜单' : '打开菜单'}
+            aria-expanded={open}
+          >
+            {open ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+          </button>
+        </div>
+      </div>
+
+      <div
+        className={`overflow-hidden bg-char-900 transition-[max-height] duration-500 lg:hidden ${
+          open ? 'max-h-[100vh]' : 'max-h-0'
+        }`}
+      >
+        <nav className="page-x flex min-h-[calc(100vh-72px)] flex-col pb-10 pt-4" aria-label="移动端导航">
+          {NAV_ITEMS.map((item, i) => (
+            <a
+              key={item.id}
+              href={`#${item.id}`}
+              onClick={() => setOpen(false)}
+              className="flex items-baseline gap-5 border-b border-copper/15 py-6 text-2xl font-light text-warmwhite"
+            >
+              <span className="font-mono text-[11px] text-amber">0{i + 1}</span>
+              {item.label}
+            </a>
+          ))}
+          <a
+            href="https://asdm.ai"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-auto flex items-center justify-between border border-copper/60 px-5 py-4 text-sm tracking-[0.12em] text-warmwhite"
+          >
+            了解 ASDM <ArrowUpRight className="h-4 w-4 text-amber" />
+          </a>
+        </nav>
+      </div>
+    </header>
+  );
+}

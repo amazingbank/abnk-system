@@ -5,7 +5,7 @@
 # 并同步登记到 .asdm/toolsets/abnk-harness-toolset/config.json 的 processes[]。
 #
 # 用法：
-#   cd abnk-system/deploy
+#   cd abnk-system/deploy/compose
 #   docker compose up -d          # 启动
 #   docker compose ps             # 查看状态
 #   docker compose logs -f abnk-pg

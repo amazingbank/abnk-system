@@ -1,19 +1,19 @@
 # abnk-system/deploy — 基础设施编排
 
-> 2026-10-25 起本仓库升级为 **ABNK 工程单体仓**（见仓库根 README）。本目录职责收窄为：**中间件容器的运行配置**。工程脚本已移至 `../scripts/`，未来前端/外围服务/定制模块源分别有独立目录。
+> 2026-10-25 起本仓库升级为 **ABNK 工程单体仓**（见仓库根 README）。本目录职责：**环境编排**。2026-10-26 目录重构：compose 配置收拢到 `compose/` 子目录。
 
-## 文件
+## 结构
 
-| 文件 | 作用 |
+| 位置 | 作用 |
 |---|---|
-| `docker-compose.yml` | 服务编排（当前：`abnk-pg`；预留 Kafka / Keycloak 接入模板） |
-| `.env` | 环境变量默认值（compose 自动读取） |
-| `.gitignore` | 排除 `.env.local` 与备份产物 |
+| `compose/` | 本地/开发环境容器编排：`docker-compose.yml`（当前：`abnk-pg`；预留 Kafka / Keycloak / Valkey 接入模板）、`.env`（环境变量默认值，compose 自动读取）、`.gitignore`（排除 `.env.local` 与备份产物） |
+| `k8s/` | 生产部署（K8s + Helm，multi-arch，ADR-007）——Phase 4 建 |
+| `envs/` | 环境差异配置（dev/staging/prod）——Phase 3 建 |
 
 ## 常用命令
 
 ```bash
-cd abnk-system/deploy
+cd abnk-system/deploy/compose
 
 docker compose up -d          # 启动
 docker compose ps             # 查看状态（healthy 才可用）
@@ -76,7 +76,7 @@ Fineract 三处默认值原本就一致：
 
 ## 接入新中间件
 
-在 `docker-compose.yml` 的 services 追加一项 → 同步登记到 `.asdm/toolsets/abnk-harness-toolset/config.json` 的 `processes[]` → 从 `extensions.planned` 移除该项。**`abnk-debugger` 的 action / spec 文档无需改动。**
+在 `compose/docker-compose.yml` 的 services 追加一项 → 同步登记到 `.asdm/toolsets/abnk-harness-toolset/config.json` 的 `processes[]`（`dir` 与 `configFiles` 用 `deploy/compose/` 路径）→ 从 `extensions.planned` 移除该项。**`abnk-debugger` 的 action / spec 文档无需改动。**
 
 ## ⚠️ 运维警示（2026-10-25 实际发生）
 

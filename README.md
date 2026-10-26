@@ -1,6 +1,6 @@
 # abnk-system — Amazing Bank 工程单体仓（Monorepo）
 
-ABNK 的**全部工程交付物与中间产出物**都放本仓库，单一事实源、统一版本线。
+ABNK 的**全部工程交付物与中间产出物**都放本仓库，单一事实源、统一版本线。**目录即架构**：顶层目录直接映射 L0–L5 分层（`overview.md`），依赖方向单向 `L0 ← L1 ← L2 ← L3 ← L4/L5`，上层永不反向。
 
 ```
 amazingbank-ws/                      # 工作区（非 git 仓库）
@@ -16,21 +16,29 @@ Fineract fork 必须与上游 `develop` 保持**季度级 rebase**（ADR-001/002
 
 ## 目录结构
 
-| 目录 | 用途 | 引入阶段 | 状态 |
-|---|---|---|---|
-| `deploy/` | 基础设施编排（中间件容器运行配置） | Phase 0 | ✅ 活跃 |
-| `scripts/` | 工程脚本：API 封装库 + Phase 1 端到端冒烟 | Phase 1 | ✅ **当前活跃** |
-| `artifacts/` | 中间产出物：数据快照、行为基线报告（可复现的小文件入库） | Phase 1 | ✅ 活跃 |
-| `custom/` | `custom/abnk` 定制模块的**源**（与 fineract 仓的同步机制见其 README） | Phase 2 | 占位 |
-| `frontend/` | 三套前端（管理后台→柜面→网银/手机，ADR-005） | Phase 3 | 占位 |
-| `services/` | 外围服务（支付适配/通知/风控订阅，`event-bus` 落点） | Phase 4 | 占位 |
+| 目录 | 层 | 用途 | 引入阶段 | 状态 |
+|---|---|---|---|---|
+| `deploy/` | — | 环境编排（`compose/` 本地 · `k8s/` 生产规划） | Phase 0 | ✅ 活跃 |
+| `scripts/` | — | 工程脚本 + API 封装库 | Phase 1 | ✅ 活跃 |
+| `artifacts/` | — | 中间产出物（按阶段归档） | Phase 1 | ✅ 活跃 |
+| `tests/` | — | 跨模块测试资产（smoke / e2e / tenant-isolation） | Phase 1 | ✅ 冒烟活跃 |
+| `custom/` | L2 | 定制模块源（同步到 fineract 仓编译） | Phase 2 | 骨架 |
+| `data/` | L1 | 本地化数据资产（COA / 日历 / seed，YAML + Schema） | Phase 2 | 占位 |
+| `channels/` | L3 | 渠道层：网关 + 全部渠道前端（ADR-008） | 2–5 | website ✅ |
+| `services/` | L4 | 外围服务（通知 / 支付适配等，事件总线消费方） | Phase 4 | 占位 |
+| `ci/` | — | 质量门禁（GitHub Actions；宪法红线 R6 补位） | Phase 2 | 占位 |
+| `release/` | — | 发版资产（rebase 检查单 / 版本线） | Phase 2 末 | 占位 |
+| `observability/` | — | 监控 as-code（dashboards / alerts / runbooks） | Phase 3 | 占位 |
+| `docs/` | — | 工程操作文档（设计文档在 `.asdm`，只链接不复制） | Phase 2 | 占位 |
+
+技术栈定案（2026-10-26）：ADR-007（信创兼容：主线开源 + 兼容层）、ADR-008（渠道层：SCG 网关 + React 前端 + 混合移动端）。
 
 ## 入库纪律
 
 - **交付物**（代码/脚本/配置）：一律入库
 - **中间产出物**：可复现、可 diff 的小文件（JSON 快照/报告）入库到 `artifacts/`；大文件与本地路径相关产物由 `.gitignore` 排除
 - 产物目录按阶段命名：`artifacts/phase1/`、`artifacts/phase2/`...
-- **数据不入库**：数据库内容只存快照（导出 JSON），不存 dump
+- **数据不入库**：数据库内容只存快照（导出 JSON），不存 dump；`data/` 放的是**施加到系统的定义**（YAML 源），不是数据
 
 ## 与其他仓库的分工
 
@@ -38,15 +46,15 @@ Fineract fork 必须与上游 `develop` 保持**季度级 rebase**（ADR-001/002
 |---|---|
 | 怎么起、怎么连、怎么排障（环境单一事实源） | `.asdm/toolsets/abnk-harness-toolset/config.json` |
 | 设计文档、决策记录 | `.asdm/workspace/docs/planning/abnk-design/` |
-| 核心引擎代码（fork，需 rebae 上游） | `fineract/` |
+| 核心引擎代码（fork，需 rebase 上游） | `fineract/` |
 | **其余一切工程产物** | **本仓库** |
 
 ## 快速开始
 
 ```bash
 # 1) 起基础设施
-cd deploy && docker compose up -d
+cd deploy/compose && docker compose up -d
 # 2) 起 Fineract（宿主 devRun，见 .asdm 的环境基线文档）
-# 3) 跑 Phase 1 冒烟（12 步端到端）
-cd ../scripts/phase1 && python3 smoke_test.py
+# 3) 跑 12 步端到端冒烟
+cd ../tests/smoke && python3 smoke_test.py
 ```

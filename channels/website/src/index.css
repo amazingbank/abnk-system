@@ -1,0 +1,92 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 72px;
+  }
+  body {
+    @apply bg-ivory text-espresso font-sans antialiased;
+    line-height: 1.5;
+    font-feature-settings: 'ss01', 'cv11';
+  }
+  h1, h2, h3 {
+    line-height: 1.2;
+  }
+  ::selection {
+    background: #d9a55c;
+    color: #26201a;
+  }
+}
+
+@layer components {
+  .page-x {
+    @apply mx-auto w-full max-w-page px-6 md:px-10 lg:px-16;
+  }
+  .eyebrow {
+    @apply font-mono text-[11px] uppercase tracking-eyebrow;
+  }
+  .hairline {
+    background: linear-gradient(90deg, rgba(176, 138, 79, 0.55), rgba(176, 138, 79, 0.15));
+    height: 1px;
+  }
+}
+
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 900ms cubic-bezier(0.2, 0.7, 0.2, 1), transform 900ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+.grid-bg-dark {
+  background-image:
+    linear-gradient(rgba(245, 239, 230, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(245, 239, 230, 0.04) 1px, transparent 1px);
+  background-size: 80px 80px;
+}
+.grid-bg-light {
+  background-image:
+    linear-gradient(rgba(61, 50, 42, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(61, 50, 42, 0.05) 1px, transparent 1px);
+  background-size: 80px 80px;
+}
+
+@keyframes dash-flow {
+  to { stroke-dashoffset: -24; }
+}
+.dash-flow {
+  stroke-dasharray: 4 8;
+  animation: dash-flow 2.4s linear infinite;
+}
+
+@keyframes pulse-soft {
+  0%, 100% { opacity: 0.35; transform: scale(1); }
+  50% { opacity: 0.9; transform: scale(1.6); }
+}
+.pulse-soft {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: pulse-soft 3.2s ease-in-out infinite;
+}
+
+@keyframes hero-in {
+  from { opacity: 0; transform: translateY(28px); }
+  to { opacity: 1; transform: none; }
+}
+.hero-in {
+  opacity: 0;
+  animation: hero-in 1100ms cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .hero-in { opacity: 1; animation: none; }
+  .reveal { opacity: 1; transform: none; transition: none; }
+  .dash-flow, .pulse-soft { animation: none; }
+}

@@ -5,8 +5,8 @@
       → 存款 → 取款 → 贷款产品 → 贷款(申请/审批/发放) → 还款
       → 推进业务日期 → 触发日终 COB(+计息作业) → 查日终效果 → 关户(负向断言)
 
-运行：cd abnk-system/scripts/phase1 && python3 smoke_test.py
-报告：../artifacts/phase1/report-<ts>.json
+运行：cd abnk-system/tests/smoke && python3 smoke_test.py
+报告：../../artifacts/phase1/report-<ts>.json
 幂等：实体名带时间戳后缀，可重复运行。
 """
 
@@ -15,7 +15,7 @@ import os
 import sys
 from datetime import date, datetime, timedelta
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "lib"))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "scripts", "lib"))
 from fineract_api import Client, StepRunner  # noqa: E402
 
 TS = datetime.now().strftime("%m%d%H%M%S")         # 幂等后缀（当天时刻+秒）
