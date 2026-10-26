@@ -1,0 +1,37 @@
+# ABNK 生产编排 — abnk-prod compose 栈
+#
+# 生产环境 = 正式部署实例（abnk-vm001）。当前阶段：abnk-website（官网渠道前端，
+# nginx 静态托管 + TLS 终止，用户入口 :80/:443）。后续接入的生产服务在此追加。
+#
+# ⚠️ 铁律（对齐 AOS Iron Rule 21——部署根相对路径编排）：
+#   - 宿主挂载一律经 ${ABNK_DEPLOY_ROOT:?}（部署根缺失即 compose 硬失败，不静默回落）
+#   - up/down 必须带 --env-file ~/deploy/.env
+#   - 一切运行时写入物（TLS 证书/日志/备份）归部署根 ~/deploy，代码域随仓库
+#
+# 用法（服务器上执行——所有制品在服务端构建）：
+#   cd ~/source/abnk-system
+#   ABNK_WEBSITE_IMAGE=abnk-website:<version> \
+#     docker compose --env-file ~/deploy/.env -f deploy/prod/compose-abnk-prod.yaml up -d
+
+# ⚠️ 必须显式固定项目名——避免与本地开发 compose（deploy/compose，name: abnk-system）冲突，
+# 也避免与 AOS 等其他项目 compose 撞项目名。
+name: abnk-prod
+
+services:
+  abnk-website:
+    container_name: abnk-website
+    # 镜像 tag 由发版流程注入（每次 up 必须显式给 ABNK_WEBSITE_IMAGE——无缺省回退）
+    image: ${ABNK_WEBSITE_IMAGE:?ABNK_WEBSITE_IMAGE is required}
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      # TLS 证书（部署根数据域，只读挂载——续期 = 覆盖两 PEM + restart，无需重建镜像）
+      - ${ABNK_DEPLOY_ROOT:?AOS-style deploy root is required}/nginx/ssl:/etc/nginx/ssl:ro
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider --no-check-certificate https://localhost/ || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 10s
