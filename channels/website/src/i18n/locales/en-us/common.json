@@ -1,0 +1,40 @@
+{
+  "meta": {
+    "title": "Amazing Bank (ABNK) — A Bank, and a Blueprint",
+    "description": "Amazing Bank is an international digital bank serving users worldwide — and an open, AI-first exemplar built end to end on the ASDM system."
+  },
+  "brand": {
+    "homeLabel": "Amazing Bank homepage"
+  },
+  "nav": {
+    "mainAria": "Main navigation",
+    "mobileAria": "Mobile navigation",
+    "primary": [
+      { "id": "identity", "label": "Identity" },
+      { "id": "global", "label": "Global" },
+      { "id": "asdm", "label": "ASDM" },
+      { "id": "open", "label": "Open" },
+      { "id": "principles", "label": "Beliefs" }
+    ],
+    "knowAsdm": "About ASDM",
+    "menu": {
+      "open": "Open menu",
+      "close": "Close menu"
+    }
+  },
+  "language": {
+    "label": "Language",
+    "switchTo": {
+      "en-us": "Switch to English",
+      "zh-cn": "切换到中文"
+    }
+  },
+  "footer": {
+    "tagline": "An international digital bank serving users worldwide — and an open-source blueprint growing on the ASDM system.",
+    "navHeading": "On This Page",
+    "navAria": "Footer navigation",
+    "systemHeading": "The System",
+    "repoComingSoon": "Open-Source Repos · Coming Soon",
+    "copyright": "© {year} Amazing Bank (ABNK)"
+  }
+}

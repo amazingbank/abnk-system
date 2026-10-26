@@ -1,13 +1,7 @@
 import { useEffect, useState } from 'react';
 import { ArrowUpRight, Menu, X } from 'lucide-react';
-
-export const NAV_ITEMS = [
-  { id: 'identity', label: '双重身份' },
-  { id: 'global', label: '全球路径' },
-  { id: 'asdm', label: 'ASDM 体系' },
-  { id: 'open', label: '开源范本' },
-  { id: 'principles', label: '理念' },
-];
+import { LanguageToggle } from '@/components/LanguageToggle';
+import { useCommon } from '@/i18n';
 
 // ASDM 官方 logo 图形（来源 asdm-ai-2026 public/images/logo——旋转矩形叠层）
 function AsdmMark({ className = '' }: { className?: string }) {
@@ -21,27 +15,28 @@ function AsdmMark({ className = '' }: { className?: string }) {
       <rect width="39" height="39" x="44.5" y="44.5" strokeWidth="1.35" opacity=".55" rx="7.5" transform="rotate(6 64 64)" />
       <rect width="33" height="33" x="47.5" y="47.5" strokeWidth=".95" opacity=".46" rx="6.5" transform="rotate(12 64 64)" />
       <rect width="27" height="27" x="50.5" y="50.5" strokeWidth=".65" opacity=".37" rx="5.5" transform="rotate(19 64 64)" />
-      <rect width="22" height="22" x="53" y="53" strokeWidth=".42" opacity=".27" rx="5" transform="rotate(27 64 64)" />
+      <rect width="22" height="22" x="53.5" y="53.5" strokeWidth=".42" opacity=".27" rx="5" transform="rotate(27 64 64)" />
       <rect width="17" height="17" x="55.5" y="55.5" strokeWidth=".26" opacity=".18" rx="4" transform="rotate(36 64 64)" />
     </svg>
   );
 }
 
 export function Logo({ className = '' }: { className?: string }) {
+  const common = useCommon();
   return (
-    <a href="#top" className={`group flex items-center gap-3 ${className}`} aria-label="Amazing Bank 首页">
-      <span className="flex h-8 w-8 items-center justify-center border border-copper/70 transition-colors duration-500 group-hover:border-amber group-hover:bg-amber/10">
-        <AsdmMark className="h-5 w-5 text-amber" />
-      </span>
+    <a href="#top" className={`group flex items-center gap-3.5 ${className}`} aria-label={common.brand.homeLabel}>
+      <AsdmMark className="h-9 w-9 shrink-0 text-amber" />
       <span className="flex flex-col leading-none">
-        <span className="text-[15px] font-semibold tracking-[0.08em] text-warmwhite">ABNK</span>
-        <span className="mt-1 font-mono text-[9px] uppercase tracking-[0.28em] text-taupe-300">Amazing Bank</span>
+        <span className="text-[17px] font-semibold tracking-[0.08em] text-warmwhite">ABNK</span>
+        <span className="mt-1.5 font-mono text-[10px] uppercase tracking-[0.28em] text-taupe-300">Amazing Bank</span>
       </span>
     </a>
   );
 }
 
 export function Nav() {
+  const common = useCommon();
+  const navItems = common.nav.primary;
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState('');
@@ -54,7 +49,7 @@ export function Nav() {
   }, []);
 
   useEffect(() => {
-    const els = NAV_ITEMS.map((i) => document.getElementById(i.id)).filter(Boolean) as HTMLElement[];
+    const els = navItems.map((i) => document.getElementById(i.id)).filter(Boolean) as HTMLElement[];
     const io = new IntersectionObserver(
       (entries) => {
         entries.forEach((e) => {
@@ -65,7 +60,7 @@ export function Nav() {
     );
     els.forEach((el) => io.observe(el));
     return () => io.disconnect();
-  }, []);
+  }, [navItems]);
 
   useEffect(() => {
     document.body.style.overflow = open ? 'hidden' : '';
@@ -80,8 +75,8 @@ export function Nav() {
       <div className="page-x flex h-[72px] items-center justify-between">
         <Logo />
 
-        <nav className="hidden items-center gap-10 lg:flex" aria-label="主导航">
-          {NAV_ITEMS.map((item) => (
+        <nav className="hidden items-center gap-10 lg:flex" aria-label={common.nav.mainAria}>
+          {navItems.map((item) => (
             <a
               key={item.id}
               href={`#${item.id}`}
@@ -106,14 +101,15 @@ export function Nav() {
             rel="noopener noreferrer"
             className="group hidden items-center gap-2 border border-copper/60 px-4 py-2 text-[12px] tracking-[0.12em] text-warmwhite transition-all duration-300 hover:border-amber hover:bg-amber hover:text-char md:flex"
           >
-            了解 ASDM
+            {common.nav.knowAsdm}
             <ArrowUpRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
           </a>
+          <LanguageToggle />
           <button
             type="button"
             onClick={() => setOpen((v) => !v)}
             className="flex h-10 w-10 items-center justify-center border border-copper/40 text-warmwhite lg:hidden"
-            aria-label={open ? '关闭菜单' : '打开菜单'}
+            aria-label={open ? common.nav.menu.close : common.nav.menu.open}
             aria-expanded={open}
           >
             {open ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
@@ -126,8 +122,8 @@ export function Nav() {
           open ? 'max-h-[100vh]' : 'max-h-0'
         }`}
       >
-        <nav className="page-x flex min-h-[calc(100vh-72px)] flex-col pb-10 pt-4" aria-label="移动端导航">
-          {NAV_ITEMS.map((item, i) => (
+        <nav className="page-x flex min-h-[calc(100vh-72px)] flex-col pb-10 pt-4" aria-label={common.nav.mobileAria}>
+          {navItems.map((item, i) => (
             <a
               key={item.id}
               href={`#${item.id}`}
@@ -144,7 +140,7 @@ export function Nav() {
             rel="noopener noreferrer"
             className="mt-auto flex items-center justify-between border border-copper/60 px-5 py-4 text-sm tracking-[0.12em] text-warmwhite"
           >
-            了解 ASDM <ArrowUpRight className="h-4 w-4 text-amber" />
+            {common.nav.knowAsdm} <ArrowUpRight className="h-4 w-4 text-amber" />
           </a>
         </nav>
       </div>

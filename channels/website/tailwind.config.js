@@ -16,9 +16,13 @@ export default {
         brick: { 300: '#D49A88', 500: '#B5604A', 700: '#844332' },
       },
       fontFamily: {
-        sans: ['Inter', '"Noto Sans SC"', 'system-ui', 'sans-serif'],
-        serif: ['"Noto Serif SC"', 'Georgia', 'serif'],
-        mono: ['"IBM Plex Mono"', 'ui-monospace', 'monospace'],
+        // 自托管 @fontsource-variable（无外部 CDN），中英文靠字体栈逐字符回退，无需 JS 切换。
+        // Latin: Oxanium · CJK: Noto Sans SC · Mono: JetBrains Mono —— 与 asdm-ai-2026 完全一致。
+        // Display serif: Noto Serif SC —— ABNK 品牌衬线大标题（方案 A）。
+        // 若决策切换为「与 asdm 完全一致（方案 B）」：删除 serif 行，全站 font-serif 改 font-sans。
+        sans: ['"Oxanium Variable"', '"Noto Sans SC Variable"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        serif: ['"Noto Serif SC Variable"', 'Georgia', 'serif'],
+        mono: ['"JetBrains Mono Variable"', '"Noto Sans SC Variable"', 'ui-monospace', 'monospace'],
       },
       letterSpacing: {
         eyebrow: '0.22em',

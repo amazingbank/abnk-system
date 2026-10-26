@@ -1,0 +1,40 @@
+{
+  "meta": {
+    "title": "Amazing Bank（ABNK）— 一家银行，也是一个范本",
+    "description": "Amazing Bank 是服务全球用户的国际化数字银行，也是生长在 ASDM 体系之上、全流程开源的 AI 优先企业数字化范本。"
+  },
+  "brand": {
+    "homeLabel": "Amazing Bank 首页"
+  },
+  "nav": {
+    "mainAria": "主导航",
+    "mobileAria": "移动端导航",
+    "primary": [
+      { "id": "identity", "label": "双重身份" },
+      { "id": "global", "label": "全球路径" },
+      { "id": "asdm", "label": "ASDM 体系" },
+      { "id": "open", "label": "开源范本" },
+      { "id": "principles", "label": "理念" }
+    ],
+    "knowAsdm": "了解 ASDM",
+    "menu": {
+      "open": "打开菜单",
+      "close": "关闭菜单"
+    }
+  },
+  "language": {
+    "label": "语言",
+    "switchTo": {
+      "en-us": "Switch to English",
+      "zh-cn": "切换到中文"
+    }
+  },
+  "footer": {
+    "tagline": "一家服务全球用户的国际化数字银行，也是一个生长在 ASDM 体系之上的开源范本。",
+    "navHeading": "页面导航",
+    "navAria": "页脚导航",
+    "systemHeading": "体系",
+    "repoComingSoon": "开源仓库 · 即将公开",
+    "copyright": "© {year} Amazing Bank（ABNK）"
+  }
+}

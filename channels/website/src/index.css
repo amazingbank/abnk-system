@@ -10,7 +10,6 @@
   body {
     @apply bg-ivory text-espresso font-sans antialiased;
     line-height: 1.5;
-    font-feature-settings: 'ss01', 'cv11';
   }
   h1, h2, h3 {
     line-height: 1.2;

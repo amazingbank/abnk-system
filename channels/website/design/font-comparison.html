@@ -1,0 +1,418 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ABNK 官网字体方案对比</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@300;400;600&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@300;400;600&family=Noto+Serif+SC:wght@400;600&family=Oxanium:wght@200..800&display=swap" rel="stylesheet" />
+<style>
+  /* ===== 基础（暖调品牌色，与官网一致） ===== */
+  :root {
+    --ivory: #FAF7F2; --ivory-200: #F2ECE2;
+    --char: #26201A; --char-900: #1C1813;
+    --espresso: #3D322A; --espresso-500: #5A4C41;
+    --warmwhite: #F5EFE6;
+    --copper: #B08A4F; --amber: #D9A55C;
+    --taupe-200: #DCD2C4; --taupe-300: #C4B7A6; --taupe-400: #A89A88; --taupe-500: #8C7E6D;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { background: var(--ivory); color: var(--espresso); line-height: 1.6;
+    font-family: 'Inter', 'Noto Sans SC', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+
+  .page-x { max-width: 1360px; margin: 0 auto; padding: 0 24px; }
+  @media (min-width: 768px) { .page-x { padding: 0 40px; } }
+  @media (min-width: 1024px) { .page-x { padding: 0 64px; } }
+
+  /* ===== 方案字体栈（本页经 Google Fonts CDN 加载；生产环境为 @fontsource 自托管，
+       family 名带 "Variable" 后缀，视觉完全一致） ===== */
+  .scheme-current {  /* S0 现状：Google Fonts CDN */
+    --f-sans: 'Inter', 'Noto Sans SC', system-ui, sans-serif;
+    --f-serif: 'Noto Serif SC', Georgia, serif;
+    --f-mono: 'IBM Plex Mono', ui-monospace, monospace;
+  }
+  .scheme-a {  /* S1 方案 A（推荐）：asdm sans/mono + 保留衬线大标题 */
+    --f-sans: 'Oxanium', 'Noto Sans SC', ui-sans-serif, system-ui, sans-serif;
+    --f-serif: 'Noto Serif SC', Georgia, serif;
+    --f-mono: 'JetBrains Mono', 'Noto Sans SC', ui-monospace, monospace;
+  }
+  .scheme-b {  /* S2 方案 B：与 asdm-ai-2026 完全一致（无衬线） */
+    --f-sans: 'Oxanium', 'Noto Sans SC', ui-sans-serif, system-ui, sans-serif;
+    --f-serif: 'Oxanium', 'Noto Sans SC', ui-sans-serif, system-ui, sans-serif;
+    --f-mono: 'JetBrains Mono', 'Noto Sans SC', ui-monospace, monospace;
+  }
+  .f-sans { font-family: var(--f-sans); }
+  .f-serif { font-family: var(--f-serif); }
+  .f-mono { font-family: var(--f-mono); }
+  .f-serif { font-weight: 600; }
+
+  .eyebrow { font-family: var(--f-mono); font-size: 11px; text-transform: uppercase; letter-spacing: .22em; }
+
+  /* ===== 页头 ===== */
+  header.page-head { background: var(--char-900); color: var(--warmwhite); }
+  .page-head .inner { padding: 88px 0 72px; }
+  .page-head h1 { font-family: 'Noto Serif SC', Georgia, serif; font-size: clamp(32px, 5vw, 56px); font-weight: 600; line-height: 1.2; letter-spacing: -0.01em; }
+  .page-head h1 em { font-style: normal; color: var(--amber); }
+  .page-head p.sub { margin-top: 20px; max-width: 760px; color: var(--taupe-200); font-size: 15px; font-weight: 300; }
+  .page-head .meta { margin-top: 28px; display: flex; flex-wrap: wrap; gap: 10px; }
+  .chip { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: .1em; padding: 6px 12px; border: 1px solid rgba(176,138,79,.5); color: var(--taupe-300); }
+
+  /* ===== 交互式 Hero 模拟 ===== */
+  section.playground { background: var(--char-900); color: var(--warmwhite); padding: 56px 0 88px; }
+  .switcher { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 40px; }
+  .switcher button { cursor: pointer; font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: .08em;
+    padding: 12px 20px; border: 1px solid rgba(176,138,79,.5); background: transparent; color: var(--taupe-200); transition: all .25s; }
+  .switcher button.active { background: var(--amber); color: var(--char); border-color: var(--amber); font-weight: 500; }
+  .switcher button:hover:not(.active) { border-color: var(--amber); color: var(--warmwhite); }
+
+  .hero-mock { border: 1px solid rgba(176,138,79,.3); position: relative; overflow: hidden;
+    background:
+      linear-gradient(rgba(245,239,230,.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(245,239,230,.04) 1px, transparent 1px);
+    background-size: 80px 80px; background-color: var(--char);
+    padding: 72px 40px 48px; transition: none; }
+  .hero-mock .scheme-tag { position: absolute; top: 16px; right: 16px; opacity: .8; }
+  .hero-mock .eyebrow-row { display: flex; align-items: center; gap: 12px; color: var(--amber); }
+  .hero-mock .eyebrow-row .line { height: 1px; width: 40px; background: rgba(217,165,92,.7); }
+  .hero-mock h1.mock-cn { margin-top: 36px; font-family: var(--f-serif); font-weight: 600; letter-spacing: -.01em; line-height: 1.05;
+    font-size: clamp(44px, 9vw, 104px); }
+  .hero-mock h1.mock-cn .accent { color: var(--amber); }
+  .hero-mock h1.mock-en { margin-top: 20px; font-family: var(--f-serif); font-weight: 600; letter-spacing: -.01em; line-height: 1.05;
+    font-size: clamp(34px, 6.5vw, 72px); opacity: .92; }
+  .hero-mock h1.mock-en .accent { color: var(--amber); }
+  .hero-mock p.lead-cn { margin-top: 32px; max-width: 600px; font-family: var(--f-sans); font-size: 15px; font-weight: 300; color: var(--taupe-200); }
+  .hero-mock p.lead-en { margin-top: 12px; max-width: 600px; font-family: var(--f-sans); font-size: 15px; font-weight: 300; color: var(--taupe-300); }
+  .hero-mock .ctas { margin-top: 36px; display: flex; flex-wrap: wrap; gap: 16px; align-items: center; }
+  .hero-mock .cta-main { font-family: var(--f-sans); background: var(--amber); color: var(--char); padding: 15px 28px; font-size: 13px; font-weight: 600; letter-spacing: .12em; }
+  .hero-mock .cta-sub { font-family: var(--f-sans); border: 1px solid var(--taupe-500); color: var(--warmwhite); padding: 15px 28px; font-size: 13px; letter-spacing: .12em; }
+  .hero-mock .meta-row { margin-top: 48px; padding-top: 24px; border-top: 1px solid rgba(176,138,79,.25);
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 20px; }
+  .hero-mock .meta-row .k { font-family: var(--f-mono); font-size: 11px; text-transform: uppercase; letter-spacing: .22em; color: var(--taupe-400); }
+  .hero-mock .meta-row .v { margin-top: 8px; font-family: var(--f-sans); font-size: 15px; color: var(--warmwhite); }
+
+  .stack-note { margin-top: 20px; font-family: 'JetBrains Mono', monospace; font-size: 11.5px; line-height: 1.9; color: var(--taupe-400); letter-spacing: .02em; white-space: pre-wrap; }
+
+  /* ===== 三方案并排卡片 ===== */
+  section.panels { padding: 72px 0; }
+  .panels h2, .detail h2, .table-sec h2 { font-family: 'Noto Serif SC', Georgia, serif; font-size: 32px; font-weight: 600; letter-spacing: -.01em; }
+  .panels .hint { margin-top: 12px; color: var(--espresso-500); font-size: 14px; max-width: 720px; }
+  .panels .grid { margin-top: 40px; display: grid; gap: 24px; grid-template-columns: 1fr; }
+  @media (min-width: 900px) { .panels .grid { grid-template-columns: repeat(3, 1fr); } }
+  .panel { border: 1px solid rgba(176,138,79,.35); background: #FDFBF8; padding: 32px 28px; display: flex; flex-direction: column; }
+  .panel.reco { border-color: var(--amber); box-shadow: 0 0 0 1px var(--amber); position: relative; }
+  .panel .badge { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 22px; }
+  .panel .badge .no { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--copper); letter-spacing: .18em; }
+  .panel .badge .name { font-family: 'Noto Sans SC', sans-serif; font-size: 15px; font-weight: 600; color: var(--espresso); }
+  .panel .badge .reco-tag { margin-left: auto; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: .12em; color: var(--char); background: var(--amber); padding: 3px 8px; }
+  .panel .stack { font-family: 'JetBrains Mono', monospace; font-size: 11px; line-height: 1.9; color: var(--taupe-500); border-bottom: 1px solid rgba(176,138,79,.3); padding-bottom: 18px; margin-bottom: 24px; }
+  .panel h3.cn { font-family: var(--f-serif); font-weight: 600; font-size: 30px; line-height: 1.15; letter-spacing: -.01em; color: var(--espresso); }
+  .panel h3.cn .accent { color: var(--amber); }
+  .panel h3.en { margin-top: 8px; font-family: var(--f-serif); font-weight: 600; font-size: 24px; line-height: 1.15; letter-spacing: -.01em; color: var(--espresso); }
+  .panel p.body { margin-top: 18px; font-family: var(--f-sans); font-size: 13.5px; font-weight: 300; color: var(--espresso-500); }
+  .panel p.body strong { font-weight: 600; color: var(--espresso); }
+  .panel .mono-line { margin-top: 18px; font-family: var(--f-mono); font-size: 11px; text-transform: uppercase; letter-spacing: .2em; color: var(--taupe-500); }
+  .panel .nav-line { margin-top: 14px; font-family: var(--f-sans); font-size: 13px; letter-spacing: .06em; color: var(--espresso-500); }
+  .panel .verdict { margin-top: auto; padding-top: 22px; font-size: 13px; color: var(--espresso-500); border-top: 1px solid rgba(176,138,79,.25); }
+  .panel .verdict b { color: var(--espresso); font-weight: 600; }
+
+  /* ===== 细节对比（同屏并置） ===== */
+  section.detail { background: var(--ivory-200); padding: 72px 0; }
+  .detail .rows { margin-top: 40px; display: flex; flex-direction: column; gap: 40px; }
+  .detail .row-title { display: flex; align-items: baseline; gap: 14px; margin-bottom: 18px; }
+  .detail .row-title .no { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: .18em; color: var(--copper); }
+  .detail .row-title .t { font-family: 'Noto Sans SC', sans-serif; font-weight: 600; font-size: 17px; }
+  .detail .cols { display: grid; gap: 16px; grid-template-columns: 1fr; }
+  @media (min-width: 900px) { .detail .cols { grid-template-columns: repeat(3, 1fr); } }
+  .detail .cell { background: #FDFBF8; border: 1px solid rgba(176,138,79,.3); padding: 22px 20px; }
+  .detail .cell .cap { font-family: 'JetBrains Mono', monospace; font-size: 10.5px; letter-spacing: .16em; text-transform: uppercase; color: var(--taupe-500); margin-bottom: 12px; display: flex; justify-content: space-between; gap: 8px; }
+  .detail .cell .sample-cn { font-family: var(--f-serif); font-weight: 600; font-size: 34px; line-height: 1.15; color: var(--char); }
+  .detail .cell .sample-en { font-family: var(--f-serif); font-weight: 600; font-size: 27px; line-height: 1.15; color: var(--char); }
+  .detail .cell .sample-body { font-family: var(--f-sans); font-size: 14px; font-weight: 300; color: var(--espresso-500); }
+  .detail .cell .sample-mono { font-family: var(--f-mono); font-size: 12px; letter-spacing: .16em; text-transform: uppercase; color: var(--espresso); }
+
+  /* ===== 方案说明表 ===== */
+  section.table-sec { padding: 72px 0 96px; }
+  .table-wrap { margin-top: 36px; overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; min-width: 720px; }
+  th, td { text-align: left; padding: 14px 16px; border-bottom: 1px solid rgba(176,138,79,.3); vertical-align: top; }
+  th { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--taupe-500); font-weight: 500; }
+  td b { font-weight: 600; }
+  td .mono { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--espresso-500); }
+  tr.hl td { background: rgba(217,165,92,.08); }
+  td .tag-a { color: var(--copper); font-weight: 600; }
+  td .tag-b { color: var(--taupe-500); font-weight: 600; }
+
+  footer { background: var(--char-900); color: var(--taupe-400); padding: 32px 0; }
+  footer .page-x { display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: .1em; }
+
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+</style>
+</head>
+<body>
+
+<header class="page-head">
+  <div class="page-x inner">
+    <div class="eyebrow" style="color:var(--amber);display:flex;align-items:center;gap:12px;">
+      <span style="height:1px;width:40px;background:rgba(217,165,92,.7)"></span>
+      FONT REVIEW · ABNK WEBSITE
+    </div>
+    <h1>官网字体方案对比<span style="color:var(--amber)">。</span></h1>
+    <p class="sub">
+      目标：引入 asdm-ai-2026 的字体方案（英文 Oxanium · 中文 Noto Sans SC · 等宽 JetBrains Mono，@fontsource 自托管）。
+      唯一待决策点：<b style="color:var(--warmwhite)">大标题衬线体（Noto Serif SC）的去留</b>。本页用官网真实文案，三个方案可视化对比。
+      切换下方按钮，在同一 Hero 版式下实时查看。
+    </p>
+    <div class="meta">
+      <span class="chip">SOURCE · asdm-ai-2026</span>
+      <span class="chip">SELF-HOSTED · @fontsource-variable</span>
+      <span class="chip">NO GOOGLE CDN</span>
+      <span class="chip">CN · Noto Sans SC</span>
+      <span class="chip">EN · Oxanium</span>
+    </div>
+  </div>
+</header>
+
+<!-- ===== 交互式 Hero 模拟 ===== -->
+<section class="playground">
+  <div class="page-x">
+    <div class="switcher" id="switcher">
+      <button data-scheme="scheme-current" class="f-mono">S0 · 现状（Google Fonts）</button>
+      <button data-scheme="scheme-a" class="f-mono active">S1 · 方案 A · 推荐（保留衬线）</button>
+      <button data-scheme="scheme-b" class="f-mono">S2 · 方案 B · 与 asdm 完全一致（无衬线）</button>
+    </div>
+
+    <div class="hero-mock scheme-a" id="heroMock">
+      <div class="scheme-tag eyebrow" id="schemeTag" style="color:var(--taupe-500)">S1 · HYBRID</div>
+      <div class="eyebrow-row">
+        <span class="line"></span>
+        <span class="eyebrow">Amazing Bank · ABNK</span>
+      </div>
+      <h1 class="mock-cn">一家银行。<br /><span class="accent">也是一个范本。</span></h1>
+      <h1 class="mock-en">A Bank.<br /><span class="accent">And a Blueprint.</span></h1>
+      <p class="lead-cn">对外，我们是服务全球用户的国际化数字银行；对内，我们是生长在 ASDM 体系之上、从第一行代码起就面向投产的开源范例。</p>
+      <p class="lead-en">Outward, an international digital bank serving users worldwide. Inward, an open-source exemplar built on the ASDM system — production-ready from the very first line of code.</p>
+      <div class="ctas">
+        <span class="cta-main">阅读我们的主张</span>
+        <span class="cta-sub">ASDM 如何驱动 ABNK</span>
+        <span class="cta-sub" style="border:none;padding:0">Read Our Proposition</span>
+      </div>
+      <div class="meta-row">
+        <div><div class="k">首批落地 / First Landing</div><div class="v">中国市场 / China Market</div></div>
+        <div><div class="k">构建于 / Built On</div><div class="v">ASDM 体系 / The ASDM System</div></div>
+        <div><div class="k">全部开放 / Fully Open</div><div class="v">流程 · 代码 · 设计 / Process · Code · Design</div></div>
+        <div><div class="k">向下滚动</div><div class="v f-mono" style="font-size:11px;letter-spacing:.2em">SCROLL TO EXPLORE ↓</div></div>
+      </div>
+    </div>
+
+    <div class="stack-note" id="stackNote">当前生效字体栈：
+--font-sans : "Oxanium Variable", "Noto Sans SC Variable", ui-sans-serif, system-ui, sans-serif
+--font-serif: "Noto Serif SC Variable", Georgia, serif
+--font-mono  : "JetBrains Mono Variable", "Noto Sans SC Variable", ui-monospace, monospace</div>
+  </div>
+</section>
+
+<!-- ===== 三方案并排 ===== -->
+<section class="panels">
+  <div class="page-x">
+    <h2>三方案并排对比</h2>
+    <p class="hint">每个卡片使用各自方案的字体栈渲染同一段官网真实文案（中文大标题 + 英文大标题 + 正文 + 等宽小标签），无需点击即可横向比较。</p>
+    <div class="grid">
+
+      <div class="panel scheme-current">
+        <div class="badge"><span class="no">S0</span><span class="name">现状 · Google Fonts CDN</span></div>
+        <div class="stack">sans : Inter + Noto Sans SC
+serif: Noto Serif SC
+mono : IBM Plex Mono
+交付 : fonts.googleapis.com CDN</div>
+        <h3 class="cn">全部公开，<br />毫无保留。</h3>
+        <h3 class="en">Everything open,<br />nothing withheld.</h3>
+        <p class="body">企业引入 AI 进行全流程数字化改造，最缺的不是工具，而是一个真实、完整、可被检验的先例。For enterprises adopting AI, what's scarcest is not tools, but a verifiable precedent.</p>
+        <div class="mono-line">01 — Open by Default · Built on ASDM</div>
+        <div class="nav-line">双重身份 · 全球路径 · ASDM 体系 · 开源范本 · 理念</div>
+        <div class="verdict"><b>问题</b>：依赖 Google CDN（国内可达性/合规风险）；英文用 Inter，与 asdm-ai-2026 的 Oxanium 不一致。</div>
+      </div>
+
+      <div class="panel scheme-a reco">
+        <div class="badge"><span class="no">S1</span><span class="name">方案 A · 混合（推荐）</span><span class="reco-tag">RECOMMENDED</span></div>
+        <div class="stack">sans : Oxanium + Noto Sans SC  ← asdm
+serif: Noto Serif SC（大标题保留）
+mono : JetBrains Mono + Noto Sans SC  ← asdm
+交付 : @fontsource-variable 自托管</div>
+        <h3 class="cn">全部公开，<br /><span class="accent">毫无保留。</span></h3>
+        <h3 class="en">Everything open,<br /><span class="accent">nothing withheld.</span></h3>
+        <p class="body">企业引入 AI 进行全流程数字化改造，最缺的不是工具，而是一个真实、完整、可被检验的先例。For enterprises adopting AI, what's scarcest is not tools, but a verifiable precedent.</p>
+        <div class="mono-line">01 — Open by Default · Built on ASDM</div>
+        <div class="nav-line">双重身份 · 全球路径 · ASDM 体系 · 开源范本 · 理念</div>
+        <div class="verdict"><b>效果</b>：正文/等宽与 asdm-ai-2026 完全一致；中文大标题保留衬线的银行稳重质感，品牌识别不变。</div>
+      </div>
+
+      <div class="panel scheme-b">
+        <div class="badge"><span class="no">S2</span><span class="name">方案 B · 与 asdm 完全一致</span></div>
+        <div class="stack">sans : Oxanium + Noto Sans SC  ← asdm
+serif: （删除，font-serif = font-sans）
+mono : JetBrains Mono + Noto Sans SC  ← asdm
+交付 : @fontsource-variable 自托管</div>
+        <h3 class="cn">全部公开，<br /><span class="accent">毫无保留。</span></h3>
+        <h3 class="en">Everything open,<br /><span class="accent">nothing withheld.</span></h3>
+        <p class="body">企业引入 AI 进行全流程数字化改造，最缺的不是工具，而是一个真实、完整、可被检验的先例。For enterprises adopting AI, what's scarcest is not tools, but a verifiable precedent.</p>
+        <div class="mono-line">01 — Open by Default · Built on ASDM</div>
+        <div class="nav-line">双重身份 · 全球路径 · ASDM 体系 · 开源范本 · 理念</div>
+        <div class="verdict"><b>效果</b>：与 asdm-ai-2026 视觉完全统一；代价是失去衬线大标题的"银行稳重感"，中文大标题变黑体，气质更偏科技。</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ===== 细节对比 ===== -->
+<section class="detail">
+  <div class="page-x">
+    <h2>关键细节：中英文标题字体并置</h2>
+    <div class="rows">
+
+      <div>
+        <div class="row-title"><span class="no">D1</span><span class="t">中文大标题 —— 衬线（Noto Serif SC） vs 黑体（Noto Sans SC）</span></div>
+        <div class="cols">
+          <div class="cell scheme-current">
+            <div class="cap"><span>Noto Serif SC · S0/S1</span><span>衬线 600</span></div>
+            <div class="sample-cn">这，是一家银行的开始。</div>
+          </div>
+          <div class="cell scheme-b">
+            <div class="cap"><span>Noto Sans SC · S2</span><span>黑体 600</span></div>
+            <div class="sample-cn">这，是一家银行的开始。</div>
+          </div>
+          <div class="cell scheme-b">
+            <div class="cap"><span>Noto Sans SC · S2</span><span>黑体 400</span></div>
+            <div class="sample-cn" style="font-weight:400">从中国出发，走向世界。</div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="row-title"><span class="no">D2</span><span class="t">英文大标题 —— Noto Serif SC 拉丁衬线 vs Oxanium（asdm） vs Inter（现状）</span></div>
+        <div class="cols">
+          <div class="cell scheme-current">
+            <div class="cap"><span>Noto Serif SC latin · S1</span><span>衬线</span></div>
+            <div class="sample-en">The Beginning of a Bank.</div>
+          </div>
+          <div class="cell scheme-a">
+            <div class="cap"><span>Oxanium · S1/S2 正文</span><span>asdm 英文字体</span></div>
+            <div class="sample-en" style="font-family:var(--f-sans)">The Beginning of a Bank.</div>
+          </div>
+          <div class="cell scheme-current">
+            <div class="cap"><span>Inter · S0 现状</span><span>将被替换</span></div>
+            <div class="sample-en" style="font-family:'Inter',sans-serif">The Beginning of a Bank.</div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="row-title"><span class="no">D3</span><span class="t">正文与中英混排 —— Oxanium 缺字形时逐字符回退 Noto Sans SC，无需任何 JS 切换</span></div>
+        <div class="cols">
+          <div class="cell scheme-a">
+            <div class="cap"><span>S1/S2 sans 栈</span><span>Oxanium → Noto Sans SC</span></div>
+            <div class="sample-body">ABNK 以 AI-First 方式构建，从第一天起就让 AI 成为系统诞生与生长的方式。 English body text renders in Oxanium, while CJK glyphs fall back to Noto Sans SC — per-character, no switching. <strong>数字 0123456789 与 Mixed 中文混排。</strong></div>
+          </div>
+          <div class="cell scheme-current">
+            <div class="cap"><span>S0 现状</span><span>Inter → Noto Sans SC</span></div>
+            <div class="sample-body" style="font-family:'Inter','Noto Sans SC',sans-serif">ABNK 以 AI-First 方式构建，从第一天起就让 AI 成为系统诞生与生长的方式。 English body text renders in Inter, while CJK glyphs fall back to Noto Sans SC. <strong>数字 0123456789 与 Mixed 中文混排。</strong></div>
+          </div>
+          <div class="cell scheme-a">
+            <div class="cap"><span>等宽对比</span><span>JetBrains Mono vs IBM Plex</span></div>
+            <div class="sample-mono">JetBrains Mono · OPEN BY DEFAULT · 0123456789</div>
+            <div class="sample-mono" style="font-family:'IBM Plex Mono',monospace;color:var(--taupe-500)">IBM Plex Mono · OPEN BY DEFAULT · 0123456789</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ===== 方案说明表 ===== -->
+<section class="table-sec">
+  <div class="page-x">
+    <h2>方案说明</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>维度</th><th>S0 · 现状</th><th>S1 · 方案 A（推荐）</th><th>S2 · 方案 B（完全一致）</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><b>正文 sans（中英文）</b></td>
+            <td>Inter + Noto Sans SC（Google CDN）</td>
+            <td class="tag-a">Oxanium + Noto Sans SC<span class="mono"> ← 与 asdm 相同</span></td>
+            <td class="tag-a">Oxanium + Noto Sans SC<span class="mono"> ← 与 asdm 相同</span></td>
+          </tr>
+          <tr>
+            <td><b>大标题 serif</b></td>
+            <td>Noto Serif SC（Google CDN）</td>
+            <td><b>Noto Serif SC（@fontsource 自托管）</b><br />保留银行衬线质感</td>
+            <td class="tag-b">删除衬线，font-serif = font-sans<br />Hero/SectionHead/Closing 等大标题全部变黑体</td>
+          </tr>
+          <tr>
+            <td><b>等宽 mono</b></td>
+            <td>IBM Plex Mono（Google CDN）</td>
+            <td class="tag-a">JetBrains Mono + Noto Sans SC<span class="mono"> ← 与 asdm 相同</span></td>
+            <td class="tag-a">JetBrains Mono + Noto Sans SC<span class="mono"> ← 与 asdm 相同</span></td>
+          </tr>
+          <tr>
+            <td><b>交付方式</b></td>
+            <td>Google Fonts CDN（外部依赖）</td>
+            <td class="tag-a">@fontsource-variable 自托管</td>
+            <td class="tag-a">@fontsource-variable 自托管</td>
+          </tr>
+          <tr>
+            <td><b>与 asdm-ai-2026 一致性</b></td>
+            <td>不一致（Inter / IBM Plex / CDN）</td>
+            <td>sans + mono 完全一致；serif 为 ABNK 品牌保留项</td>
+            <td>完全一致（100%）</td>
+          </tr>
+          <tr>
+            <td><b>改动面</b></td>
+            <td>—</td>
+            <td>index.html 去 CDN link；tailwind.config 字体栈；main.tsx 引入 4 个 @fontsource 包；去 Inter 专属 font-feature-settings</td>
+            <td>同 S1，另需将全站 <span class="mono">font-serif</span> 类改为 <span class="mono">font-sans</span>（约 9 处组件改动）</td>
+          </tr>
+          <tr class="hl">
+            <td><b>切换成本</b></td>
+            <td colspan="3">S1 ↔ S2 互切只需：①tailwind.config 中 serif 栈改指 sans 栈（或反之）；②增删一行 fontsource 引入。5 分钟内完成，无文案/结构改动。</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="page-x">
+    <span>ABNK WEBSITE · FONT REVIEW</span>
+    <span>REVIEW ASDM-AI-2026 SCHEME · 2026-10</span>
+  </div>
+</footer>
+
+<script>
+  var STACKS = {
+    'scheme-current': { tag: 'S0 · CURRENT (GOOGLE FONTS)', text: '当前生效字体栈：\n--font-sans : "Inter", "Noto Sans SC", system-ui, sans-serif\n--font-serif: "Noto Serif SC", Georgia, serif\n--font-mono  : "IBM Plex Mono", ui-monospace, monospace\n（Google Fonts CDN 交付）' },
+    'scheme-a': { tag: 'S1 · HYBRID (RECOMMENDED)', text: '当前生效字体栈：\n--font-sans : "Oxanium Variable", "Noto Sans SC Variable", ui-sans-serif, system-ui, sans-serif\n--font-serif: "Noto Serif SC Variable", Georgia, serif\n--font-mono  : "JetBrains Mono Variable", "Noto Sans SC Variable", ui-monospace, monospace\n（@fontsource 自托管，本页经 Google Fonts 预览同名家族）' },
+    'scheme-b': { tag: 'S2 · FULL ASDM CONSISTENCY', text: '当前生效字体栈：\n--font-sans : "Oxanium Variable", "Noto Sans SC Variable", ui-sans-serif, system-ui, sans-serif\n--font-serif: （无衬线，= font-sans 栈）\n--font-mono  : "JetBrains Mono Variable", "Noto Sans SC Variable", ui-monospace, monospace\n（@fontsource 自托管，本页经 Google Fonts 预览同名家族）' }
+  };
+  var mock = document.getElementById('heroMock');
+  var tag = document.getElementById('schemeTag');
+  var note = document.getElementById('stackNote');
+  var switcher = document.getElementById('switcher');
+  switcher.addEventListener('click', function (e) {
+    var btn = e.target.closest('button[data-scheme]');
+    if (!btn) return;
+    var scheme = btn.getAttribute('data-scheme');
+    mock.className = 'hero-mock ' + scheme;
+    tag.textContent = STACKS[scheme].tag;
+    note.textContent = STACKS[scheme].text;
+    switcher.querySelectorAll('button').forEach(function (b) { b.classList.toggle('active', b === btn); });
+  });
+</script>
+</body>
+</html>

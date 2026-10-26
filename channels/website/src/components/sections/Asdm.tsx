@@ -2,14 +2,9 @@ import { useState } from 'react';
 import { ArrowUpRight } from 'lucide-react';
 import { Reveal } from '@/components/Reveal';
 import { SectionHead } from '@/components/SectionHead';
+import { useHome } from '@/i18n';
 
-const PHASES = [
-  { no: '01', name: '洞察', en: 'Discover', body: 'AI 与团队共同梳理意图与约束，把模糊的想法沉淀为结构化的知识。' },
-  { no: '02', name: '设计', en: 'Design', body: '体验、架构与规范在同一张知识图谱中生成、推演与校验。' },
-  { no: '03', name: '构建', en: 'Build', body: 'AI 参与每一行代码的产出与审阅，人始终对关键判断负责。' },
-  { no: '04', name: '运行', en: 'Operate', body: '交付不是终点。系统在真实运行中持续学习、迭代与进化。' },
-];
-
+// 知识图谱节点布局（纯图形数据，与语言无关）。
 const GRAPH = [
   { x: 200, y: 60, p: 0 }, { x: 110, y: 120, p: 0 }, { x: 280, y: 130, p: 0 },
   { x: 330, y: 220, p: 1 }, { x: 400, y: 150, p: 1 }, { x: 430, y: 270, p: 1 },
@@ -77,22 +72,23 @@ function KnowledgeGraph({ active }: { active: number }) {
 
 export function Asdm() {
   const [active, setActive] = useState(0);
+  const t = useHome().asdm;
 
   return (
     <section id="asdm" className="relative bg-ivory py-24 md:py-40">
       <div className="grid-bg-light absolute inset-0 opacity-60 [mask-image:linear-gradient(to_bottom,black,transparent)]" />
       <div className="page-x relative">
         <SectionHead
-          index="03"
-          label="Built on ASDM"
+          index={t.index}
+          label={t.label}
           title={
             <>
-              AI 优先，
+              {t.title.line1}
               <br className="hidden sm:block" />
-              而非 AI 附加。
+              {t.title.line2}
             </>
           }
-          lead="ASDM 是一套 AI 优先的系统开发方法与平台。ABNK 不是在既有流程上叠加 AI，而是从第一天起，就让 AI 成为系统诞生与生长的方式。"
+          lead={t.lead}
         />
 
         <div className="mt-20 grid grid-cols-12 items-center gap-y-16 md:mt-28 lg:gap-x-16">
@@ -102,7 +98,7 @@ export function Asdm() {
 
           <div className="col-span-12 lg:col-span-7">
             <ol className="border-t border-copper/30">
-              {PHASES.map((p, i) => (
+              {t.phases.map((p, i) => (
                 <Reveal as="li" key={p.no} delay={i * 90} className="border-b border-copper/30">
                   <button
                     type="button"
@@ -118,7 +114,7 @@ export function Asdm() {
                       <span className={`block text-2xl font-semibold transition-colors duration-300 ${i === active ? 'text-espresso' : 'text-taupe-500 group-hover:text-espresso-600'}`}>
                         {p.name}
                       </span>
-                      <span className="mt-1 block font-mono text-[10px] uppercase tracking-[0.2em] text-taupe-400">{p.en}</span>
+                      <span className="mt-1 block font-mono text-[10px] uppercase tracking-[0.2em] text-taupe-400">{p.note}</span>
                     </span>
                     <span
                       className={`col-span-10 col-start-3 text-[15px] font-light transition-all duration-500 md:col-span-8 md:col-start-auto ${
@@ -139,7 +135,7 @@ export function Asdm() {
                 rel="noopener noreferrer"
                 className="group inline-flex items-center gap-3 text-[13px] font-semibold tracking-[0.12em] text-copper-600 transition-colors hover:text-espresso"
               >
-                <span className="border-b border-copper/50 pb-1 transition-colors group-hover:border-espresso">访问 asdm.ai</span>
+                <span className="border-b border-copper/50 pb-1 transition-colors group-hover:border-espresso">{t.visitLink}</span>
                 <ArrowUpRight className="h-4 w-4 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
               </a>
             </Reveal>

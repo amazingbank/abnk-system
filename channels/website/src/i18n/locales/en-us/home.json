@@ -1,0 +1,192 @@
+{
+  "hero": {
+    "eyebrow": "Amazing Bank · ABNK",
+    "title": {
+      "line1": "A Bank.",
+      "line2": "And a Blueprint."
+    },
+    "lead": "Outward, we are an international digital bank serving users around the world. Inward, we are an open-source exemplar growing on the ASDM system — built for real production from the very first line of code.",
+    "cta": {
+      "primary": "Read Our Proposition",
+      "secondary": "How ASDM Powers ABNK"
+    },
+    "scroll": "Scroll to Explore",
+    "meta": [
+      { "k": "First Landing", "v": "China Market" },
+      { "k": "Built On", "v": "The ASDM System" },
+      { "k": "Fully Open", "v": "Process · Code · Design" }
+    ]
+  },
+  "identity": {
+    "index": "01",
+    "label": "Dual Identity",
+    "title": {
+      "line1": "Two identities,",
+      "line2": "one promise."
+    },
+    "lead": "ABNK answers two questions at once: how should a bank serve the world, and how should an enterprise embrace AI? We chose one system to deliver both answers.",
+    "items": [
+      {
+        "no": "01",
+        "side": "Outward",
+        "title": "A Bank",
+        "body": "An international digital bank for users around the world. Starting from the Chinese market, with long-termism as our method, we bring the steadiness, clarity and trust a bank owes to everyone.",
+        "tags": ["International", "Digital-Native", "Mass-Market Care"]
+      },
+      {
+        "no": "02",
+        "side": "Inward",
+        "title": "A Blueprint",
+        "body": "A living sample and real application growing on the ASDM system. Its goal is not to demo, but to run in real production; its process, code and design are fully open for any enterprise that wants to reshape itself with AI.",
+        "tags": ["AI-First", "Production-Ready", "Fully Open"]
+      }
+    ]
+  },
+  "globalPath": {
+    "index": "02",
+    "label": "Global Path",
+    "title": {
+      "line1": "From China,",
+      "line2": "to the world."
+    },
+    "lead": "ABNK was born global. We expand with a clear and patient rhythm — every step is built on a verified foundation.",
+    "stageLabel": "Phase {no}",
+    "stages": [
+      {
+        "no": "01",
+        "name": "China",
+        "note": "First Landing",
+        "body": "First landing in the most digitally dynamic market — honing the system, proving the paradigm."
+      },
+      {
+        "no": "02",
+        "name": "Southeast Asia",
+        "note": "Near Markets",
+        "body": "Reaching neighboring markets of many cultures and languages, testing how well the system adapts."
+      },
+      {
+        "no": "03",
+        "name": "Belt & Road",
+        "note": "Corridors",
+        "body": "Extending along the corridors that connect the world, letting one method grow across a wider map."
+      },
+      {
+        "no": "04",
+        "name": "Developed Markets",
+        "note": "Proving Grounds",
+        "body": "Standing the same test in the most mature and demanding markets."
+      }
+    ]
+  },
+  "asdm": {
+    "index": "03",
+    "label": "Built on ASDM",
+    "title": {
+      "line1": "AI-First,",
+      "line2": "not an add-on."
+    },
+    "lead": "ASDM is an AI-first system development methodology and platform. ABNK does not bolt AI onto an existing process — from day one, AI is how the system is born and how it grows.",
+    "phases": [
+      {
+        "no": "01",
+        "name": "Discover",
+        "note": "Insight",
+        "body": "AI and the team work together to map intent and constraints, settling vague ideas into structured knowledge."
+      },
+      {
+        "no": "02",
+        "name": "Design",
+        "note": "Blueprint",
+        "body": "Experience, architecture and standards are generated, reasoned and validated within one shared knowledge graph."
+      },
+      {
+        "no": "03",
+        "name": "Build",
+        "note": "Engineering",
+        "body": "AI takes part in producing and reviewing every line of code, while people stay accountable for the key judgments."
+      },
+      {
+        "no": "04",
+        "name": "Operate",
+        "note": "Evolution",
+        "body": "Delivery is not the end. The system keeps learning, iterating and evolving in real operation."
+      }
+    ],
+    "visitLink": "Visit asdm.ai"
+  },
+  "openSource": {
+    "index": "04",
+    "label": "Open by Default",
+    "title": {
+      "line1": "Everything open,",
+      "line2": "nothing withheld."
+    },
+    "lead": "For enterprises pursuing end-to-end digital transformation with AI, what is scarcest is not tools — it is a real, complete, verifiable precedent. ABNK chooses to be that precedent.",
+    "stats": ["Development in the Open", "Classes of Open Assets", "Global Path Stages", "Unified Methodology"],
+    "assets": [
+      {
+        "name": "Process",
+        "note": "Traceable",
+        "body": "Every step from intent to launch — every decision, every retrospective — openly recorded in a traceable way."
+      },
+      {
+        "name": "Code",
+        "note": "Production-Grade",
+        "body": "Complete code written to real production standards, open for anyone to read, examine and borrow from."
+      },
+      {
+        "name": "Design",
+        "note": "Reproducible",
+        "body": "Design language, interaction standards and experience decisions are opened in sync — making good experience reproducible."
+      }
+    ]
+  },
+  "principles": {
+    "index": "05",
+    "label": "What We Believe",
+    "title": "What we believe.",
+    "quote": {
+      "line1": "Banking-grade steadiness and engineering-grade precision",
+      "line2": "are not at odds — they were always meant to come from the same attitude."
+    },
+    "quoteSource": "The ABNK Manifesto",
+    "items": [
+      {
+        "no": "01",
+        "name": "Steadfast",
+        "note": "Trust",
+        "body": "A bank's first duty is to be trusted. We make every decision for the long term, and never chase the noise."
+      },
+      {
+        "no": "02",
+        "name": "Precise",
+        "note": "Rigor",
+        "body": "We treat every detail with engineering rigor — measurable, verifiable, traceable."
+      },
+      {
+        "no": "03",
+        "name": "Open",
+        "note": "Transparency",
+        "body": "We put our process and outcomes to public scrutiny. Transparency is the best guarantee of quality."
+      },
+      {
+        "no": "04",
+        "name": "Caring",
+        "note": "People",
+        "body": "Technology ends with people. Everyone deserves to be treated with care and as an equal."
+      }
+    ]
+  },
+  "closing": {
+    "eyebrow": "The Beginning",
+    "title": {
+      "line1": "This is the beginning of a bank,",
+      "line2": "and the proof of a method."
+    },
+    "lead": "Whether you care about a trustworthy new bank, or about how AI can truly change an enterprise — you are welcome to witness it with us.",
+    "cta": {
+      "primary": "Explore the ASDM System",
+      "secondary": "Reread the Proposition"
+    }
+  }
+}
