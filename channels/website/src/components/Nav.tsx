@@ -99,7 +99,7 @@ export function Nav() {
             href="https://asdm.ai"
             target="_blank"
             rel="noopener noreferrer"
-            className="group hidden items-center gap-2 border border-copper/60 px-4 py-2 text-[12px] tracking-[0.12em] text-warmwhite transition-all duration-300 hover:border-amber hover:bg-amber hover:text-char md:flex"
+            className="group hidden h-10 items-center gap-2 border border-copper/60 px-4 text-[12px] tracking-[0.12em] text-warmwhite transition-all duration-300 hover:border-amber hover:bg-amber hover:text-char md:flex"
           >
             {common.nav.knowAsdm}
             <ArrowUpRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
