@@ -17,6 +17,9 @@ artifacts/**/*.log
 artifacts/**/tmp/
 artifacts/**/*.dump
 
+# 运行时生成：种子脚本产出的环境特定映射（含 clientId/账户 id，随环境变化）
+data/seed_demo_mapping.json
+
 # 数据快照默认入库（小 JSON）；大体积导出按需显式排除：
 # artifacts/**/*.csv
 
