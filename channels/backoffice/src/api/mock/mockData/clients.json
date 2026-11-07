@@ -1,0 +1,130 @@
+{
+  "_source": "P0.3 seed-poc-evidence.json (2026-11-07T10:43:47) — BO 运营视角快照（姓名/外部编号/证件号取种子实参：王/李/赵 POC-*，TS=1107104347；账户/贷款数值对齐 seed readback）；derivedStatus 由 expiryDate 对业务日期 2027-03-29 推导（客户 A=EXPIRED 2020-01-01 / B、C=VALID）",
+  "businessDate": "2027-03-29",
+  "clients": [
+    {
+      "clientId": 28,
+      "externalId": "ABNK-POC-A-1107104347",
+      "firstname": "王",
+      "lastname": "POC-A1107104347",
+      "displayName": "王POC-A1107104347",
+      "mobileNo": "13504347001",
+      "emailAddress": "wang.a@abnk.example.com",
+      "officeName": "Head Office",
+      "status": "ACTIVE",
+      "identifier": {
+        "identifierId": 1,
+        "documentTypeId": 1,
+        "documentTypeName": "身份证",
+        "documentKey": "ID-A-1107104347",
+        "status": "ACTIVE",
+        "derivedStatus": "EXPIRED",
+        "issuanceDate": "2015-01-01",
+        "expiryDate": "2020-01-01",
+        "description": "身份证(已过期)"
+      },
+      "savingsAccounts": [
+        {
+          "id": 11,
+          "accountNo": "0000**0011",
+          "productName": "ABNK 活期储蓄",
+          "accountBalance": 10000.0,
+          "currency": "CNY",
+          "status": "ACTIVE"
+        },
+        {
+          "id": 12,
+          "accountNo": "0000**0012",
+          "productName": "ABNK 活期储蓄",
+          "accountBalance": 0.0,
+          "currency": "CNY",
+          "status": "ACTIVE"
+        }
+      ],
+      "fixedDepositAccounts": [],
+      "loan": null
+    },
+    {
+      "clientId": 29,
+      "externalId": "ABNK-POC-B-1107104347",
+      "firstname": "李",
+      "lastname": "POC-B1107104347",
+      "displayName": "李POC-B1107104347",
+      "mobileNo": "13504347002",
+      "emailAddress": "li.b@abnk.example.com",
+      "officeName": "Head Office",
+      "status": "ACTIVE",
+      "identifier": {
+        "identifierId": 2,
+        "documentTypeId": 1,
+        "documentTypeName": "身份证",
+        "documentKey": "ID-B-1107104347",
+        "status": "ACTIVE",
+        "derivedStatus": "VALID",
+        "issuanceDate": "2020-06-01",
+        "expiryDate": "2099-12-31",
+        "description": "身份证(有效)"
+      },
+      "savingsAccounts": [
+        {
+          "id": 13,
+          "accountNo": "0000**0013",
+          "productName": "ABNK 活期储蓄",
+          "accountBalance": 5000.0,
+          "currency": "CNY",
+          "status": "ACTIVE"
+        }
+      ],
+      "fixedDepositAccounts": [
+        {
+          "id": 14,
+          "accountNo": "0000**0014",
+          "productName": "ABNK 定期存款",
+          "accountBalance": 10000.0,
+          "interestRate": 3.0,
+          "maturityDate": "2028-01-17",
+          "status": "ACTIVE"
+        }
+      ],
+      "loan": null
+    },
+    {
+      "clientId": 30,
+      "externalId": "ABNK-POC-C-1107104347",
+      "firstname": "赵",
+      "lastname": "POC-C1107104347",
+      "displayName": "赵POC-C1107104347",
+      "mobileNo": "13504347003",
+      "emailAddress": "zhao.c@abnk.example.com",
+      "officeName": "Head Office",
+      "status": "ACTIVE",
+      "identifier": {
+        "identifierId": 3,
+        "documentTypeId": 1,
+        "documentTypeName": "身份证",
+        "documentKey": "ID-C-1107104347",
+        "status": "ACTIVE",
+        "derivedStatus": "VALID",
+        "issuanceDate": "2020-06-01",
+        "expiryDate": "2099-12-31",
+        "description": "身份证(有效)"
+      },
+      "savingsAccounts": [],
+      "fixedDepositAccounts": [],
+      "loan": {
+        "loanId": 6,
+        "externalId": "ABNK-POC-C-LN-1107104347",
+        "productName": "ABNK-POC消费贷1107104347",
+        "principal": 50000.0,
+        "interestRate": 10.0,
+        "termMonths": 12,
+        "status": "Active",
+        "inArrears": true,
+        "overdueDays": 40,
+        "overdueSinceDate": "2027-02-17",
+        "totalOverdue": 8791.58,
+        "delinquencyClassification": "ABNK_POC_OD"
+      }
+    }
+  ]
+}

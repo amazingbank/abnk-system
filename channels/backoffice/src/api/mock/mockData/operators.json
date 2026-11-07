@@ -1,0 +1,6 @@
+{
+  "_source": "mock 演示凭据（原型专用明文，同 P1.3 fixtures demoUsers 口径）——生产走 PBKDF2（data/gateway_users.json admin 用户，D2 简化登录）；BO 运营角色对应 P2.5 网关内部通道 /bo/api/* 鉴权口径",
+  "operators": [
+    { "username": "admin", "password": "password", "displayName": "ABNK 运营管理员", "role": "OPERATOR" }
+  ]
+}

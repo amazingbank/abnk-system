@@ -1,0 +1,13 @@
+/* ABNK Backoffice 全局样式（任务 P1.4）——字体栈/色板经 abnkTheme.ts 注入的 CSS 变量引用 */
+
+body {
+  margin: 0;
+  font-family: var(--abnk-font-sans);
+  background-color: var(--abnk-color-bg);
+  color: var(--abnk-color-text);
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  min-height: 100vh;
+}

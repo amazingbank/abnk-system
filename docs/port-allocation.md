@@ -29,8 +29,8 @@
 |---|---|---|---|
 | 6201 | website dev server | `channels/website/vite.config.ts`（`ABNK_WEBSITE_PORT` 可覆盖） | ✅ 生效 |
 | 6202 | website preview | 同上 | ✅ 生效 |
-| 6203 | backoffice dev | `channels/backoffice/`（ADR-008，Ant Design Pro） | 预留 Phase 3 |
-| 6204 | backoffice preview | 同上 | 预留 |
+| 6203 | backoffice dev | `channels/backoffice/vite.config.ts`（`ABNK_BO_PORT` 可覆盖；2026-11-07 P1.4 原型启用） | ✅ 生效 |
+| 6204 | backoffice preview | 同上（`npm run preview`） | ✅ 生效 |
 | 6205 / 6206 | online-banking dev / preview | `channels/online-banking/` | 预留 Phase 4 |
 | 6207 / 6208 | counter dev / preview | `channels/counter/` | 预留 Phase 3 末 |
 | 6209 | mobile-banking H5 dev | `channels/mobile-banking/h5/` | 预留 Phase 5 |

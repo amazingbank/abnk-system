@@ -8,6 +8,9 @@
 node_modules/
 dist/
 
+# playwright-cli 浏览器会话缓存（走查截图已归档 artifacts/，会话数据不入库）
+.playwright-cli/
+
 # 环境与本地覆盖
 deploy/compose/.env.local
 **/.env.local
