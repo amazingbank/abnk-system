@@ -1,0 +1,32 @@
+{
+  "algorithm": "PBKDF2-HMAC-SHA256",
+  "iterations": 100000,
+  "dklen": 32,
+  "pepper": "none",
+  "hashContract": "password_hash = PBKDF2-HMAC-SHA256(password_utf8, salt_bytes, iterations=100000, dklen=32) as hex; salt = 16 random bytes as hex; no pepper",
+  "users": [
+    {
+      "username": "alice",
+      "clientId": 28,
+      "algorithm": "PBKDF2-HMAC-SHA256",
+      "iterations": 100000,
+      "salt": "36416316d5d2b97bd304ff5a073311d8",
+      "password_hash": "0ac3d426f04da87d847ac90911e082e12d9a5cb7b5d42b8aa6861b7b5f6ec07d"
+    },
+    {
+      "username": "bob",
+      "clientId": 29,
+      "algorithm": "PBKDF2-HMAC-SHA256",
+      "iterations": 100000,
+      "salt": "47b2fb8e1b7a8f8b34342e3299e76976",
+      "password_hash": "256236519fefb36d1a866c70e498a210a0d9ca9d09a3edb5086b16ff7f85ed1b"
+    },
+    {
+      "username": "admin",
+      "algorithm": "PBKDF2-HMAC-SHA256",
+      "iterations": 100000,
+      "salt": "f1a55ebdde57d795b6adc8442a55c881",
+      "password_hash": "f8bc959f16605b7f59ad70f2a3c8601efa0994991b3846f961bf05ee8c29abba"
+    }
+  ]
+}
