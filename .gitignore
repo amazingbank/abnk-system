@@ -29,3 +29,8 @@ data/seed_demo_mapping.json
 # IDE
 .idea/
 .vscode/
+
+# Java/Gradle（channels/gateway 等 JVM 工程）
+.gradle/
+build/
+src/*/build/

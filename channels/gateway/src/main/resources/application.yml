@@ -1,0 +1,42 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: abnk-gateway
+  cloud:
+    gateway:
+      server:
+        webflux:
+          # 转发目标（Fineract 生产形态）：
+          # dev 形态 = 本地生产形态栈；服务器形态经 ABNK_FINERACT_BASE 指向容器内网（如 http://abnk-fineract:8080）
+          # ⚠️ SCG 实测（2026-11-07）忽略 route URI 的 path 部分——context path 必须
+          # 经 PrefixPath 显式拼回，故 base 与前缀拆为两个 env 变量
+          routes:
+            - id: customer-channel
+              uri: ${ABNK_FINERACT_BASE:http://localhost:8081}
+              predicates:
+                - Path=/abnk/api/**
+              filters:
+                - StripPrefix=1                                                        # /abnk/api/v1/offices -> /api/v1/offices
+                - PrefixPath=${ABNK_FINERACT_PREFIX:/fineract-provider}                 # -> /fineract-provider/api/v1/offices
+            - id: bo-channel
+              uri: ${ABNK_FINERACT_BASE:http://localhost:8081}
+              predicates:
+                - Path=/bo/api/**
+              filters:
+                - StripPrefix=1                                                        # /bo/api/v1/clients -> /api/v1/clients
+                - PrefixPath=${ABNK_FINERACT_PREFIX:/fineract-provider}                 # -> /fineract-provider/api/v1/clients
+          # Fineract 租户头/Basic 双头由网关全局注入（权威来源在网关侧，
+          # 客户端传入的同名头先剥后加，避免重复/伪造）
+          default-filters:
+            - RemoveRequestHeader=Fineract-Platform-TenantId
+            - AddRequestHeader=Fineract-Platform-TenantId, default
+            - RemoveRequestHeader=Authorization
+            - AddRequestHeader=Authorization, Basic bWlmb3M6cGFzc3dvcmQ=
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

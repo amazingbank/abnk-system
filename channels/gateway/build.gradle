@@ -1,0 +1,49 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.5.6'
+    id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'ai.amazingbank'
+version = '0.0.1-SNAPSHOT'
+description = 'ABNK API Gateway (Spring Cloud Gateway, Phase P2.1)'
+
+java {
+    toolchain {
+        // 与 fineract 仓同口径：JDK 25 toolchain（硬门槛）
+        languageVersion = JavaLanguageVersion.of(25)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+ext {
+    // 版本组合钉死（均为 Boot 3.5 兼容线）：
+    // - Spring Boot 3.5.x（LTS）——不对齐 fineract 仓的 Boot 4.1.1（独立服务口径）
+    // - Spring Cloud 2025.0.x
+    // - springdoc 2.8.x（Boot 4 需 springdoc v3 线，升 Boot 4 时须同步换）
+    set('springCloudVersion', '2025.0.0')
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    // SCG 2025.0.x starter（WebFlux 服务端网关，4.3+ 新命名）
+    implementation 'org.springframework.cloud:spring-cloud-starter-gateway-server-webflux'
+    // springdoc 必须用 WebFlux 线（SCG 是 WebFlux 栈；误用 webmvc starter 不生效）
+    // P2.6 /v3/api-docs 契约导出依赖此依赖
+    implementation 'org.springdoc:springdoc-openapi-starter-webflux-ui:2.8.9'
+    // ⚠️ spring-boot-starter-security 延后至 P2.2 引入（骨架期无安全配置时
+    // Spring Security 默认全端点 401，转发链路验证判据必挂）
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
