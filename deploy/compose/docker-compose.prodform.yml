@@ -1,0 +1,81 @@
+# Amazing Bank — 本地生产形态栈（Fineract WAR + Tomcat + 独立 PostgreSQL）
+#
+# 用途：Phase P0.1（Sprint v0.0.1 Part02）——在本地以「生产形态」运行 Fineract，
+#       与开发栈（abnk-system 项目：宿主 devRun :8443 + abnk-pg :5432）并行互不干扰。
+# 范式依据：fineract/docker-compose-war-test.yml（官方 WAR 冒烟栈，CI 保活用例）。
+#
+# ⚠️ 项目名固定 abnk-prodform——与开发栈 abnk-system、生产栈 abnk-prod 严格区分，
+#    不得在错误目录执行 down（会误停人家容器）。
+#
+# 前置：先构建 WAR——
+#   cd fineract && JAVA_HOME=~/.sdkman/candidates/java/25.0.5+8-tem ./gradlew :fineract-war:war
+#
+# 用法（或用 scripts/prodform/stack.sh 一键脚本）：
+#   cd abnk-system/deploy/compose
+#   docker compose -f docker-compose.prodform.yml up -d
+#   docker compose -f docker-compose.prodform.yml ps
+#   docker compose -f docker-compose.prodform.yml logs -f abnk-fineract
+#   docker compose -f docker-compose.prodform.yml down   # 停栈（数据卷保留；执行前问用户）
+
+name: abnk-prodform
+
+services:
+  abnk-pg-prod:
+    container_name: abnk-pg-prod
+    image: postgres:${ABNK_PG_PROD_IMAGE_TAG:-18.3}
+    restart: unless-stopped
+
+    ports:
+      # 宿主 5433 → 容器 5432（与开发栈 abnk-pg 的 5432 错开）
+      - "${ABNK_PG_PROD_PORT:-5433}:5432"
+
+    environment:
+      # 沿用开发栈口径（root/postgres/root），与 Fineract env 零覆盖对齐
+      POSTGRES_USER: ${ABNK_PG_PROD_USER:-root}
+      POSTGRES_PASSWORD: ${ABNK_PG_PROD_PASSWORD:-postgres}
+      POSTGRES_DB: ${ABNK_PG_PROD_DB:-root}
+      TZ: ${ABNK_TZ:-Asia/Shanghai}
+
+    # Fineract 迁移代码不建库（TenantDatabaseUpgradeService 无 CREATE DATABASE），
+    # 必须由 initdb 通道预建 fineract_tenants + fineract_default 两库，否则启动必失败。
+    volumes:
+      # ⚠️ PostgreSQL 18+：挂 /var/lib/postgresql 父目录（版本化子目录 18/data），不是 .../data
+      - abnk-pg-prod-data:/var/lib/postgresql
+      - ./initdb/01-init-abnk.sh:/docker-entrypoint-initdb.d/01-init-abnk.sh:ro
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${ABNK_PG_PROD_USER:-root}"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 20s
+
+  abnk-fineract:
+    container_name: abnk-fineract
+    # 版本钉死对齐官方 docker-compose-war-test.yml 实测值
+    image: tomcat:10.1.59-jdk25-temurin
+    restart: unless-stopped
+
+    volumes:
+      # WAR 为官方构建产物直接只读挂载（不进镜像——P0.4 服务器侧才打镜像）
+      # 相对路径上三级 = 工作区根（compose 相对路径以本文件所在目录为基准）
+      - ../../../fineract/fineract-war/build/libs/fineract-provider.war:/usr/local/tomcat/webapps/fineract-provider.war:ro
+
+    tmpfs:
+      - /tmp:rw,nosuid,size=256m
+
+    ports:
+      # 宿主 8081 → 容器 8080（Tomcat 平面 HTTP；公网 TLS 终止在网关层是 P2 之后的事）
+      - "8081:8080"
+
+    env_file:
+      - env/fineract-prodform.env
+
+    depends_on:
+      abnk-pg-prod:
+        condition: service_healthy
+
+volumes:
+  abnk-pg-prod-data:
+    # name 固定，避免 compose 加 abnk-prodform_ 前缀
+    name: abnk-pg-prod-data
