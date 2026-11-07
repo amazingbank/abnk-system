@@ -123,26 +123,26 @@ abstract final class AbnkFonts {
   ];
 
   /// sans 样式（Latin 主字体 Oxanium，CJK 逐字符回退 Noto Sans SC）。
+  ///
+  /// google_fonts 6.x 生成方法不再接受 fontFamilyFallback 形参——回退栈经
+  /// [TextStyle.copyWith] 附加（P1.3 编译验证时按实包口径修正，token 数值不变）。
   static TextStyle sans({TextStyle? base}) => GoogleFonts.oxanium(
         textStyle: base,
-        fontFamilyFallback: sansFallback,
-      );
+      ).copyWith(fontFamilyFallback: sansFallback);
 
   /// serif 样式（品牌衬线大标题 Noto Serif SC）。
   static TextStyle serif({TextStyle? base}) => GoogleFonts.notoSerifSc(
         textStyle: base,
-        fontFamilyFallback: serifFallback,
-      );
+      ).copyWith(fontFamilyFallback: serifFallback);
 
   /// mono 样式（JetBrains Mono，CJK 回退 Noto Sans SC）。
   static TextStyle mono({TextStyle? base}) => GoogleFonts.jetBrainsMono(
         textStyle: base,
-        fontFamilyFallback: monoFallback,
-      );
+      ).copyWith(fontFamilyFallback: monoFallback);
 
   /// eyebrow 样式——小号大写字距标签（官网 eyebrow 范式）。
   static TextStyle eyebrow({TextStyle? base, double fontSize = 12}) =>
-      (sans(base: base) ?? const TextStyle()).copyWith(
+      sans(base: base).copyWith(
         letterSpacing: AbnkMetrics.eyebrow(fontSize),
       );
 }

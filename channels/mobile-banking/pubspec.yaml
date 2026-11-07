@@ -1,0 +1,110 @@
+name: abnk_mobile
+description: "ABNK 手机银行（Amazing Bank mobile banking）——Sprint v0.0.1 Part02 Phase P1 mock 原型。三目标载体（web + iOS + Android，ADR-009）。"
+# The following line prevents the package from being accidentally published to
+# pub.dev using `flutter pub publish`. This is preferred for private packages.
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+
+# The following defines the version and build number for your application.
+# A version number is three numbers separated by dots, followed by an optional
+# build number separated by a plus sign.
+# In Android, build-name is used as versionName while build-number used as versionCode.
+# In iOS, build-name is used as CFBundleShortVersionString while build-number is used as CFBundleVersion.
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.13.7
+
+# Dependencies specify what packages your package needs to work.
+#
+# To automatically upgrade your package dependencies to the latest available versions,
+# run `flutter pub upgrade --major-versions`.
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # The following adds the Cupertino Icons font to your application.
+  # Use with the CupertinoIcons class for iOS style icons.
+  cupertino_icons: ^1.0.8
+
+  # ABNK 设计系统字体栈（P1.2 主题依赖）——字体文件自托管于 assets/fonts/
+  # （对齐官网 no-CDN 口径），google_fonts 仅做族名匹配，运行时拉取已禁用。
+  google_fonts: ^6.3.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  # 三载体走查（P1.3 VP1.3.5/VP1.3.6）——flutter drive 驱动 UI 并截屏归档
+  integration_test:
+    sdk: flutter
+
+  # 启动器图标生成（iOS AppIcon + Android mipmap/自适应图标）——
+  # 源图 assets/brand/app-icon-1024.png（ASDM logo，SVG 矢量栅格化）
+  flutter_launcher_icons: ^0.14.4
+
+  # The "flutter_lints" package above contains a set of recommended lints to
+  # encourage good coding practices. The lint set provided by the package is
+  # activated in the `analysis_options.yaml` file located at the root of your
+  # package. See that file for information about deactivating specific lint
+  # rules and activating additional ones.
+  flutter_lints: ^6.0.0
+
+# For information on the generic Dart part of this file, see the
+# following page: https://dart.dev/tools/pub/pubspec
+
+# The following section is specific to Flutter packages.
+flutter:
+
+  # The following line ensures that the Material Icons font is
+  # included with your application, so that you can use the icons in
+  # the material Icons class.
+  uses-material-design: true
+
+  # ABNK mock fixtures（P0.3 种子快照导出，mock repository 数据源）
+  assets:
+    - fixtures/me.json
+    - fixtures/identity.json
+    - fixtures/accounts.json
+    - fixtures/transactions.json
+    - fixtures/loan_products.json
+    # 自托管字体资产目录——google_fonts 在 allowRuntimeFetching=false 时按
+    # 「族名去空格-变体名.ttf」文件名约定经 AssetManifest 命中（实测源码口径）。
+    - assets/fonts/
+    # ASDM 品牌 logo（登录页展示；SVG 矢量 1024 栅格化，透明底）
+    - assets/brand/asdm-logo.png
+
+  # ABNK 自托管字体（no-CDN 口径）——fonts 段注册直连族名（供
+  # fontFamilyFallback 与非 google_fonts 路径使用），文件与 assets 段共用。
+  fonts:
+    - family: Oxanium
+      fonts:
+        - asset: assets/fonts/Oxanium-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Oxanium-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Oxanium-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Oxanium-Bold.ttf
+          weight: 700
+    - family: Noto Sans SC
+      fonts:
+        - asset: assets/fonts/NotoSansSC-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/NotoSansSC-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/NotoSansSC-Bold.ttf
+          weight: 700
+    - family: Noto Serif SC
+      fonts:
+        - asset: assets/fonts/NotoSerifSC-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/NotoSerifSC-Bold.ttf
+          weight: 700
+    - family: JetBrains Mono
+      fonts:
+        - asset: assets/fonts/JetBrainsMono-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/JetBrainsMono-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/JetBrainsMono-SemiBold.ttf
+          weight: 600

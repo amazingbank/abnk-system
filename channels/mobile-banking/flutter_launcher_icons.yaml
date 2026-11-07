@@ -1,0 +1,11 @@
+# flutter_launcher_icons 配置（pubspec 外置文件，避免污染 pubspec 主体）
+# 源图：assets/brand/app-icon-1024.png——ASDM logo（SVG 矢量栅格化，
+# 米白 #FAF7F2 底 + 螺旋标志居中 640/1024）；Android 自适应前景为透明底
+# 520/1024 安全区口径。生成：dart run flutter_launcher_icons
+flutter_launcher_icons:
+  android: true
+  ios: true
+  remove_alpha_ios: true
+  image_path: "assets/brand/app-icon-1024.png"
+  adaptive_icon_background: "#FAF7F2"
+  adaptive_icon_foreground: "assets/brand/app-icon-adaptive-fg.png"

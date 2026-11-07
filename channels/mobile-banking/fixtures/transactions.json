@@ -1,0 +1,32 @@
+{
+  "_source": "P0.2 capability-probe.json VP0.2.4 实测 item 字段口径（id/date/transactionType/amount/runningBalance/note）+ P0.3 种子余额快照",
+  "11": [
+    {
+      "id": 21,
+      "date": "2027-01-17",
+      "transactionType": "Deposit",
+      "amount": 10000.00,
+      "runningBalance": 10000.00,
+      "note": "初始存入"
+    }
+  ],
+  "12": [],
+  "13": [
+    {
+      "id": 22,
+      "date": "2027-01-17",
+      "transactionType": "Deposit",
+      "amount": 10000.00,
+      "runningBalance": 10000.00,
+      "note": "初始存入"
+    },
+    {
+      "id": 23,
+      "date": "2027-02-20",
+      "transactionType": "Withdrawal",
+      "amount": 5000.00,
+      "runningBalance": 5000.00,
+      "note": "日常消费"
+    }
+  ]
+}

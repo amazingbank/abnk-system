@@ -1,0 +1,55 @@
+{
+  "_source": "P0.3 seed-poc-evidence.json — 客户 A：sourceAccount=11（余额 10000.0）/ targetAccount=12；客户 B：savingsAccount=13（余额 5000）+ fixedDepositAccount=14（maturity=2028-01-17）",
+  "alice": {
+    "savingsAccounts": [
+      {
+        "id": 11,
+        "accountNo": "0000**0011",
+        "productName": "ABNK 活期储蓄",
+        "accountType": "SAVINGS",
+        "currency": "CNY",
+        "accountBalance": 10000.00,
+        "availableBalance": 10000.00,
+        "status": "ACTIVE"
+      },
+      {
+        "id": 12,
+        "accountNo": "0000**0012",
+        "productName": "ABNK 活期储蓄",
+        "accountType": "SAVINGS",
+        "currency": "CNY",
+        "accountBalance": 0.00,
+        "availableBalance": 0.00,
+        "status": "ACTIVE"
+      }
+    ],
+    "fixedDepositAccounts": []
+  },
+  "bob": {
+    "savingsAccounts": [
+      {
+        "id": 13,
+        "accountNo": "0000**0013",
+        "productName": "ABNK 活期储蓄",
+        "accountType": "SAVINGS",
+        "currency": "CNY",
+        "accountBalance": 5000.00,
+        "availableBalance": 5000.00,
+        "status": "ACTIVE"
+      }
+    ],
+    "fixedDepositAccounts": [
+      {
+        "id": 14,
+        "accountNo": "0000**0014",
+        "productName": "ABNK 定期存款",
+        "accountType": "FIXED_DEPOSIT",
+        "currency": "CNY",
+        "accountBalance": 10000.00,
+        "interestRate": 3.0,
+        "maturityDate": "2028-01-17",
+        "status": "ACTIVE"
+      }
+    ]
+  }
+}
