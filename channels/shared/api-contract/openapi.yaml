@@ -1,0 +1,1498 @@
+openapi: 3.1.0
+info:
+  title: ABNK Gateway API（KBank POC 基线契约）
+  version: 0.1.0
+  description: |
+    Amazing Bank（ABNK）KBank POC 基线系统的网关 API 契约（冻结评审版）。
+
+    **双通道形态**（Sprint v0.0.1 Part02 决策 D2/D3）：
+    - **对客通道**（手机银行消费）：`/login` + `/abnk/api/v1/*`——收敛面，字段脱敏，
+      客户端不可见 Fineract 内部形态。
+    - **内部通道**（Backoffice 消费）：`/bo/login` + `/bo/api/v1/*`——全量转发面
+      （含贷款 command 族与 identifiers PUT）。
+
+    **鉴权**：简化登录（D2）——`POST /login` / `POST /bo/login` 换取 JWT（HS256，
+    TTL 15min），后续请求携带 `Authorization: Bearer <token>`；token 携带
+    `channel` claim（customer / internal），通道隔离由网关校验。
+
+    **事实源**（本契约 schema 字段反推依据）：
+    - 手机银行 repository 接口签名与模型：`channels/mobile-banking/lib/data/`（P1.3 交付）
+    - Backoffice repository 接口签名与模型：`channels/backoffice/src/api/`（P1.4 交付）
+    - Fineract 端点实测形态：`artifacts/phaseP0/capability-probe.json`（P0.2 探查矩阵）
+    - 种子数据快照：`artifacts/phaseP0/seed-poc-evidence.json`（P0.3 交付）
+
+    **基线不含证照拦截逻辑**（POC 演示增量；identity 端点为纯读计算）。
+    冻结后 P2 网关按本契约实现，Dart/TS client 从本契约生成（P2.6），双前端零手写 API 类型（D3）。
+servers:
+  - url: http://localhost:8080
+    description: 本地 dev 网关（P2 dev 形态）
+  - url: https://api.amazingbank.ai
+    description: 生产网关（P3.5 上线）
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Auth·对客
+    description: 手机银行登录（简化登录，D2 口径）
+  - name: Me·对客
+    description: 当前客户资料与证照（收敛面 + 脱敏）
+  - name: Accounts·对客
+    description: 账户总览 / 交易明细 / 转账聚合 / 定期开户
+  - name: Loans·对客
+    description: 贷款产品与申请（收敛面）
+  - name: Auth·内部
+    description: Backoffice 运营登录
+  - name: Clients·内部
+    description: 客户与证照管理（Backoffice 全量面）
+  - name: Loans·内部
+    description: 贷款运营（只读列表 + command 族转发）
+
+paths:
+  # ── 对客通道 ────────────────────────────────────────────────
+  /login:
+    post:
+      tags: [Auth·对客]
+      operationId: login
+      summary: 客户登录（简化登录，签发 JWT）
+      description: |
+        凭据校验（PBKDF2，用户表 `data/gateway_users.json`——P0.3 口径）通过后
+        签发 HS256 JWT（claim：`sub`=clientId、`channel`="customer"）。
+        mock 阶段演示口令见 `channels/mobile-banking/fixtures/me.json`（原型专用明文）。
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+            example:
+              username: alice
+              password: password
+      responses:
+        '200':
+          description: 登录成功，返回 token 与客户标识
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+              example:
+                token: eyJhbGciOiJIUzI1NiJ9.xxx.yyy
+                tokenType: Bearer
+                expiresIn: 900
+                channel: customer
+                username: alice
+                displayName: Alice Green
+                clientId: 28
+        '401':
+          description: 凭据错误
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                status: 401
+                error: Unauthorized
+                message: 用户名或密码错误
+
+  /abnk/api/v1/me:
+    get:
+      tags: [Me·对客]
+      operationId: getMe
+      summary: 当前客户资料
+      description: |
+        按 token `sub`（clientId）反查 Fineract `GET /clients/{id}`，字段按契约收敛：
+        姓名脱敏（姓 + 名首字）、手机号尾号形态（`135******01`）。
+      responses:
+        '200':
+          description: 当前客户资料（脱敏口径）
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+              example:
+                clientId: 28
+                externalId: ABNK-POC-A-1107104347
+                firstname: Alice
+                lastname: Green
+                displayName: Alice Green
+                mobileNo: 135******01
+                emailAddress: alice@example.com
+                officeName: Head Office
+        '401':
+          description: 未携带 / 无效 token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /abnk/api/v1/me/identity:
+    get:
+      tags: [Me·对客]
+      operationId: getMyIdentity
+      summary: 当前客户证照信息（只读）
+      description: |
+        聚合 Fineract `GET /clients/{id}/identifiers`，`status` 为纯读计算值
+        （expiryDate 对业务日期比较：EXPIRED / EXPIRING_SOON / VALID）。
+        **基线无任何拦截行为**——证照过期横幅 / 交易拦截为 POC 演示增量。
+      responses:
+        '200':
+          description: 证照信息（状态三态 + 有效期）
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdentityInfo'
+              example:
+                documentTypeId: 1
+                documentTypeName: 身份证
+                documentKey: 3301**********001X
+                status: EXPIRED
+                issuanceDate: '2015-01-01'
+                expiryDate: '2020-01-01'
+        '401':
+          description: 未携带 / 无效 token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /abnk/api/v1/me/accounts:
+    get:
+      tags: [Accounts·对客]
+      operationId: getMyAccounts
+      summary: 账户总览（活期 + 定期）
+      description: |
+        聚合 Fineract `GET /clients/{id}/accounts`，账号尾号脱敏（`0000**0011`）。
+        定期账户快照可无 availableBalance（支取受限，回退为账面余额）。
+      responses:
+        '200':
+          description: 账户总览（按账户类型分组）
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountSummary'
+        '401':
+          description: 未携带 / 无效 token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /abnk/api/v1/accounts/{id}/transactions:
+    get:
+      tags: [Accounts·对客]
+      operationId: listAccountTransactions
+      summary: 单账户交易明细（含 runningBalance）
+      description: |
+        转发 Fineract `GET /savingsaccounts/{id}/transactions/search`（P0.2 VP0.2.4
+        实测：Spring 标准分页 `content`/`total`），item 按契约收敛为 6 字段。
+        仅本人账户可达（归属校验）。
+      parameters:
+        - $ref: '#/components/parameters/AccountId'
+      responses:
+        '200':
+          description: 交易明细列表（新→旧）
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TransactionItem'
+        '401':
+          description: 未携带 / 无效 token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: 账户不存在或不属于当前客户
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /abnk/api/v1/accounts/{id}/transfer:
+    post:
+      tags: [Accounts·对客]
+      operationId: transfer
+      summary: 本人账户间转账（网关聚合，幂等 + 补偿）
+      description: |
+        Fineract 无满足语义的原生单端点（planning 层 mobile-banking-mvp.md M7 缺口表），
+        网关聚合实现：本人账户归属校验 → withdrawal → deposit 两步编排。
+        **幂等**：`externalId` 为客户端幂等键，重放返回首次结果（缓存未命中时兜底
+        查 Fineract 派生 externalId `<key>-w`/`<key>-d`——网关重启不破坏幂等）。
+        **补偿**：第二步失败自动对第一步提交反向冲正（accounting NONE 产品口径，
+        P0.3 种子），冲正失败则 502 + 冲正单号（人工对账口径）。
+        **基线不做证件校验**（POC 演示增量）。
+      parameters:
+        - $ref: '#/components/parameters/AccountId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransferRequest'
+            example:
+              toAccountId: 12
+              amount: 2500
+              externalId: T-0001
+              note: 零钱归集
+      responses:
+        '200':
+          description: 转账成功（幂等重放同结果）
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransferResult'
+              example:
+                transactionId: 101
+                newSourceBalance: 7500
+        '400':
+          description: 参数校验失败（金额非正 / 账户相同 / 余额不足）
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: 未携带 / 无效 token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: 目标账户不属于当前客户（本人账户约束）
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: 账户不存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '502':
+          description: 下游失败且补偿冲正已提交（含冲正单号，人工对账口径）
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /abnk/api/v1/savings:
+    post:
+      tags: [Accounts·对客]
+      operationId: openFixedDeposit
+      summary: 定期开户（从活期账户扣款转入新定期账户）
+      description: |
+        转发 Fineract `POST /fixeddepositaccounts`（P0.2 VP0.2.3 实测链路：
+        申请→审批→激活由网关侧编排，对客呈现为一次开户动作）。
+        到期日 = 激活日 + N 个月（对年对月对日，日 Clamp 到月末——P0.2 实测口径）。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FixedDepositRequest'
+            example:
+              productId: 20
+              sourceAccountId: 11
+              amount: 5000
+      responses:
+        '200':
+          description: 开户成功（新账户号 + 到期日）
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FixedDepositResult'
+              example:
+                accountId: 200
+                maturityDate: '2027-11-08'
+        '400':
+          description: 参数校验失败（金额非正 / 低于起存金额 / 余额不足）
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: 未携带 / 无效 token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: 定期产品或源账户不存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /abnk/api/v1/loan-products:
+    get:
+      tags: [Loans·对客]
+      operationId: listLoanProducts
+      summary: 消费贷产品清单（对客收敛字段）
+      description: |
+        转发 Fineract `GET /loanproducts`，字段按契约收敛（隐藏内部配置：
+        会计规则、审批工作流等）。
+      responses:
+        '200':
+          description: 产品清单
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LoanProduct'
+        '401':
+          description: 未携带 / 无效 token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /abnk/api/v1/fixed-deposit-products:
+    get:
+      tags: [Loans·对客]
+      operationId: listFixedDepositProducts
+      summary: 定期存款产品清单（对客收敛字段）
+      description: |
+        转发 Fineract `GET /fixeddepositproducts`，字段按契约收敛
+        （利率 chart 收敛为单一 interestRate 数值）。
+      responses:
+        '200':
+          description: 产品清单
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FixedDepositProduct'
+        '401':
+          description: 未携带 / 无效 token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /abnk/api/v1/loans:
+    post:
+      tags: [Loans·对客]
+      operationId: applyLoan
+      summary: 提交贷款申请
+      description: |
+        转发 Fineract `POST /loans`（P0.2 VP0.2.2 实测链路），返回申请编号与初始状态
+        （Submitted and pending approval）；审批/发放为内部通道动作（Backoffice）。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoanApplicationRequest'
+            example:
+              productId: 11
+              principal: 50000
+              termMonths: 12
+              purpose: 装修
+      responses:
+        '200':
+          description: 申请受理（申请编号 + 初始状态）
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoanApplicationResult'
+              example:
+                loanId: 30
+                status: Submitted and pending approval
+        '400':
+          description: 参数校验失败（金额越界 / 期限不符产品）
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: 未携带 / 无效 token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /abnk/api/v1/loans/{id}:
+    get:
+      tags: [Loans·对客]
+      operationId: getLoan
+      summary: 贷款详情（对客收敛口径）
+      description: |
+        转发 Fineract `GET /loans/{id}`（P0.2 VP0.2.2 实测：状态对象 + 还款计划），
+        按契约收敛为对客字段。仅本人贷款可达（归属校验）。
+      parameters:
+        - $ref: '#/components/parameters/LoanId'
+      responses:
+        '200':
+          description: 贷款详情
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoanDetail'
+        '401':
+          description: 未携带 / 无效 token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: 贷款不存在或不属于当前客户
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # ── 内部通道 ────────────────────────────────────────────────
+  /bo/login:
+    post:
+      tags: [Auth·内部]
+      operationId: boLogin
+      summary: 运营登录（内部通道，签发 JWT）
+      description: |
+        凭据校验（PBKDF2，用户表 admin 用户——P0.3 口径）通过后签发 HS256 JWT
+        （claim：`sub`=username（内部通道不依赖 clientId 反查）、`channel`="internal"）。
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+            example:
+              username: admin
+              password: password
+      responses:
+        '200':
+          description: 登录成功，返回 token 与运营角色
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BoLoginResponse'
+              example:
+                token: eyJhbGciOiJIUzI1NiJ9.xxx.yyy
+                tokenType: Bearer
+                expiresIn: 900
+                channel: internal
+                username: admin
+                displayName: 运营管理员
+                role: ADMIN
+        '401':
+          description: 凭据错误
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /bo/api/v1/clients:
+    get:
+      tags: [Clients·内部]
+      operationId: listClients
+      summary: 客户列表（含证照状态列数据）
+      description: |
+        转发 Fineract `GET /clients`，网关侧聚合每客户首证照的到期状态推导
+        （expiryDate 对业务日期比较）。`search` 命中姓名 / 外部编号 / 手机号。
+      parameters:
+        - name: search
+          in: query
+          required: false
+          description: 关键词检索（姓名 / 外部编号 / 手机号）
+          schema:
+            type: string
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 50
+      responses:
+        '200':
+          description: 客户列表（列表页最小投影 + 证照状态列）
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientListResult'
+        '401':
+          description: 未携带 / 无效 token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: 对客 token 不可达内部面（通道隔离）
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /bo/api/v1/clients/{id}:
+    get:
+      tags: [Clients·内部]
+      operationId: getClientDetail
+      summary: 客户详情（基本信息 + 证照 + 账户 + 贷款）
+      description: |
+        网关聚合 Fineract `GET /clients/{id}` + `GET /clients/{id}/identifiers` +
+        `GET /clients/{id}/accounts` + 贷款关联（详情页全量形态，Backoffice 消费）。
+      parameters:
+        - $ref: '#/components/parameters/ClientId'
+      responses:
+        '200':
+          description: 客户详情
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientDetail'
+        '401':
+          description: 未携带 / 无效 token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: 对客 token 不可达内部面（通道隔离）
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: 客户不存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /bo/api/v1/clients/{id}/identifiers:
+    get:
+      tags: [Clients·内部]
+      operationId: listClientIdentifiers
+      summary: 客户证照清单
+      description: 转发 Fineract `GET /clients/{id}/identifiers`（含到期状态推导值）。
+      parameters:
+        - $ref: '#/components/parameters/ClientId'
+      responses:
+        '200':
+          description: 证照清单
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ClientIdentifier'
+        '401':
+          description: 未携带 / 无效 token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: 对客 token 不可达内部面（通道隔离）
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /bo/api/v1/clients/{id}/identifiers/{identifierId}:
+    get:
+      tags: [Clients·内部]
+      operationId: getClientIdentifier
+      summary: 单条证照详情
+      description: 转发 Fineract `GET /clients/{id}/identifiers/{identifierId}`。
+      parameters:
+        - $ref: '#/components/parameters/ClientId'
+        - $ref: '#/components/parameters/IdentifierId'
+      responses:
+        '200':
+          description: 证照详情
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientIdentifier'
+        '401':
+          description: 未携带 / 无效 token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: 对客 token 不可达内部面（通道隔离）
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: 证照不存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    put:
+      tags: [Clients·内部]
+      operationId: updateClientIdentifier
+      summary: 更新证照（旅程 Step 7 修复端点——expiryDate 为核心可变更字段）
+      description: |
+        转发 Fineract `PUT /clients/{id}/identifiers/{identifierId}`
+        （P0.2 VP0.2.1 实测闭环：expiryDate 2020-01-01 → 2099-12-31 回读一致）。
+        Fineract 侧要求的 `locale`/`dateFormat` 参数由网关注入，契约面不暴露。
+      parameters:
+        - $ref: '#/components/parameters/ClientId'
+        - $ref: '#/components/parameters/IdentifierId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IdentifierUpdatePayload'
+            example:
+              expiryDate: '2030-12-31'
+      responses:
+        '200':
+          description: 更新成功（返回更新后全量证照）
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientIdentifier'
+        '400':
+          description: 参数校验失败（expiryDate 缺失 / 日期格式错误）
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: 未携带 / 无效 token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: 对客 token 不可达内部面（通道隔离）
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: 证照不存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /bo/api/v1/loans:
+    get:
+      tags: [Loans·内部]
+      operationId: listLoans
+      summary: 贷款运营列表（只读 + 逾期分档）
+      description: |
+        转发 Fineract `GET /loans`，网关侧聚合客户投影与逾期口径
+        （overdueDays / totalOverdue / delinquencyClassification——P0.3 客户 C 种子口径）。
+        基线只读；审批 / 放款操作位为 POC 预埋（command 族端点已契约化）。
+      responses:
+        '200':
+          description: 贷款运营列表
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LoanOpsItem'
+        '401':
+          description: 未携带 / 无效 token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: 对客 token 不可达内部面（通道隔离）
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /bo/api/v1/loans/{id}:
+    post:
+      tags: [Loans·内部]
+      operationId: executeLoanCommand
+      summary: 贷款 command 族转发（审批 / 放款）
+      description: |
+        转发 Fineract `POST /loans/{loanId}?command={command}`
+        （P0.2 VP0.2.2 实测：approve / disburse 双 command 200）。
+        `command` 为查询参数（Fineract 原生形态，转发保真）；请求体按 command 分形。
+        Backoffice 基线页面的操作按钮为 disabled（只读），本端点为 POC 演示增量
+        （现场「审批 + 放款」操作）预埋。
+      parameters:
+        - $ref: '#/components/parameters/LoanId'
+        - name: command
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [approve, disburse]
+          description: 贷款生命周期命令（Fineract command 转发）
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/LoanApproveRequest'
+                - $ref: '#/components/schemas/LoanDisburseRequest'
+            examples:
+              approve:
+                summary: 审批通过
+                value:
+                  approvedOnDate: '2026-11-08'
+              disburse:
+                summary: 放款
+                value:
+                  actualDisbursementDate: '2026-11-08'
+      responses:
+        '200':
+          description: 命令执行成功（贷款新状态）
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoanCommandResult'
+              example:
+                loanId: 30
+                status: Approved
+                processedOnDate: '2026-11-08'
+        '400':
+          description: 参数校验失败（状态机不允许该命令 / 日期缺失）
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: 未携带 / 无效 token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: 对客 token 不可达内部面（通道隔离）
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: 贷款不存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  parameters:
+    AccountId:
+      name: id
+      in: path
+      required: true
+      description: 账户 ID（Fineract savings account id）
+      schema:
+        type: integer
+        format: int64
+    LoanId:
+      name: id
+      in: path
+      required: true
+      description: 贷款 ID（Fineract loan id）
+      schema:
+        type: integer
+        format: int64
+    ClientId:
+      name: id
+      in: path
+      required: true
+      description: 客户 ID（Fineract client id）
+      schema:
+        type: integer
+        format: int64
+    IdentifierId:
+      name: identifierId
+      in: path
+      required: true
+      description: 证照 ID（Fineract client identifier id）
+      schema:
+        type: integer
+        format: int64
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: 简化登录 JWT（D2 口径，HS256 / TTL 15min / channel claim 通道隔离）
+
+  schemas:
+    # ── 通用 ──────────────────────────────────────────────────
+    ErrorResponse:
+      type: object
+      description: 统一错误载荷
+      required: [status, error, message]
+      properties:
+        status:
+          type: integer
+          description: HTTP 状态码
+        error:
+          type: string
+          description: 错误类别（Unauthorized / Forbidden / Not Found / Bad Request / Bad Gateway）
+        message:
+          type: string
+          description: 人类可读错误信息（中文，对客展示口径）
+
+    # ── 认证（对客）────────────────────────────────────────────
+    LoginRequest:
+      type: object
+      required: [username, password]
+      properties:
+        username:
+          type: string
+          minLength: 1
+        password:
+          type: string
+          minLength: 1
+          writeOnly: true
+          description: 口令明文（仅请求方向；服务端 PBKDF2 校验，不落日志）
+
+    LoginResponse:
+      type: object
+      required: [token, tokenType, expiresIn, channel, username, displayName, clientId]
+      properties:
+        token:
+          type: string
+          description: JWT 三段式（HS256）
+        tokenType:
+          type: string
+          enum: [Bearer]
+        expiresIn:
+          type: integer
+          description: token 有效期（秒，默认 900）
+        channel:
+          type: string
+          enum: [customer]
+        username:
+          type: string
+        displayName:
+          type: string
+        clientId:
+          type: integer
+          format: int64
+          description: 映射的种子客户 ID（网关用户表口径，P0.3）
+
+    # ── 认证（内部）────────────────────────────────────────────
+    BoLoginResponse:
+      type: object
+      required: [token, tokenType, expiresIn, channel, username, displayName, role]
+      properties:
+        token:
+          type: string
+          description: JWT 三段式（HS256）
+        tokenType:
+          type: string
+          enum: [Bearer]
+        expiresIn:
+          type: integer
+          description: token 有效期（秒，默认 900）
+        channel:
+          type: string
+          enum: [internal]
+        username:
+          type: string
+        displayName:
+          type: string
+        role:
+          type: string
+          enum: [ADMIN]
+          description: 运营角色（基线单一 ADMIN）
+
+    # ── 对客·资料与证照 ───────────────────────────────────────
+    UserProfile:
+      type: object
+      description: 当前客户资料（脱敏口径：姓名姓+首字、手机号尾号形态）
+      required: [clientId, externalId, firstname, lastname, displayName, mobileNo, emailAddress, officeName]
+      properties:
+        clientId:
+          type: integer
+          format: int64
+        externalId:
+          type: string
+        firstname:
+          type: string
+        lastname:
+          type: string
+        displayName:
+          type: string
+        mobileNo:
+          type: string
+          description: 脱敏形态（如 135******01）
+        emailAddress:
+          type: string
+          format: email
+        officeName:
+          type: string
+
+    IdentityInfo:
+      type: object
+      description: 客户证照信息（只读；status 为到期状态推导值——纯读计算无拦截）
+      required: [documentTypeId, documentTypeName, documentKey, status, issuanceDate, expiryDate]
+      properties:
+        documentTypeId:
+          type: integer
+        documentTypeName:
+          type: string
+        documentKey:
+          type: string
+          description: 证件号（脱敏形态，如 3301**********001X）
+        status:
+          type: string
+          enum: [VALID, EXPIRING_SOON, EXPIRED]
+          description: 到期状态三态（expiryDate 对业务日期比较推导）
+        issuanceDate:
+          type: string
+          format: date
+        expiryDate:
+          type: string
+          format: date
+
+    # ── 对客·账户 ────────────────────────────────────────────
+    Account:
+      type: object
+      description: 账户（活期 / 定期统一形态；账号尾号脱敏）
+      required: [id, accountNo, productName, accountType, currency, accountBalance, availableBalance, status]
+      properties:
+        id:
+          type: integer
+          format: int64
+        accountNo:
+          type: string
+          description: 脱敏形态（如 0000**0011）
+        productName:
+          type: string
+        accountType:
+          type: string
+          enum: [SAVINGS, FIXED_DEPOSIT]
+        currency:
+          type: string
+        accountBalance:
+          type: number
+          description: 账面余额
+        availableBalance:
+          type: number
+          description: 可用余额（定期账户支取受限，快照可回退为账面余额）
+        status:
+          type: string
+          description: 账户状态（ACTIVE 等，透传 Fineract 状态值）
+        interestRate:
+          type: number
+          description: 年利率（%——仅定期账户）
+        maturityDate:
+          type: string
+          format: date
+          description: 到期日（仅定期账户；对年对月对日口径）
+
+    AccountSummary:
+      type: object
+      description: 账户总览（活期 + 定期两组）
+      required: [savingsAccounts, fixedDepositAccounts]
+      properties:
+        savingsAccounts:
+          type: array
+          items:
+            $ref: '#/components/schemas/Account'
+        fixedDepositAccounts:
+          type: array
+          items:
+            $ref: '#/components/schemas/Account'
+
+    TransactionItem:
+      type: object
+      description: 单笔交易明细（P0.2 VP0.2.4 实测字段口径：runningBalance 保留）
+      required: [id, date, transactionType, amount, runningBalance]
+      properties:
+        id:
+          type: integer
+          format: int64
+        date:
+          type: string
+          format: date
+        transactionType:
+          type: string
+          description: 交易类型（Deposit / Withdrawal / InterestPosting 等 Fineract 枚举值）
+        amount:
+          type: number
+        runningBalance:
+          type: number
+          description: 该笔交易入账后的账户余额
+        note:
+          type: string
+
+    TransferRequest:
+      type: object
+      description: |
+        本人账户间转账请求。路径参数 `id` 为转出账户；`externalId` 为客户端幂等键
+        （重放返回首次结果——P2.4 幂等语义）。
+      required: [toAccountId, amount, externalId]
+      properties:
+        toAccountId:
+          type: integer
+          format: int64
+          description: 转入账户（须为本人账户，否则 403）
+        amount:
+          type: number
+          description: 转账金额（须大于 0）
+        externalId:
+          type: string
+          minLength: 1
+          description: 幂等键（客户端生成，如 UUID；网关派生 `<key>-w`/`<key>-d` 落账）
+        note:
+          type: string
+          description: 附言（可选）
+
+    TransferResult:
+      type: object
+      description: 转账结果（幂等重放返回同值）
+      required: [transactionId, newSourceBalance]
+      properties:
+        transactionId:
+          type: integer
+          format: int64
+          description: 转出账户流水号（withdrawal 交易 ID）
+        newSourceBalance:
+          type: number
+          description: 转出账户新余额
+
+    FixedDepositRequest:
+      type: object
+      description: 定期开户请求（从源活期账户扣款转入新定期账户）
+      required: [productId, sourceAccountId, amount]
+      properties:
+        productId:
+          type: integer
+          format: int64
+          description: 定期存款产品 ID
+        sourceAccountId:
+          type: integer
+          format: int64
+          description: 扣款源活期账户（须为本人账户）
+        amount:
+          type: number
+          description: 存入金额（须 ≥ 产品起存金额且 ≤ 源账户可用余额）
+
+    FixedDepositResult:
+      type: object
+      description: 定期开户结果
+      required: [accountId, maturityDate]
+      properties:
+        accountId:
+          type: integer
+          format: int64
+          description: 新建定期账户 ID
+        maturityDate:
+          type: string
+          format: date
+          description: 到期日（对年对月对日）
+
+    # ── 对客·贷款 ────────────────────────────────────────────
+    LoanProduct:
+      type: object
+      description: 消费贷产品（对客收敛字段——隐藏内部配置）
+      required: [id, name, description, interestRate, termFrequency, termPeriodFrequencyType, minPrincipalAmount, maxPrincipalAmount, repaymentMethod]
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        description:
+          type: string
+        interestRate:
+          type: number
+          description: 年利率（%）
+        termFrequency:
+          type: integer
+          description: 期限数值（默认 12）
+        termPeriodFrequencyType:
+          type: string
+          enum: [MONTHS]
+        minPrincipalAmount:
+          type: number
+        maxPrincipalAmount:
+          type: number
+        repaymentMethod:
+          type: string
+          enum: [EQUAL_INSTALLMENTS]
+          description: 还款方式（等额本息）
+
+    FixedDepositProduct:
+      type: object
+      description: 定期存款产品（利率 chart 收敛为单一数值）
+      required: [id, name, description, interestRate, depositPeriod, minDepositAmount]
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        description:
+          type: string
+        interestRate:
+          type: number
+          description: 年利率（%）
+        depositPeriod:
+          type: integer
+          description: 存期（月）
+        minDepositAmount:
+          type: number
+          description: 起存金额
+
+    LoanApplicationRequest:
+      type: object
+      description: 贷款申请请求
+      required: [productId, principal, termMonths]
+      properties:
+        productId:
+          type: integer
+          format: int64
+        principal:
+          type: number
+          description: 申请本金（须在产品 min/max 区间内）
+        termMonths:
+          type: integer
+          description: 期限（月，须与产品期限一致）
+        purpose:
+          type: string
+          description: 贷款用途（可选）
+
+    LoanApplicationResult:
+      type: object
+      description: 贷款申请受理结果
+      required: [loanId, status]
+      properties:
+        loanId:
+          type: integer
+          format: int64
+        status:
+          type: string
+          description: 初始状态（Submitted and pending approval）
+
+    LoanDetail:
+      type: object
+      description: 贷款详情（对客收敛口径）
+      required: [loanId, productName, principal, interestRate, termMonths, status, submittedOnDate]
+      properties:
+        loanId:
+          type: integer
+          format: int64
+        productName:
+          type: string
+        principal:
+          type: number
+        interestRate:
+          type: number
+        termMonths:
+          type: integer
+        status:
+          type: string
+          description: 贷款状态（Submitted and pending approval / Approved / Active 等 Fineract 状态值）
+        submittedOnDate:
+          type: string
+          format: date
+        disbursedOnDate:
+          type: string
+          format: date
+          description: 放款日（未放款为 null）
+        totalOutstanding:
+          type: number
+          description: 未偿总额（未放款为 null）
+
+    # ── 内部·客户与证照 ───────────────────────────────────────
+    ClientSummary:
+      type: object
+      description: 客户列表行（列表页最小投影 + 证照状态列）
+      required: [clientId, externalId, displayName, mobileNo, officeName, status]
+      properties:
+        clientId:
+          type: integer
+          format: int64
+        externalId:
+          type: string
+        displayName:
+          type: string
+        mobileNo:
+          type: string
+        officeName:
+          type: string
+        status:
+          type: string
+          description: 客户状态（Active 等 Fineract 状态值）
+        identifierStatus:
+          type:
+            - string
+            - 'null'
+          enum: [VALID, EXPIRED, null]
+          description: 首证照到期状态推导值（无证照为 null）
+        identifierExpiryDate:
+          type:
+            - string
+            - 'null'
+          format: date
+          description: 首证照到期日（无证照为 null）
+
+    ClientIdentifier:
+      type: object
+      description: 客户证照（对齐 Fineract client identifiers 结构 + 到期状态推导）
+      required: [identifierId, documentTypeId, documentTypeName, documentKey, status, derivedStatus, issuanceDate, expiryDate]
+      properties:
+        identifierId:
+          type: integer
+          format: int64
+        documentTypeId:
+          type: integer
+        documentTypeName:
+          type: string
+        documentKey:
+          type: string
+          description: 证件号
+        status:
+          type: string
+          enum: [ACTIVE, INACTIVE]
+          description: Fineract 记录状态
+        derivedStatus:
+          type: string
+          enum: [VALID, EXPIRED]
+          description: 到期状态推导值（expiryDate 对业务日期比较）
+        issuanceDate:
+          type: string
+          format: date
+        expiryDate:
+          type: string
+          format: date
+        description:
+          type: string
+
+    IdentifierUpdatePayload:
+      type: object
+      description: |
+        证照更新载荷（P0.2 VP0.2.1 实测口径：expiryDate 为核心可变更字段；
+        Fineract 侧 locale/dateFormat 由网关注入）。
+      required: [expiryDate]
+      properties:
+        expiryDate:
+          type: string
+          format: date
+          description: 新到期日（YYYY-MM-DD）
+        documentKey:
+          type: string
+          description: 证件号（可选——变更时提供）
+        description:
+          type: string
+
+    ClientDetail:
+      type: object
+      description: 客户详情（详情页全量形态：基本信息 + 证照 + 账户 + 贷款）
+      required: [clientId, externalId, displayName, mobileNo, officeName, status, firstname, lastname, emailAddress, savingsAccounts, fixedDepositAccounts]
+      properties:
+        clientId:
+          type: integer
+          format: int64
+        externalId:
+          type: string
+        displayName:
+          type: string
+        mobileNo:
+          type: string
+        officeName:
+          type: string
+        status:
+          type: string
+        identifierStatus:
+          type:
+            - string
+            - 'null'
+          enum: [VALID, EXPIRED, null]
+        identifierExpiryDate:
+          type:
+            - string
+            - 'null'
+          format: date
+        firstname:
+          type: string
+        lastname:
+          type: string
+        emailAddress:
+          type: string
+        identifier:
+          oneOf:
+            - $ref: '#/components/schemas/ClientIdentifier'
+            - type: 'null'
+          description: 首证照（无证照为 null）
+        savingsAccounts:
+          type: array
+          items:
+            $ref: '#/components/schemas/SavingsAccountSummary'
+        fixedDepositAccounts:
+          type: array
+          items:
+            $ref: '#/components/schemas/FixedDepositSummary'
+        loan:
+          oneOf:
+            - $ref: '#/components/schemas/LoanSummary'
+            - type: 'null'
+          description: 贷款概要（无贷款为 null）
+
+    SavingsAccountSummary:
+      type: object
+      description: 活期账户概要（内部面）
+      required: [id, accountNo, productName, accountBalance, currency, status]
+      properties:
+        id:
+          type: integer
+          format: int64
+        accountNo:
+          type: string
+        productName:
+          type: string
+        accountBalance:
+          type: number
+        currency:
+          type: string
+        status:
+          type: string
+
+    FixedDepositSummary:
+      type: object
+      description: 定期账户概要（内部面）
+      required: [id, accountNo, productName, accountBalance, interestRate, maturityDate, status]
+      properties:
+        id:
+          type: integer
+          format: int64
+        accountNo:
+          type: string
+        productName:
+          type: string
+        accountBalance:
+          type: number
+        interestRate:
+          type: number
+        maturityDate:
+          type: string
+          format: date
+        status:
+          type: string
+
+    ClientListResult:
+      type: object
+      description: 客户列表结果
+      required: [total, items]
+      properties:
+        total:
+          type: integer
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ClientSummary'
+
+    # ── 内部·贷款运营 ─────────────────────────────────────────
+    LoanSummary:
+      type: object
+      description: 贷款概要（含逾期分档——P0.3 客户 C 口径）
+      required: [loanId, externalId, productName, principal, interestRate, termMonths, status, inArrears, overdueDays, totalOverdue]
+      properties:
+        loanId:
+          type: integer
+          format: int64
+        externalId:
+          type: string
+        productName:
+          type: string
+        principal:
+          type: number
+        interestRate:
+          type: number
+        termMonths:
+          type: integer
+        status:
+          type: string
+        inArrears:
+          type: boolean
+        overdueDays:
+          type: integer
+          description: 逾期天数（无逾期为 0）
+        overdueSinceDate:
+          type:
+            - string
+            - 'null'
+          format: date
+          description: 逾期起始日（无逾期为 null）
+        totalOverdue:
+          type: number
+          description: 逾期总额（无逾期为 0）
+        delinquencyClassification:
+          type:
+            - string
+            - 'null'
+          description: 逾期分档（ABNK_POC_OD 等 P0.3 分档口径；无逾期为 null）
+
+    LoanOpsItem:
+      type: object
+      description: 贷款运营列表行（LoanSummary + 客户投影）
+      required: [loanId, externalId, productName, principal, interestRate, termMonths, status, inArrears, overdueDays, totalOverdue, clientId, clientName]
+      allOf:
+        - $ref: '#/components/schemas/LoanSummary'
+        - type: object
+          required: [clientId, clientName]
+          properties:
+            clientId:
+              type: integer
+              format: int64
+            clientName:
+              type: string
+
+    LoanApproveRequest:
+      type: object
+      description: 审批通过载荷（command=approve）
+      required: [approvedOnDate]
+      properties:
+        approvedOnDate:
+          type: string
+          format: date
+        note:
+          type: string
+
+    LoanDisburseRequest:
+      type: object
+      description: 放款载荷（command=disburse）
+      required: [actualDisbursementDate]
+      properties:
+        actualDisbursementDate:
+          type: string
+          format: date
+        note:
+          type: string
+
+    LoanCommandResult:
+      type: object
+      description: 贷款命令执行结果（网关收敛口径）
+      required: [loanId, status]
+      properties:
+        loanId:
+          type: integer
+          format: int64
+        status:
+          type: string
+          description: 命令执行后的贷款状态（Approved / Active 等）
+        processedOnDate:
+          type: string
+          format: date
+          description: 命令生效日（审批日 / 放款日）

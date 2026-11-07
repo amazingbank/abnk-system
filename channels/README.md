@@ -8,10 +8,10 @@
 |---|---|---|---|---|
 | `website/` | 官网 | 品牌站（bolt.new 生成已验收）；零业务 API、静态部署 | 已交付原型 | ✅ 活跃 |
 | `gateway/` | 渠道整合层 | 路由 / 鉴权(OIDC) / 租户注入 / 字段脱敏 / 限流；国密商密收口（ADR-007） | Phase 3 | 占位 |
-| `backoffice/` | 管理后台 | 内部运营（Ant Design Pro） | Phase 3 首个交付 | 占位 |
+| `backoffice/` | 管理后台 | 内部运营（React + AntD v5 暖色定制；客户/证照/贷款运营 mock 原型） | Sprint v0.0.1 Part02 P1.4 | ✅ 原型已交付 |
 | `counter/` | 柜面 | 网点柜员操作 | Phase 3 末 | 占位 |
 | `online-banking/` | 网银 | 对客 Web | Phase 4 | 占位 |
-| `mobile-banking/` | 手机银行 | 混合 App：原生薄壳只做安全与设备能力，业务页面 H5（`harmony/` `android/` `ios/` `h5/` 四子目录） | Phase 5 | 占位 |
+| `mobile-banking/` | 手机银行 | Flutter 工程（ADR-009）：web + iOS + Android 三目标，repository 接口层 + mock fixtures，自托管字体 | Sprint v0.0.1 Part02 P1.3 | ✅ 原型已交付 |
 | `shared/` | 跨渠道共享 | 网关 OpenAPI 生成的 TS client、组件库、设计 tokens | Phase 3 | 占位 |
 
 ## 铁律（ADR-005 / ADR-008 衍生约束）
