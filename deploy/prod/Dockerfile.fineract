@@ -1,0 +1,20 @@
+# ABNK Fineract 平台镜像（Phase P0 任务 P0.4）
+#
+# 多阶段：builder 层（scratch）仅 COPY WAR；运行层 tomcat 基础镜像
+# （版本对齐官方 docker-compose-war-test.yml 与本地 prodform 栈实测钉死值）。
+#
+# 构建上下文 = 部署根（~/deploy）——WAR 经 scp 落位于此（VP0.4.3 sha256 校验），
+# 仓库目录不落 WAR（铁律 7：服务器纯 git pull + build + compose）。
+#
+# 构建（服务器执行）：
+#   docker build -f ~/source/abnk-system/deploy/prod/Dockerfile.fineract \
+#     -t abnk-fineract:<fineract 仓 8 位短 hash> ~/deploy
+#
+# 注：WAR 为 JVM 字节码、架构无关——本地构建 + scp 上传 + 服务器打镜像
+# （与「制品在服务端构建」铁律的适配说明见任务 P0.4 部署制品口径）。
+
+FROM scratch AS war
+COPY fineract-provider.war /fineract-provider.war
+
+FROM tomcat:10.1.59-jdk25-temurin
+COPY --from=war /fineract-provider.war /usr/local/tomcat/webapps/fineract-provider.war

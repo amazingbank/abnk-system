@@ -1,0 +1,103 @@
+# Amazing Bank — 生产服务器平台栈（Fineract WAR + Tomcat + 独立 PostgreSQL）
+#
+# 用途：Phase P0 任务 P0.4（Sprint v0.0.1 Part02）——abnk-vm001 上的平台生产形态。
+# D7 调整（2026-11-07）：abnk-fineract 端口 0.0.0.0:8080 直接公网暴露
+# （NSG 放行 8080 为部署前置，Azure Portal 操作；公网入口 http://amazingbank.ai:8080）。
+#
+# ⚠️ 项目名固定 abnk-prod-platform——与官网栈 abnk-prod（compose-abnk-prod.yaml）、
+#    本地生产形态栈 abnk-prodform 严格区分，不得在错误目录执行 down。
+#
+# 前置（部署根 ~/deploy，卷挂载全经 ${ABNK_DEPLOY_ROOT:?} 硬失败闸）：
+#   1) scp fineract-provider.war → ~/deploy/fineract-provider.war（sha256 两侧核对）
+#   2) cp <仓库>/deploy/compose/initdb/01-init-abnk.sh → ~/deploy/initdb/01-init-abnk.sh
+#   3) 真实值 env → ~/deploy/.env（样例 deploy/prod/env/platform.env.example；
+#      源件 .github-private/abnk-prod/platform.env）
+#   4) docker build -f deploy/prod/Dockerfile.fineract -t abnk-fineract:$TAG ~/deploy
+#
+# 用法（服务器，仓库根执行）：
+#   docker compose --env-file ~/deploy/.env -f deploy/prod/compose-abnk-platform.yaml up -d
+#   docker compose --env-file ~/deploy/.env -f deploy/prod/compose-abnk-platform.yaml ps
+#   docker logs abnk-fineract 2>&1 | grep -c 'APACHE FINERACT IS READY'   # ≥1 即就绪
+
+name: abnk-prod-platform
+
+services:
+  abnk-pg-platform:
+    container_name: abnk-pg-platform
+    image: postgres:18.3
+    restart: unless-stopped
+
+    # 不映射宿主端口——仅 compose 内网（D7 只放开 Fineract 8080，PG 永不对公网）
+    expose:
+      - "5432"
+
+    environment:
+      POSTGRES_USER: ${ABNK_PG_USER:?ABNK_PG_USER required}
+      POSTGRES_PASSWORD: ${ABNK_PG_PASSWORD:?ABNK_PG_PASSWORD required}
+      POSTGRES_DB: root
+      TZ: ${ABNK_TZ:-Asia/Shanghai}
+
+    # Fineract 迁移代码不建库（TenantDatabaseUpgradeService 无 CREATE DATABASE），
+    # 必须由 initdb 通道预建 fineract_tenants + fineract_default 两库，否则启动必失败
+    # （P0.1 实测口径；脚本自仓内 deploy/compose/initdb/ 复制到部署根）。
+    volumes:
+      # ⚠️ PostgreSQL 18+：挂 /var/lib/postgresql 父目录（版本化子目录 18/data）
+      - abnk-pg-platform-data:/var/lib/postgresql
+      - ${ABNK_DEPLOY_ROOT:?ABNK_DEPLOY_ROOT required}/initdb/01-init-abnk.sh:/docker-entrypoint-initdb.d/01-init-abnk.sh:ro
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${ABNK_PG_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 20s
+
+  abnk-fineract:
+    container_name: abnk-fineract
+    # 镜像在服务器本地构建（VP0.4.4：docker build -t abnk-fineract:<fineract 仓 8 位短 hash>）
+    image: abnk-fineract:${ABNK_FINERACT_IMAGE_TAG:?ABNK_FINERACT_IMAGE_TAG required}
+    restart: unless-stopped
+
+    tmpfs:
+      - /tmp:rw,nosuid,size=256m
+
+    ports:
+      # D7（2026-11-07）：平台直接公网暴露——NSG 放行 8080 为前置（Azure Portal）
+      - "8080:8080"
+
+    # 结构性值内联；凭据经 --env-file ~/deploy/.env 注入（占位符进 public 仓，
+    # 实际值进 .github-private/abnk-prod/platform.env）
+    environment:
+      FINERACT_HIKARI_DRIVER_SOURCE_CLASS_NAME: org.postgresql.Driver
+      FINERACT_HIKARI_JDBC_URL: jdbc:postgresql://abnk-pg-platform:5432/fineract_tenants
+      FINERACT_HIKARI_USERNAME: ${ABNK_PG_USER:?ABNK_PG_USER required}
+      FINERACT_HIKARI_PASSWORD: ${ABNK_PG_PASSWORD:?ABNK_PG_PASSWORD required}
+      # ⚠️ HOSTNAME 必须显式注入（默认 localhost 在容器内不可达 PG——P0.1 实测坑）
+      FINERACT_DEFAULT_TENANTDB_HOSTNAME: abnk-pg-platform
+      FINERACT_DEFAULT_TENANTDB_PORT: "5432"
+      FINERACT_DEFAULT_TENANTDB_UID: ${ABNK_PG_USER:?ABNK_PG_USER required}
+      FINERACT_DEFAULT_TENANTDB_PWD: ${ABNK_PG_PASSWORD:?ABNK_PG_PASSWORD required}
+      FINERACT_DEFAULT_TENANTDB_IDENTIFIER: default
+      FINERACT_DEFAULT_TENANTDB_NAME: fineract_default
+      # Tomcat 平面 HTTP（公网 TLS 终止与网关收口在 P3）
+      FINERACT_SERVER_SSL_ENABLED: "false"
+      # JVM：对照本地 prodform 栈实测口径（服务器 7.7G 内存，2G 堆 + 官方 --add-opens 系列）
+      JAVA_TOOL_OPTIONS: >-
+        -Xmx2G -XX:+UseContainerSupport
+        --add-exports=java.naming/com.sun.jndi.ldap=ALL-UNNAMED
+        --add-opens=java.base/java.lang=ALL-UNNAMED
+        --add-opens=java.base/java.lang.invoke=ALL-UNNAMED
+        --add-opens=java.base/java.io=ALL-UNNAMED
+        --add-opens=java.base/java.security=ALL-UNNAMED
+        --add-opens=java.base/java.util=ALL-UNNAMED
+        --add-opens=java.management/javax.management=ALL-UNNAMED
+        --add-opens=java.naming/javax.naming=ALL-UNNAMED
+
+    depends_on:
+      abnk-pg-platform:
+        condition: service_healthy
+
+volumes:
+  abnk-pg-platform-data:
+    # name 固定，避免 compose 加 abnk-prod-platform_ 前缀
+    name: abnk-pg-platform-data
