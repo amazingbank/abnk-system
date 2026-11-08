@@ -12,14 +12,9 @@ spring:
           # dev 形态 = 本地生产形态栈；服务器形态经 ABNK_FINERACT_BASE 指向容器内网（如 http://abnk-fineract:8080）
           # ⚠️ SCG 实测（2026-11-07）忽略 route URI 的 path 部分——context path 必须
           # 经 PrefixPath 显式拼回，故 base 与前缀拆为两个 env 变量
+          # P2.3 起 customer-channel 路由移除：对客面（/abnk/api/v1/*）收敛为网关本地
+          # @RestController 聚合（customer/ 包），数据源走 FineractClient；仅 bo 通道保留转发
           routes:
-            - id: customer-channel
-              uri: ${ABNK_FINERACT_BASE:http://localhost:8081}
-              predicates:
-                - Path=/abnk/api/**
-              filters:
-                - StripPrefix=1                                                        # /abnk/api/v1/offices -> /api/v1/offices
-                - PrefixPath=${ABNK_FINERACT_PREFIX:/fineract-provider}                 # -> /fineract-provider/api/v1/offices
             - id: bo-channel
               uri: ${ABNK_FINERACT_BASE:http://localhost:8081}
               predicates:
@@ -43,6 +38,10 @@ management:
 
 # ---- P2.2 简化登录与 JWT（D2 口径）----
 abnk:
+  # 对客聚合的 Fineract 数据源（P2.3；与 SCG bo 路由同 base/prefix 口径，双头在 FineractClient 注入）
+  fineract:
+    base: ${ABNK_FINERACT_BASE:http://localhost:8081}
+    prefix: ${ABNK_FINERACT_PREFIX:/fineract-provider}
   users:
     # 网关用户表（P0.3 产物）。dev/bootRun 默认相对网关工程工作目录（$GW/../../data）；
     # 容器形态（P3.4）经 ABNK_USERS_FILE 指向 /app/data/gateway_users.json

@@ -3,8 +3,6 @@ package ai.amazingbank.gateway.auth;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cloud.gateway.filter.GatewayFilterChain;
-import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -13,15 +11,22 @@ import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.WebFilter;
+import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Mono;
 
 /**
- * Bearer 校验过滤器（GlobalFilter）：放行清单（/login、/actuator/health，application.yml
+ * Bearer 校验过滤器（WebFilter）：放行清单（/login、/actuator/health，application.yml
  * abnk.security.public-paths）之外的路径强制 Authorization: Bearer；解析成功后
- * sub / channel 写入请求属性（P2.3+ 对客聚合按 sub 反查、P2.5 通道隔离按 channel 判定）。
+ * sub / channel 写入请求属性（P2.3 对客聚合按 sub 反查、P2.5 通道隔离按 channel 判定）。
+ *
+ * <p>**P2.3 架构调整**：由 GlobalFilter 改为 WebFilter——对客收敛面（/abnk/api/v1/*）自 P2.3
+ * 起为网关本地 @RestController 聚合，本地请求不经 SCG 路由链（GlobalFilter 只包裹 route 执行），
+ * WebFilter 对本地 controller 与 SCG 转发（bo 通道）统一生效。放行清单 / 401 载荷 / 属性键
+ * 均保持 P2.2 口径不变。
  */
 @Component
-public class BearerTokenFilter implements GlobalFilter, Ordered {
+public class BearerTokenFilter implements WebFilter, Ordered {
 
     /** 请求属性键：token subject（customerId 或 username）与通道。 */
     public static final String ATTR_SUB = "abnk.auth.sub";
@@ -39,7 +44,7 @@ public class BearerTokenFilter implements GlobalFilter, Ordered {
     }
 
     @Override
-    public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+    public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
         String path = exchange.getRequest().getPath().value();
         if (publicPaths.stream().anyMatch(pattern -> MATCHER.match(pattern, path))) {
             return chain.filter(exchange);
@@ -72,7 +77,7 @@ public class BearerTokenFilter implements GlobalFilter, Ordered {
 
     @Override
     public int getOrder() {
-        // 早于路由转发类 GlobalFilter（NettyRoutingFilter 等），晚于 SCG 内部核心过滤器
+        // 全链路最前置（早于 BlacklistFilter(-90) 与 SCG 路由转发）
         return -100;
     }
 }
