@@ -34,8 +34,12 @@ dependencies {
     // springdoc 必须用 WebFlux 线（SCG 是 WebFlux 栈；误用 webmvc starter 不生效）
     // P2.6 /v3/api-docs 契约导出依赖此依赖
     implementation 'org.springdoc:springdoc-openapi-starter-webflux-ui:2.8.9'
-    // ⚠️ spring-boot-starter-security 延后至 P2.2 引入（骨架期无安全配置时
-    // Spring Security 默认全端点 401，转发链路验证判据必挂）
+    // P2.2（D2 简化登录）：starter-security 随放行清单（SecurityConfig permitAll）一并引入——
+    // 通道鉴权由 BearerTokenFilter（GlobalFilter）执行，Security 只占框架位（换 Keycloak 时替换点在 SecurityConfig）
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    // Nimbus JOSE JWT（经 spring-security-oauth2-jose 引入，版本随 Boot BOM）——HS256 签发/解析
+    implementation 'org.springframework.security:spring-security-oauth2-jose'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 
 dependencyManagement {
@@ -46,4 +50,9 @@ dependencyManagement {
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
+}
+
+tasks.named('test') {
+    // JUnit 5（spring-boot-starter-test 传递）；无此声明则 Gradle 默认 JUnit4 跑不到用例
+    useJUnitPlatform()
 }

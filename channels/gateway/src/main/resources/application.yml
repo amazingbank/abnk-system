@@ -40,3 +40,19 @@ management:
     web:
       exposure:
         include: health,info
+
+# ---- P2.2 简化登录与 JWT（D2 口径）----
+abnk:
+  users:
+    # 网关用户表（P0.3 产物）。dev/bootRun 默认相对网关工程工作目录（$GW/../../data）；
+    # 容器形态（P3.4）经 ABNK_USERS_FILE 指向 /app/data/gateway_users.json
+    file: ${ABNK_USERS_FILE:../../data/gateway_users.json}
+  jwt:
+    # HS256 密钥：开发默认值入 public 仓（占位）；生产值经 env 注入（真实值只存 .github-private）
+    secret: ${ABNK_JWT_SECRET:abnk-dev-jwt-secret-0123456789abcdef-0123456789abcdef}
+    # 短时效 token（ISO-8601 duration）
+    ttl: PT15M
+  security:
+    # BearerTokenFilter 放行清单（Ant 风格，逗号分隔——@Value 占位符与 YAML 列表形式不兼容）
+    # 受保护路径 = 其余全部（含 /abnk/api/**、/bo/api/**）
+    public-paths: ${ABNK_PUBLIC_PATHS:/login,/actuator/health}

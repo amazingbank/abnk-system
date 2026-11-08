@@ -34,3 +34,6 @@ data/seed_demo_mapping.json
 .gradle/
 build/
 src/*/build/
+
+# VS Code Java language server 编译输出（bin/）
+bin/

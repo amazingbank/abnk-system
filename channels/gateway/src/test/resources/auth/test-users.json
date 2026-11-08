@@ -1,0 +1,25 @@
+{
+  "algorithm": "PBKDF2-HMAC-SHA256",
+  "iterations": 100000,
+  "dklen": 32,
+  "pepper": "none",
+  "hashContract": "password_hash = PBKDF2-HMAC-SHA256(password_utf8, salt_bytes, iterations=100000, dklen=32) as hex; salt = 16 random bytes as hex; no pepper",
+  "_note": "单测专用 fixture（自造口令，与 .github-private 演示口令无关）：alice/correct-password, admin/admin-password",
+  "users": [
+    {
+      "username": "alice",
+      "clientId": 28,
+      "algorithm": "PBKDF2-HMAC-SHA256",
+      "iterations": 100000,
+      "salt": "00112233445566778899aabbccddeeff",
+      "password_hash": "2b11b20b7ead5b6ddeddf7b2b5ba58d9a8d1dd864d5526c3ca1aaf92cc05d7aa"
+    },
+    {
+      "username": "admin",
+      "algorithm": "PBKDF2-HMAC-SHA256",
+      "iterations": 100000,
+      "salt": "ffeeddccbbaa99887766554433221100",
+      "password_hash": "c74d850df9f614b26df97e873b2398633f09a7b0f1328f3c806f631303fc7a07"
+    }
+  ]
+}
