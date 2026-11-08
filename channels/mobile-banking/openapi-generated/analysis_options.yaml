@@ -1,0 +1,7 @@
+# 生成代码（openapi-generator 7.27.0 dart-dio 模板）的 analyzer 口径：
+# 模板固有噪声（unused import / 未用可选参数）不阻塞 P3 接线判据——
+# 该文件由 .openapi-generator-ignore 保护，重新生成不覆盖。
+analyzer:
+  errors:
+    unused_import: ignore
+    unused_element_parameter: ignore

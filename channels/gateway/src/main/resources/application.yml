@@ -58,4 +58,6 @@ abnk:
   security:
     # BearerTokenFilter 放行清单（Ant 风格，逗号分隔——@Value 占位符与 YAML 列表形式不兼容）
     # 受保护路径 = 其余全部（含 /abnk/api/**、/bo/api/**）
-    public-paths: ${ABNK_PUBLIC_PATHS:/login,/actuator/health}
+    # P2.6 追加：/bo/login（契约 Auth·内部登录）+ /v3/api-docs/**（springdoc 契约导出——
+    # spring 自有端点，容差白名单声明见任务 P2.6）
+    public-paths: ${ABNK_PUBLIC_PATHS:/login,/bo/login,/actuator/health,/v3/api-docs/**}

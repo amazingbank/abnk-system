@@ -105,13 +105,21 @@ public class UsersStore {
         return user.clientId() != null ? String.valueOf(user.clientId()) : user.username();
     }
 
+    /**
+     * 展示名（契约 LoginResponse / BoLoginResponse 的 displayName）：用户表可选字段，
+     * 缺失回退 username——登录响应不依赖 Fineract 下游（凭据校验零下游原则）。
+     */
+    public static String displayNameOf(GatewayUser user) {
+        return user.displayName() != null && !user.displayName().isBlank() ? user.displayName() : user.username();
+    }
+
     @JsonIgnoreProperties(ignoreUnknown = true)
     record UsersFile(String algorithm, Integer iterations, Integer dklen, String pepper,
             String hashContract, List<GatewayUser> users) {
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    record GatewayUser(String username, Long clientId, String algorithm, Integer iterations, String salt,
-            @JsonProperty("password_hash") String passwordHash) {
+    record GatewayUser(String username, Long clientId, String displayName, String algorithm, Integer iterations,
+            String salt, @JsonProperty("password_hash") String passwordHash) {
     }
 }

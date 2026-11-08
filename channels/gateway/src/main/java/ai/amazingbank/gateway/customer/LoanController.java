@@ -2,6 +2,11 @@ package ai.amazingbank.gateway.customer;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -40,6 +45,8 @@ public class LoanController {
 
     // ── 产品清单（对客收敛字段）──────────────────────────────────
 
+    @Operation(responses = @ApiResponse(responseCode = "200",
+            content = @Content(array = @ArraySchema(schema = @Schema(implementation = LoanProduct.class)))))
     @GetMapping("/abnk/api/v1/loan-products")
     public Mono<ResponseEntity<Object>> loanProducts() {
         return fineract.get("/loanproducts").map(resp -> {
@@ -55,6 +62,8 @@ public class LoanController {
         });
     }
 
+    @Operation(responses = @ApiResponse(responseCode = "200",
+            content = @Content(array = @ArraySchema(schema = @Schema(implementation = FixedDepositProduct.class)))))
     @GetMapping("/abnk/api/v1/fixed-deposit-products")
     public Mono<ResponseEntity<Object>> fixedDepositProducts() {
         return fineract.get("/fixeddepositproducts").map(resp -> {
@@ -86,6 +95,8 @@ public class LoanController {
     public record LoanApplicationResult(Long loanId, String status) {
     }
 
+    @Operation(responses = @ApiResponse(responseCode = "200",
+            content = @Content(schema = @Schema(implementation = LoanApplicationResult.class))))
     @PostMapping("/abnk/api/v1/loans")
     public Mono<ResponseEntity<Object>> applyLoan(@RequestBody LoanApplicationRequest request,
             ServerWebExchange exchange) {
@@ -175,6 +186,8 @@ public class LoanController {
                 });
     }
 
+    @Operation(responses = @ApiResponse(responseCode = "200",
+            content = @Content(schema = @Schema(implementation = LoanDetail.class))))
     @GetMapping("/abnk/api/v1/loans/{id}")
     public Mono<ResponseEntity<Object>> loanDetail(@PathVariable long id, ServerWebExchange exchange) {
         var clientId = CustomerContext.clientIdOf(exchange);

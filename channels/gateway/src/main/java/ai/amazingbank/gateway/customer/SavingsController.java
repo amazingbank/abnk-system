@@ -1,6 +1,10 @@
 package ai.amazingbank.gateway.customer;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -39,6 +43,8 @@ public class SavingsController {
     public record FixedDepositResult(Long accountId, String maturityDate) {
     }
 
+    @Operation(responses = @ApiResponse(responseCode = "200",
+            content = @Content(schema = @Schema(implementation = FixedDepositResult.class))))
     @PostMapping("/abnk/api/v1/savings")
     public Mono<ResponseEntity<Object>> openFixedDeposit(@RequestBody FixedDepositRequest request,
             ServerWebExchange exchange) {

@@ -16,7 +16,7 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 
 /**
  * 登录端点单测：真实 UsersStore（fixture PBKDF2 数据，自造口令）+ 固定时钟 JwtService。
- * 正/误口令、未知用户、admin 无 clientId 三类分支。
+ * P2.6 契约对齐断言：LoginResponse / BoLoginResponse 全字段、双通道严格匹配（跨通道 401）。
  */
 @WebFluxTest(controllers = LoginController.class)
 @Import({ SecurityConfig.class, LoginControllerTest.TestBeans.class })
@@ -49,16 +49,19 @@ class LoginControllerTest {
     }
 
     @Test
-    void loginSuccessIssuesCustomerToken() {
+    void loginSuccessIssuesCustomerTokenWithContractFields() {
         webTestClient.post().uri("/login")
                 .bodyValue(new LoginController.LoginRequest("alice", "correct-password"))
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
                 .jsonPath("$.token").value(token -> assertThat(((String) token).split("\\.")).hasSize(3))
+                .jsonPath("$.tokenType").isEqualTo("Bearer")
+                .jsonPath("$.expiresIn").isEqualTo(900)
                 .jsonPath("$.channel").isEqualTo("customer")
-                .jsonPath("$.sub").isEqualTo("28")
-                .jsonPath("$.expiresIn").isEqualTo(900);
+                .jsonPath("$.username").isEqualTo("alice")
+                .jsonPath("$.displayName").isEqualTo("王 POC-A")
+                .jsonPath("$.clientId").isEqualTo(28);
 
         // token 可被同一密钥解析（sub / channel 断言）
         String token = loginToken("alice", "correct-password");
@@ -68,14 +71,46 @@ class LoginControllerTest {
     }
 
     @Test
-    void adminHasNoClientSubFallsBackToUsernameAsInternal() {
-        webTestClient.post().uri("/login")
+    void boLoginIssuesInternalTokenWithContractFields() {
+        webTestClient.post().uri("/bo/login")
                 .bodyValue(new LoginController.LoginRequest("admin", "admin-password"))
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
+                .jsonPath("$.token").value(token -> assertThat(((String) token).split("\\.")).hasSize(3))
+                .jsonPath("$.tokenType").isEqualTo("Bearer")
+                .jsonPath("$.expiresIn").isEqualTo(900)
                 .jsonPath("$.channel").isEqualTo("internal")
-                .jsonPath("$.sub").isEqualTo("admin");
+                .jsonPath("$.username").isEqualTo("admin")
+                .jsonPath("$.displayName").isEqualTo("运营管理员")
+                .jsonPath("$.role").isEqualTo("ADMIN");
+
+        String token = boLoginToken("admin", "admin-password");
+        JwtService.AuthToken parsed = jwtService.parse(token);
+        assertThat(parsed.sub()).isEqualTo("admin");
+        assertThat(parsed.channel()).isEqualTo("internal");
+    }
+
+    @Test
+    void internalUserOnCustomerLoginRejected() {
+        // 通道严格匹配（契约 channel enum 单值）：admin 打 /login → 401
+        webTestClient.post().uri("/login")
+                .bodyValue(new LoginController.LoginRequest("admin", "admin-password"))
+                .exchange()
+                .expectStatus().isUnauthorized()
+                .expectBody()
+                .jsonPath("$.error").isEqualTo("invalid_credentials");
+    }
+
+    @Test
+    void customerUserOnBoLoginRejected() {
+        // alice 打 /bo/login → 401（不跨通道签发）
+        webTestClient.post().uri("/bo/login")
+                .bodyValue(new LoginController.LoginRequest("alice", "correct-password"))
+                .exchange()
+                .expectStatus().isUnauthorized()
+                .expectBody()
+                .jsonPath("$.error").isEqualTo("invalid_credentials");
     }
 
     @Test
@@ -104,6 +139,17 @@ class LoginControllerTest {
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody(LoginController.LoginResponse.class)
+                .returnResult()
+                .getResponseBody()
+                .token();
+    }
+
+    private String boLoginToken(String username, String password) {
+        return webTestClient.post().uri("/bo/login")
+                .bodyValue(new LoginController.LoginRequest(username, password))
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(LoginController.BoLoginResponse.class)
                 .returnResult()
                 .getResponseBody()
                 .token();

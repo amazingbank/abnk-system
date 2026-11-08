@@ -12,14 +12,16 @@
       "algorithm": "PBKDF2-HMAC-SHA256",
       "iterations": 100000,
       "salt": "00112233445566778899aabbccddeeff",
-      "password_hash": "2b11b20b7ead5b6ddeddf7b2b5ba58d9a8d1dd864d5526c3ca1aaf92cc05d7aa"
+      "password_hash": "2b11b20b7ead5b6ddeddf7b2b5ba58d9a8d1dd864d5526c3ca1aaf92cc05d7aa",
+      "displayName": "王 POC-A"
     },
     {
       "username": "admin",
       "algorithm": "PBKDF2-HMAC-SHA256",
       "iterations": 100000,
       "salt": "ffeeddccbbaa99887766554433221100",
-      "password_hash": "c74d850df9f614b26df97e873b2398633f09a7b0f1328f3c806f631303fc7a07"
+      "password_hash": "c74d850df9f614b26df97e873b2398633f09a7b0f1328f3c806f631303fc7a07",
+      "displayName": "运营管理员"
     }
   ]
 }

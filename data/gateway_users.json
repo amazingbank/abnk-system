@@ -11,7 +11,8 @@
       "algorithm": "PBKDF2-HMAC-SHA256",
       "iterations": 100000,
       "salt": "792e3e0818bbacc6ff7c48ce2ab829ac",
-      "password_hash": "523104e08957c66e39f4e840d980bb2dae1ea92fe20239e656ae712ad939295d"
+      "password_hash": "523104e08957c66e39f4e840d980bb2dae1ea92fe20239e656ae712ad939295d",
+      "displayName": "王 POC-A"
     },
     {
       "username": "bob",
@@ -19,14 +20,16 @@
       "algorithm": "PBKDF2-HMAC-SHA256",
       "iterations": 100000,
       "salt": "f3dcf35a4dacc9fb1d7a0930ab7cb8b2",
-      "password_hash": "e725f5ebe82b9339da16a509774668244af67e52b5f06a333f39408c29d25aa0"
+      "password_hash": "e725f5ebe82b9339da16a509774668244af67e52b5f06a333f39408c29d25aa0",
+      "displayName": "李 POC-B"
     },
     {
       "username": "admin",
       "algorithm": "PBKDF2-HMAC-SHA256",
       "iterations": 100000,
       "salt": "80f46f234bfb2ee3a8b72e2a4c58b996",
-      "password_hash": "24a429449f18969504437b787fc09c0b76095ebb4653aa3b2afd61009adc8ceb"
+      "password_hash": "24a429449f18969504437b787fc09c0b76095ebb4653aa3b2afd61009adc8ceb",
+      "displayName": "运营管理员"
     }
   ]
 }

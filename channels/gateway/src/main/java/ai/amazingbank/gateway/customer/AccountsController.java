@@ -1,6 +1,11 @@
 package ai.amazingbank.gateway.customer;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.http.HttpStatus;
@@ -34,6 +39,8 @@ public class AccountsController {
         this.fineract = fineract;
     }
 
+    @Operation(responses = @ApiResponse(responseCode = "200",
+            content = @Content(schema = @Schema(implementation = AccountSummary.class))))
     @GetMapping("/abnk/api/v1/me/accounts")
     public Mono<ResponseEntity<Object>> myAccounts(ServerWebExchange exchange) {
         var clientId = CustomerContext.clientIdOf(exchange);
@@ -63,6 +70,8 @@ public class AccountsController {
                 });
     }
 
+    @Operation(responses = @ApiResponse(responseCode = "200",
+            content = @Content(array = @ArraySchema(schema = @Schema(implementation = TransactionItem.class)))))
     @GetMapping("/abnk/api/v1/accounts/{id}/transactions")
     public Mono<ResponseEntity<Object>> transactions(@PathVariable long id, ServerWebExchange exchange) {
         var clientId = CustomerContext.clientIdOf(exchange);

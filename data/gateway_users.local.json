@@ -11,7 +11,8 @@
       "iterations": 100000,
       "salt": "ba4b7f52e4ea66e1e1533d677fd3018e",
       "password_hash": "5c0941267a2c8a42b98766294423bca87c693e5274cf287c6456dec5311e06ff",
-      "clientId": 28
+      "clientId": 28,
+      "displayName": "王 POC-A"
     },
     {
       "username": "bob",
@@ -19,14 +20,16 @@
       "iterations": 100000,
       "salt": "c735810baee48bd47fc6d86a074b8fcd",
       "password_hash": "7f78d980479c262d3f1a92b01548b41c2bac4f40727ce252e99d5d447c9ad7fe",
-      "clientId": 29
+      "clientId": 29,
+      "displayName": "李 POC-B"
     },
     {
       "username": "admin",
       "algorithm": "PBKDF2-HMAC-SHA256",
       "iterations": 100000,
       "salt": "11ecae9e4046ebdb41d619cf546a2fb8",
-      "password_hash": "f6f92b6139d62af8ae2acba192dd82fdad1ca66bf36afaf58448c7cccb440cc6"
+      "password_hash": "f6f92b6139d62af8ae2acba192dd82fdad1ca66bf36afaf58448c7cccb440cc6",
+      "displayName": "运营管理员"
     }
   ]
 }

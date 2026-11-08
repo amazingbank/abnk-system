@@ -2,6 +2,10 @@ package ai.amazingbank.gateway.transfer;
 
 import ai.amazingbank.gateway.customer.CustomerContext;
 import ai.amazingbank.gateway.customer.MeController.ApiError;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -39,6 +43,8 @@ public class TransferController {
     public record TransferRequest(Long toAccountId, Double amount, String externalId, String note) {
     }
 
+    @Operation(responses = @ApiResponse(responseCode = "200",
+            content = @Content(schema = @Schema(implementation = TransferService.TransferResult.class))))
     @PostMapping("/abnk/api/v1/accounts/{id}/transfer")
     public Mono<ResponseEntity<Object>> transfer(@PathVariable long id, @RequestBody TransferRequest request,
             ServerWebExchange exchange) {
