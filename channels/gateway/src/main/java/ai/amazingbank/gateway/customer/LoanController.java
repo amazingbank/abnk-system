@@ -236,7 +236,7 @@ public class LoanController {
                 repaymentMethod);
     }
 
-    static String downstreamMessage(JsonNode errorBody, String fallback) {
+    public static String downstreamMessage(JsonNode errorBody, String fallback) {
         if (errorBody != null) {
             String msg = errorBody.path("defaultUserMessage").asText(null);
             if (msg != null) {

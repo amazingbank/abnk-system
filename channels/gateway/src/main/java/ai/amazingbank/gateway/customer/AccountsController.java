@@ -102,7 +102,7 @@ public class AccountsController {
     }
 
     /** 归属校验：账户 id ∈ /clients/{id}/accounts 的 savingsAccounts（FD 账户也在此键下，实测）。 */
-    static boolean ownsAccount(JsonNode accountsBody, long accountId) {
+    public static boolean ownsAccount(JsonNode accountsBody, long accountId) {
         if (accountsBody == null) {
             return false;
         }

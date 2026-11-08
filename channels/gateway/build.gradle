@@ -39,6 +39,8 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-security'
     // Nimbus JOSE JWT（经 spring-security-oauth2-jose 引入，版本随 Boot BOM）——HS256 签发/解析
     implementation 'org.springframework.security:spring-security-oauth2-jose'
+    // P2.4 转账幂等缓存（externalId → 首次响应，TTL 24h；版本随 Boot BOM）
+    implementation 'com.github.ben-manes.caffeine:caffeine'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 

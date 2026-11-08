@@ -58,7 +58,7 @@ public class IdentityController {
     }
 
     /** 拉取 Fineract 业务日期（BUSINESS_DATE 条目；缺失 / 失败回退系统当前日期）。 */
-    static Mono<LocalDate> businessDateOfHolder(FineractClient fineract) {
+    public static Mono<LocalDate> businessDateOfHolder(FineractClient fineract) {
         return fineract.get("/businessdate")
                 .map(resp -> businessDateOf(resp.body()))
                 .defaultIfEmpty(LocalDate.now());
