@@ -15,6 +15,10 @@ spring:
           # P2.3 起 customer-channel 路由移除：对客面（/abnk/api/v1/*）收敛为网关本地
           # @RestController 聚合（customer/ 包），数据源走 FineractClient；仅 bo 通道保留转发
           routes:
+            # bo 通道放行矩阵（P2.5，BoRouteFilter 执行，order -80）：
+            #   channel=internal → jobs ✅ / configurations ✅ / fineract.json ❌(404) / 其余 ✅
+            #                        （含贷款 command 族与 identifiers PUT——旅程 Step 7 修复端点）
+            #   channel=customer → /bo/api/** 全部 ❌(403)——通道隔离核心断言
             - id: bo-channel
               uri: ${ABNK_FINERACT_BASE:http://localhost:8081}
               predicates:
