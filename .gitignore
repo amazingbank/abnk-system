@@ -15,6 +15,9 @@ dist/
 deploy/compose/.env.local
 **/.env.local
 
+# 本地 prod 演练根（P3.4：自签证书对 + initdb 副本 + fineract WAR 等运行时物料，勿入库）
+deploy/prod/.drill-root/
+
 # 产物：只入库小 JSON 报告，排除运行中产物与临时文件
 artifacts/**/*.log
 artifacts/**/tmp/

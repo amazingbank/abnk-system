@@ -5,7 +5,9 @@ plugins {
 }
 
 group = 'ai.amazingbank'
-version = '0.0.1-SNAPSHOT'
+// 版本唯一事实源 = gradle.properties 的 version（镜像 tag 源，P3.4）；
+// 属性缺失时回落 SNAPSHOT（本地 bootRun 调试形态）
+version = findProperty('version') ?: '0.0.1-SNAPSHOT'
 description = 'ABNK API Gateway (Spring Cloud Gateway, Phase P2.1)'
 
 java {
@@ -49,6 +51,10 @@ dependencyManagement {
         mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
     }
 }
+
+// bootJar 为唯一 jar 产物（P3.4 容器化：Dockerfile COPY build/libs/*.jar 单文件
+// 通配口径——默认追加的 *-plain.jar 会撞通配）
+tasks.named('jar') { enabled = false }
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'

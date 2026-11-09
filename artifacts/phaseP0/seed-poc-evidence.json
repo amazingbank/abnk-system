@@ -1,44 +1,44 @@
 {
   "asserts": [
     {
-      "label": "Delinquency range 已存在，复用（classification 唯一约束）",
+      "label": "Delinquency range 施加成功（minAge=1 无上界）",
       "pass": true,
       "evidence": "rangeId=1"
     },
     {
-      "label": "Delinquency bucket 已存在（挂本 range），复用",
+      "label": "Delinquency bucket 施加成功（REGULAR，挂 1 range）",
       "pass": true,
       "evidence": "bucketId=1"
     },
     {
       "label": "贷款产品施加深成功（等额本息 + delinquencyBucketId）",
       "pass": true,
-      "evidence": "productId=11 bucketId=1"
+      "evidence": "productId=1 bucketId=1"
     },
     {
       "label": "定期产品施加深成功（含利率 chart）",
       "pass": true,
-      "evidence": "productId=20"
+      "evidence": "productId=2"
     },
     {
       "label": "客户 A（过期证照）+ 源/目标账户施加深成功",
       "pass": true,
-      "evidence": "clientId=28 src=11 dst=12 源余额=10000.0"
+      "evidence": "clientId=1 src=1 dst=2 源余额=10000.0"
     },
     {
       "label": "客户 B（有效证照）+ 账户 + 定期账户施加深成功",
       "pass": true,
-      "evidence": "clientId=29 sav=13 fd=14 maturity=2028-01-17"
+      "evidence": "clientId=2 sav=3 fd=4 maturity=2027-11-10"
     },
     {
       "label": "客户 C 贷款施加深成功（发放后零还款）",
       "pass": true,
-      "evidence": "loanId=6"
+      "evidence": "loanId=1"
     },
     {
-      "label": "业务日期推进到 2027-03-29（首期 due 2027-02-17 + 40 天，单向不回拨）",
+      "label": "业务日期推进到 2027-01-19（首期 due 2026-12-10 + 40 天，单向不回拨）",
       "pass": true,
-      "evidence": "businessDate=2027-03-29"
+      "evidence": "businessDate=2027-01-19"
     },
     {
       "label": "executeJob Update Loan Arrears Ageing 触发（jobId=2）",
@@ -51,7 +51,7 @@
       "evidence": "HTTP 202 "
     },
     {
-      "label": "客户 C 贷款逾期天数 ≥40（业务日期 2027-03-29 − 首期 due 2027-02-17）",
+      "label": "客户 C 贷款逾期天数 ≥40（业务日期 2027-01-19 − 首期 due 2026-12-10）",
       "pass": true,
       "evidence": "days=40"
     },
@@ -68,7 +68,7 @@
     {
       "label": "overdueSinceDate 字段存在",
       "pass": true,
-      "evidence": "2027-02-17"
+      "evidence": "2026-12-10"
     },
     {
       "label": "gateway_users.json 三用户就位",
@@ -83,51 +83,51 @@
   ],
   "readback": {
     "businessDateAdvanced": {
-      "to": "2027-03-29",
-      "firstDueDate": "2027-02-17",
+      "to": "2027-01-19",
+      "firstDueDate": "2026-12-10",
       "daysAdvancedPastFirstDue": 40
     },
     "clientCLoan": {
-      "loanId": 6,
+      "loanId": 1,
       "inArrears": true,
       "delinquencyRange": {
         "id": 1,
         "classification": "ABNK_POC_OD",
         "minimumAgeDays": 1
       },
-      "overdueSinceDate": "2027-02-17",
+      "overdueSinceDate": "2026-12-10",
       "totalOverdue": 8791.58,
       "overdueDaysCalculated": 40,
-      "businessDate": "2027-03-29",
-      "firstDueDate": "2027-02-17"
+      "businessDate": "2027-01-19",
+      "firstDueDate": "2026-12-10"
     },
     "seed": {
       "clientA": {
-        "clientId": 28,
-        "externalId": "ABNK-POC-A-1107104347",
+        "clientId": 1,
+        "externalId": "ABNK-POC-A-1110073555",
         "identifierExpiry": "2020-01-01",
-        "sourceAccount": 11,
-        "targetAccount": 12,
+        "sourceAccount": 1,
+        "targetAccount": 2,
         "sourceBalance": 10000.0
       },
       "clientB": {
-        "clientId": 29,
-        "externalId": "ABNK-POC-B-1107104347",
+        "clientId": 2,
+        "externalId": "ABNK-POC-B-1110073555",
         "identifierExpiry": "2099-12-31",
-        "savingsAccount": 13,
-        "fixedDepositAccount": 14,
-        "fdMaturityDate": "2028-01-17"
+        "savingsAccount": 3,
+        "fixedDepositAccount": 4,
+        "fdMaturityDate": "2027-11-10"
       },
       "clientC": {
-        "clientId": 30,
-        "externalId": "ABNK-POC-C-1107104347",
-        "loanId": 6,
-        "loanExternalId": "ABNK-POC-C-LN-1107104347"
+        "clientId": 3,
+        "externalId": "ABNK-POC-C-1110073555",
+        "loanId": 1,
+        "loanExternalId": "ABNK-POC-C-LN-1110073555"
       },
       "products": {
-        "savingsProductId": 19,
-        "loanProductId": 11,
-        "fixedDepositProductId": 20,
+        "savingsProductId": 1,
+        "loanProductId": 1,
+        "fixedDepositProductId": 2,
         "delinquencyRangeId": 1,
         "delinquencyBucketId": 1,
         "delinquencyClassification": "ABNK_POC_OD"
@@ -141,71 +141,15 @@
         ],
         "iterations": 100000
       }
-    },
-    "vp032Verify": {
-      "method": "独立 curl 复核（非脚本内断言）",
-      "clientA": {
-        "query": "externalId=ABNK-POC-A-1107104347",
-        "totalFilteredRecords": 1,
-        "clientId": 28
-      },
-      "clientB": {
-        "query": "externalId=ABNK-POC-B-1107104347",
-        "totalFilteredRecords": 1,
-        "clientId": 29
-      },
-      "clientC": {
-        "query": "externalId=ABNK-POC-C-1107104347",
-        "totalFilteredRecords": 1,
-        "clientId": 30
-      },
-      "loanProduct": {
-        "id": 11,
-        "name": "ABNK-POC消费贷1107104347",
-        "delinquencyBucket": "id=1 REGULAR（ranges 含 ABNK_POC_OD）"
-      },
-      "fixedDepositProduct": {
-        "id": 20,
-        "name": "ABNK-POC定期1107104347",
-        "depositAmount": 10000.0
-      },
-      "conclusion": "客户 A/B/C 均命中（totalFilteredRecords ≥ 1）；贷款产品/定期产品各 ≥1"
-    },
-    "vp033Verify": {
-      "method": "独立 curl GET /loans/6?associations=all 复核",
-      "inArrears": true,
-      "overdueSinceDate": "2027-02-17",
-      "businessDate": "2027-03-29",
-      "overdueDays": 40,
-      "overdueDaysGe31": true,
-      "delinquencyClassification": "ABNK_POC_OD",
-      "totalOverdue": 8791.58,
-      "principalOverdue": 7991.4,
-      "loanStatus": "Active",
-      "conclusion": "逾期天数 40 ≥ 31；delinquency 分档命中种子 range（classification=ABNK_POC_OD 非空）"
-    },
-    "vp034Verify": {
-      "method": "静态校验（用户名清单 + PBKDF2 复算比对）",
-      "usernames": [
-        "admin",
-        "alice",
-        "bob"
-      ],
-      "aliceHashRecomputedMatch": true,
-      "iterations": 100000,
-      "saltBytes": 16,
-      "hashBytes": 32,
-      "conclusion": "三用户就位；alice 复算 hash 一致（True）；参数符合跨端互验契约"
     }
   },
-  "runAt": "2026-11-07T10:43:47",
+  "runAt": "2026-11-10T07:35:55",
   "baseUrl": "http://localhost:8081/fineract-provider/api/v1",
-  "tsSuffix": "1107104347",
-  "businessDateBeforeAdvance": "2027-01-17",
+  "tsSuffix": "1110073555",
+  "businessDateBeforeAdvance": "2026-11-10",
   "summary": {
     "allPassed": true,
     "assertCount": 16,
-    "note": "明文演示口令不入本证据文件（仅打印一次性，由执行者存 .github-private/）",
-    "vp03xAllPassed": true
+    "note": "明文演示口令不入本证据文件（仅打印一次性，由执行者存 .github-private/）"
   }
 }

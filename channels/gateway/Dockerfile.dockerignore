@@ -1,0 +1,16 @@
+# 网关镜像专用上下文裁剪（BuildKit per-Dockerfile ignore——仅当
+# `docker build -f channels/gateway/Dockerfile .`（上下文=仓库根）时生效，
+# 完全取代不存在的根 .dockerignore）。
+#
+# 放行清单：channels/gateway/**（构建工程）+ data/gateway_users.json（镜像打包）
+# 排除：工程内 build/bin/.gradle 产物目录
+*
+!channels
+!data
+channels/*
+!channels/gateway
+data/*
+!data/gateway_users.json
+channels/gateway/build
+channels/gateway/bin
+channels/gateway/.gradle

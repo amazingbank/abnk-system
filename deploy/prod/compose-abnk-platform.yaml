@@ -4,6 +4,13 @@
 # D7 调整（2026-11-07）：abnk-fineract 端口 0.0.0.0:8080 直接公网暴露
 # （NSG 放行 8080 为部署前置，Azure Portal 操作；公网入口 http://amazingbank.ai:8080）。
 #
+# ⚠️ ⚠️ SUPERSEDED（P3.4，2026-11-09）：本栈的服务定义（abnk-pg-platform /
+#    abnk-fineract，含 initdb 挂载与固定卷名 abnk-pg-platform-data）已**原样并入**
+#    `compose-abnk-prod.yaml`（全栈七容器）并被其 supersede——本文件保留仅供历史
+#    追溯与 P3.5.6 切换前的在产运行。**不得在此文件追加新服务**（双栈定义漂移）；
+#    P3.5.6 全栈上线时先退役本栈（同名容器冲突，down 前问用户），数据卷随固定
+#    卷名直接延续（数据不动、种子连续）。
+#
 # ⚠️ 项目名固定 abnk-prod-platform——与官网栈 abnk-prod（compose-abnk-prod.yaml）、
 #    本地生产形态栈 abnk-prodform 严格区分，不得在错误目录执行 down。
 #

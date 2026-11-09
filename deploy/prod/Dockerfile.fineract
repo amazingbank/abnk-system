@@ -17,4 +17,8 @@ FROM scratch AS war
 COPY fineract-provider.war /fineract-provider.war
 
 FROM tomcat:10.1.59-jdk25-temurin
+# P3.4：compose healthcheck（actuator health 探活）依赖 curl——tomcat 基础镜像
+#（Ubuntu 系）不含 curl/wget（2026-11-09 实测 abnk-fineract 容器内 which 均空）
+RUN apt-get update && apt-get install -y --no-install-recommends curl \
+    && rm -rf /var/lib/apt/lists/*
 COPY --from=war /fineract-provider.war /usr/local/tomcat/webapps/fineract-provider.war

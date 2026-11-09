@@ -10,26 +10,23 @@
       "clientId": 1,
       "algorithm": "PBKDF2-HMAC-SHA256",
       "iterations": 100000,
-      "salt": "792e3e0818bbacc6ff7c48ce2ab829ac",
-      "password_hash": "523104e08957c66e39f4e840d980bb2dae1ea92fe20239e656ae712ad939295d",
-      "displayName": "王 POC-A"
+      "salt": "4a8ada69ca06219d81e380a721495d6f",
+      "password_hash": "2b163e2e9a743b38dd0ba8eeac273759487f292edacd166fee0a9c767ef56e8b"
     },
     {
       "username": "bob",
       "clientId": 2,
       "algorithm": "PBKDF2-HMAC-SHA256",
       "iterations": 100000,
-      "salt": "f3dcf35a4dacc9fb1d7a0930ab7cb8b2",
-      "password_hash": "e725f5ebe82b9339da16a509774668244af67e52b5f06a333f39408c29d25aa0",
-      "displayName": "李 POC-B"
+      "salt": "c5dd55a2519cfadfe00a70cff5d1f0b4",
+      "password_hash": "19c902865948e4dbadcd140aa9e188d7f4c93402b76a9235a5b0891a11e0603c"
     },
     {
       "username": "admin",
       "algorithm": "PBKDF2-HMAC-SHA256",
       "iterations": 100000,
-      "salt": "80f46f234bfb2ee3a8b72e2a4c58b996",
-      "password_hash": "24a429449f18969504437b787fc09c0b76095ebb4653aa3b2afd61009adc8ceb",
-      "displayName": "运营管理员"
+      "salt": "fbc044c6f3a07360fdfe4468af1c3e43",
+      "password_hash": "84e4828627abf0047ccabc6ccc5e186c3a03ce5114e376013b8d0e7622d4cd63"
     }
   ]
 }

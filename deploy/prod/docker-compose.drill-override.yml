@@ -1,0 +1,16 @@
+# ABNK 本地 prod 演练专用 override（P3.4，VP3.4.2）
+#
+# ⚠️ 仅演练 compose 命令携带——生产切换（P3.5.6）**不带此文件**：
+#   cd $ABNK_REPO/deploy/prod
+#   docker compose -f compose-abnk-prod.yaml -f docker-compose.drill-override.yml \
+#     --env-file env/abnk-fullstack.drill.env up -d
+#
+# 唯一差异：abnk-fineract 回环绑定 127.0.0.1:8081 ——
+#   - VP3.4.3 种子施加通道（seed_poc.py 经 ABNK_BASE_URL=http://localhost:8081/...）
+#   - VP3.4.4 剧本 Fineract 独立核对通道（baseline_gap_test.py 的 ABNK_FINERACT_BASE）
+#   （prodform 栈退役后端口无冲突；生产栈 fineract 不映射任何宿主端口）
+
+services:
+  abnk-fineract:
+    ports:
+      - "127.0.0.1:8081:8080"
