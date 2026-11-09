@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.Ordered;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpResponse;
@@ -45,6 +46,12 @@ public class BearerTokenFilter implements WebFilter, Ordered {
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
+        // CORS preflight 直通（P3.1 接线）：OPTIONS 预检不带业务语义与 Bearer 头，
+        // 交由 SCG globalcors 的 CorsWebFilter 应答（本过滤器 order -100 先于其执行）。
+        // 网关无业务 OPTIONS 端点，真实请求仍走下方鉴权链。
+        if (HttpMethod.OPTIONS.equals(exchange.getRequest().getMethod())) {
+            return chain.filter(exchange);
+        }
         String path = exchange.getRequest().getPath().value();
         if (publicPaths.stream().anyMatch(pattern -> MATCHER.match(pattern, path))) {
             return chain.filter(exchange);

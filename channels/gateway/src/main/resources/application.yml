@@ -33,6 +33,15 @@ spring:
             - AddRequestHeader=Fineract-Platform-TenantId, default
             - RemoveRequestHeader=Authorization
             - AddRequestHeader=Authorization, Basic bWlmb3M6cGFzc3dvcmQ=
+          # CORS（P3.1 前后端接线）：dev 形态 web 载体（:6280）跨 origin 访问网关；
+          # 生产拓扑（P3.4）api 与静态站同域反代，此配置为冗余放行、无安全减损。
+          # preflight OPTIONS 由 BearerTokenFilter 直通（见该类注释）。
+          globalcors:
+            cors-configurations:
+              '[/**]':
+                allowedOriginPatterns: "*"
+                allowedMethods: "*"
+                allowedHeaders: "*"
 
 management:
   endpoints:

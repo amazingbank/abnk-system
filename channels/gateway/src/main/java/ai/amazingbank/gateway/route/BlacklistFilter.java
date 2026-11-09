@@ -56,6 +56,11 @@ public class BlacklistFilter implements WebFilter, Ordered {
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
+        // CORS preflight 直通（P3.1 接线）：OPTIONS 预检无业务语义（契约表均为
+        // GET/POST），不参与收敛判定，交由 CorsWebFilter 应答（order 在其后）。
+        if (HttpMethod.OPTIONS.equals(exchange.getRequest().getMethod())) {
+            return chain.filter(exchange);
+        }
         String path = exchange.getRequest().getPath().value();
         if (!path.startsWith("/abnk/api/")) {
             return chain.filter(exchange);

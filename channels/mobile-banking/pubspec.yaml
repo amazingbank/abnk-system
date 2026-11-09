@@ -30,6 +30,13 @@ dependencies:
   # （对齐官网 no-CDN 口径），google_fonts 仅做族名匹配，运行时拉取已禁用。
   google_fonts: ^6.3.1
 
+  # ABNK 生成 client（P2.6 契约生成物，P3.1 接线的 remote 数据层载体）——
+  # 包名 openapi，路径依赖同仓 openapi-generated/，随契约冻结版锁定。
+  # dio 为 remote 适配层直接消费（DioException 捕获与错误映射），显式声明。
+  dio: ^5.7.0
+  openapi:
+    path: openapi-generated
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -33,6 +33,11 @@ final class ForbiddenException extends AppException {
   const ForbiddenException([super.message = '无权限执行该操作']);
 }
 
+/// 服务端异常（5xx / 非预期状态码）——remote 数据层（P3.1）映射引入。
+final class ServerException extends AppException {
+  const ServerException([super.message = '服务异常，请稍后重试']);
+}
+
 /// 异常 → 用户提示的分发器（UI 层消费异常的唯一入口）。
 ///
 /// 新增错误语义时在此登记分支，页面层不感知具体异常类型。
