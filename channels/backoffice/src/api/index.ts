@@ -1,19 +1,11 @@
 /**
- * repository 装配点（任务 P1.4）——P1 阶段全 mock；P3.2 接线时
- * 仅替换本文件装配为 OpenAPI 生成 client 实现（换实现不改页面）。
+ * repository 装配点（任务 P1.4 建，P3.2 接线切换）——
+ * P3.2 起实例装配移交 `dataSource`（按 `VITE_ABNK_API_BASE` 切换
+ * mock / remote 实现）；本文件保留页面层一致的 import 路径与类型出口
+ * （换实现不改页面——分层纪律兑现）。
  */
 
-import type { AuthRepository } from './repositories/authRepository';
-import type { ClientRepository } from './repositories/clientRepository';
-import type { LoanRepository } from './repositories/loanRepository';
-import { mockAuthRepository } from './mock/mockAuth';
-import { mockClientRepository } from './mock/mockClient';
-import { mockLoanRepository } from './mock/mockLoan';
-
-export const authRepository: AuthRepository = mockAuthRepository;
-export const clientRepository: ClientRepository = mockClientRepository;
-export const loanRepository: LoanRepository = mockLoanRepository;
-
+export { authRepository, clientRepository, loanRepository } from './dataSource';
 export type {
   AuthRepository,
   AuthSession,

@@ -7,6 +7,12 @@ import { fileURLToPath, URL } from 'node:url';
 // 不自动漂移——冲突要暴露而不是静默换端口。
 const devPort = Number(process.env.ABNK_BO_PORT) || 6203;
 
+// P3.2 接线：dev server proxy——remote 模式（VITE_ABNK_API_BASE 非空，见
+// src/api/dataSource.ts）经同源相对路径转发到 ABNK 网关（ADR-005：前端
+// 永不直连 Fineract）。mock 模式无网络请求，proxy 常驻不干扰。
+// 目标可经 ABNK_GW_BASE 覆盖（默认本地 dev 网关 :8080）。
+const gwProxyTarget = process.env.ABNK_GW_BASE || 'http://localhost:8080';
+
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
@@ -18,6 +24,9 @@ export default defineConfig({
   server: {
     port: devPort,
     strictPort: true,
+    proxy: {
+      '/bo': { target: gwProxyTarget, changeOrigin: true },
+    },
   },
   preview: {
     port: devPort + 1,
