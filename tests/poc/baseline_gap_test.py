@@ -13,8 +13,9 @@ POC 开场要演示「证件过期客户转账依然成功」——缺口存在�
 约定（Phase P3 详细计划 P3.3 口径）：
 - 纯 Python 标准库，零第三方依赖；结构复用 tests/gateway/gateway_test.py 的
   Runner/StepCtx 范式（fail-fast + 报告脱敏）
-- 演示口令经环境变量 ABNK_DEMO_CREDENTIALS 注入（指向 P0.3 归档处
-  asdm-training/docs/workshops/sessions/20251110-KBankPOC/gateway-demo-passwords.json），不入剧本代码与报告 JSON
+- 演示口令经环境变量 ABNK_DEMO_CREDENTIALS 注入（指向凭据归档处
+  .github-private/abnk-prod/gateway-demo-passwords.json——abnk demo 凭据档案，
+  含 server/local-prodform/local-drill 三实例），不入剧本代码与报告 JSON
 - 幂等后缀 TS 模式：转账 externalId 携带毫秒时间戳——同一栈可重复执行（每轮新
   externalId 隔离，各落一笔新交易，不触发网关幂等重放）
 - 转账金额小额 10；脚本末尾不做余额回滚（单向，声明）——运行口径见 P3.3 改动详情
