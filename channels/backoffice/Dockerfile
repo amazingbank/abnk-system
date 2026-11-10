@@ -14,7 +14,8 @@
 #   （tag 源 = package.json version 0.1.0，patch 递增纪律同 website Iron Rule 4）
 
 # ---------- builder ----------
-FROM node:22-alpine AS build
+# multi-arch：builder 钉构建机架构（npm build 产物为静态文件，架构无关）
+FROM --platform=$BUILDPLATFORM node:22-alpine AS build
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci --no-audit --no-fund

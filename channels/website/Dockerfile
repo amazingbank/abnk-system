@@ -6,7 +6,8 @@
 # 证书续期 = 覆盖挂载文件 + restart，无需重建镜像。
 
 # ---------- builder ----------
-FROM node:20-alpine AS build
+# multi-arch：builder 钉构建机架构（vite build 产物为静态文件，架构无关）
+FROM --platform=$BUILDPLATFORM node:20-alpine AS build
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci --no-audit --no-fund

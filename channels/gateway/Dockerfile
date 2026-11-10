@@ -20,7 +20,10 @@
 #   ABNK_USERS_FILE     镜像内默认已配（仅 dev 覆盖）
 #   ABNK_JWT_SECRET     生产值经部署根 .env 注入（源 .github-private 凭据档案）
 
-FROM eclipse-temurin:25-jdk AS build
+# ⚠️ multi-arch（P3.5 后补）：builder 钉构建机架构（jar 产物架构无关，JVM 字节码
+#    COPY 进各目标架构 runtime 层）——避免 QEMU 模拟 gradle 构建；runtime 层
+#    eclipse-temurin:25-jre 官方双架构（amd64/arm64）。
+FROM --platform=$BUILDPLATFORM eclipse-temurin:25-jdk AS build
 WORKDIR /workspace
 # 上下文裁剪由 channels/gateway/Dockerfile.dockerignore 承担（仅放行
 # channels/gateway/ 与 data/gateway_users.json；build/bin/.gradle 排除）
