@@ -10,7 +10,7 @@
 - 纯 Python 标准库，零第三方依赖；复用 scripts/lib/fineract_api.py 的
   Client/StepRunner 思路，但直连网关 :8080 并改用 Bearer 头（Fineract 双头由网关注入）
 - 演示口令经环境变量 ABNK_DEMO_CREDENTIALS 注入（指向 P0.3 归档处
-  .github-private/kbank-poc/gateway-demo-passwords.json），不入剧本代码与报告 JSON
+  asdm-training/docs/workshops/sessions/20251110-KBankPOC/gateway-demo-passwords.json），不入剧本代码与报告 JSON
 - 幂等后缀 TS 模式：转账 externalId 携带毫秒时间戳，剧本可重复执行
 - 报告 JSON 归档 artifacts/phaseP2/gateway-report-<ts>.json（token 字段一律脱敏）
 - 退出码：0 = 全部通过；1 = 任一断言失败（fail-fast）；2 = 前置缺失
@@ -455,7 +455,8 @@ def s_prev_response(runner, step_no):
 def main():
     if not CRED_FILE or not os.path.isfile(CRED_FILE):
         print("ERROR: 环境变量 ABNK_DEMO_CREDENTIALS 未设置或文件不存在\n"
-              "（应指向 .github-private/kbank-poc/gateway-demo-passwords.json）")
+              "（应指向 asdm-training/docs/workshops/sessions/20251110-KBankPOC/"
+              "gateway-demo-passwords.json）")
         return 2
     with open(CRED_FILE, encoding="utf-8") as f:
         cred = json.load(f)

@@ -1,6 +1,6 @@
 {
   "_meta": {
-    "description": "ABNK 全渠道设计 tokens 单一事实源（Sprint v0.0.1 Part02 任务 P1.2）。提取自官网 channels/website/tailwind.config.js 的 theme.extend 段——官网为品牌视觉源点；本文件为只读同步产物，修改须先改 tailwind 源，再经 channels/shared/scripts/tokens_sync.py 验证零差异后回写。",
+    "description": "ABNK 全渠道设计 tokens 单一事实源（Sprint v0.0.1 Part02 任务 P1.2）。提取自官网 tailwind.config.js 的 theme.extend 段——官网为品牌视觉源点（⚠️ 2026-11-10 官网已迁独立私有仓 abnk-website，本文件为只读同步产物，同步链见 channels/shared/scripts/tokens_sync.py 跨仓挂账说明）。",
     "extractedFrom": "channels/website/tailwind.config.js",
     "verifiedBy": "channels/shared/scripts/tokens_sync.py",
     "lastSync": "2026-11-07",

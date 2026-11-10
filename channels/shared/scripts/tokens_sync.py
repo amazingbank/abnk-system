@@ -1,8 +1,13 @@
 #!/usr/bin/env python3
 """tokens_sync.py — ABNK design tokens 一致性比对脚本（Sprint v0.0.1 Part02 任务 P1.2 / VP1.2.1）。
 
+⚠️ 跨仓依赖（2026-11-10 挂账）：tailwind 源已随官网迁至独立私有仓 abnk-website
+   （amazingbank/abnk-website，subtree split 迁出）。本脚本的 TAILWIND_PATH 缺省
+   指向同工作区的 `../abnk-website/tailwind.config.js`（本仓 channels/website 已移除）；
+   工作区布局变化时以 --tailwind 覆盖（或改 TAILWIND_PATH）。
+
 比对两个事实载体：
-  1. 源：channels/website/tailwind.config.js（官网设计 tokens 源点，只读不动）
+  1. 源：abnk-website 仓 tailwind.config.js（官网设计 tokens 源点，只读不动）
   2. 单一事实源：channels/shared/design-tokens.json（双端映射的提取产物）
 
 比对口径（逐值）：
@@ -20,6 +25,7 @@ pageMaxWidth）时，即使数值一致 `DIFF: 0` 也判无效——脚本以退
 """
 
 import json
+import os
 import re
 import sys
 from pathlib import Path
@@ -28,7 +34,10 @@ MIN_COLOR_FAMILIES = 10
 MIN_FONT_STACKS = 3
 SCRIPT_DIR = Path(__file__).resolve().parent
 TOKENS_PATH = SCRIPT_DIR.parent / "design-tokens.json"
-TAILWIND_PATH = SCRIPT_DIR.parents[1] / "website" / "tailwind.config.js"
+# 跨仓缺省：工作区根平级的 abnk-website clone（env ABNK_WEBSITE_TAILWIND 可覆盖）
+TAILWIND_PATH = Path(os.environ.get(
+    "ABNK_WEBSITE_TAILWIND",
+    str(SCRIPT_DIR.parents[3] / "abnk-website" / "tailwind.config.js")))
 
 
 def find_braced_block(text: str, start: int) -> tuple[int, int]:

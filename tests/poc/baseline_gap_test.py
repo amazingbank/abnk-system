@@ -14,7 +14,7 @@ POC 开场要演示「证件过期客户转账依然成功」——缺口存在�
 - 纯 Python 标准库，零第三方依赖；结构复用 tests/gateway/gateway_test.py 的
   Runner/StepCtx 范式（fail-fast + 报告脱敏）
 - 演示口令经环境变量 ABNK_DEMO_CREDENTIALS 注入（指向 P0.3 归档处
-  .github-private/kbank-poc/gateway-demo-passwords.json），不入剧本代码与报告 JSON
+  asdm-training/docs/workshops/sessions/20251110-KBankPOC/gateway-demo-passwords.json），不入剧本代码与报告 JSON
 - 幂等后缀 TS 模式：转账 externalId 携带毫秒时间戳——同一栈可重复执行（每轮新
   externalId 隔离，各落一笔新交易，不触发网关幂等重放）
 - 转账金额小额 10；脚本末尾不做余额回滚（单向，声明）——运行口径见 P3.3 改动详情
@@ -357,7 +357,8 @@ def scenario(runner, users):
 def main():
     if not CRED_FILE or not os.path.isfile(CRED_FILE):
         print("ERROR: 环境变量 ABNK_DEMO_CREDENTIALS 未设置或文件不存在\n"
-              "（应指向 .github-private/kbank-poc/gateway-demo-passwords.json）")
+              "（应指向 asdm-training/docs/workshops/sessions/20251110-KBankPOC/"
+              "gateway-demo-passwords.json）")
         return 2
     with open(CRED_FILE, encoding="utf-8") as f:
         cred = json.load(f)

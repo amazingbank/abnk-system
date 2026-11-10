@@ -28,8 +28,8 @@
 
 | 端口 | 服务 | 位置 | 状态 |
 |---|---|---|---|
-| 6201 | website dev server | `channels/website/vite.config.ts`（`ABNK_WEBSITE_PORT` 可覆盖） | ✅ 生效 |
-| 6202 | website preview | 同上 | ✅ 生效 |
+| 6201 | website dev server | `abnk-website` 仓（独立私有仓，2026-11-10 自本仓 `channels/website` 迁出；`vite.config.ts`，`ABNK_WEBSITE_PORT` 可覆盖） | ✅ 生效（迁仓后归属新仓） |
+| 6202 | website preview | 同上 | ✅ 生效（迁仓后归属新仓） |
 | 6203 | backoffice dev | `channels/backoffice/vite.config.ts`（`ABNK_BO_PORT` 可覆盖；2026-11-07 P1.4 原型启用） | ✅ 生效 |
 | 6204 | backoffice preview | 同上（`npm run preview`） | ✅ 生效 |
 | 6205 / 6206 | online-banking dev / preview | `channels/online-banking/` | 预留 Phase 4 |
@@ -72,8 +72,8 @@
 cd abnk-system/deploy/compose && docker compose up -d     # abnk-pg :5432
 # 2) Fineract（宿主 devRun，断点调试）
 cd fineract && ./gradlew devRun                            # :8443
-# 3) 官网
-cd abnk-system/channels/website && npm run dev             # :6201
+# 3) 官网（独立仓 abnk-website，2026-11-10 迁出）
+cd abnk-website && npm run dev                                  # :6201
 # 4) 其他工作区各服务按各自文档启动 —— 端口与上表无任何交集
 ```
 
