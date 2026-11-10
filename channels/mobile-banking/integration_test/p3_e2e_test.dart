@@ -46,12 +46,21 @@ void main() {
     await tester.enterText(find.byKey(const Key('login-username')), 'alice');
     await tester.enterText(find.byKey(const Key('login-password')), password);
     await tester.tap(find.byKey(const Key('login-submit')));
-    await tester.pumpAndSettle(const Duration(seconds: 5));
+    // P3.6 适配（公网基址口径）：模拟器 QEMU NAT 慢链路下登录请求
+    // 可达 10s+，5s 上限会过早断言；pumpAndSettle settle 即返回，
+    // 放宽上限只影响慢网络场景。
+    await tester.pumpAndSettle(const Duration(seconds: 25));
     await _shot(binding, 'web-02-home');
 
     // ── 第 2 步：首页总览（真实 Fineract 余额 = P0.3 种子口径） ──
-    expect(find.text('你好，王 P.'), findsOneWidget,
+    // P3.6 适配：displayName 断言环境无关化——网关脱敏 displayName 随
+    // 种子实例不同（本地演练=「王 P.」，生产 server 实例=「alice」），
+    // 断言「你好，<displayName>」渲染而非硬编码特定种子值。
+    final greeting = find.textContaining('你好，');
+    expect(greeting, findsOneWidget,
         reason: '登录后显示网关脱敏 displayName');
+    // ignore: avoid_print
+    print('[P3-E2E] displayName 快照: ${tester.widget<Text>(greeting).data}');
     final balance = _readTotalBalance(tester);
     expect(balance, matches(RegExp(r'^¥[\d,]+\.\d{2}$')),
         reason: '总余额以货币格式渲染（真实数据）');
@@ -68,7 +77,7 @@ void main() {
 
     // ── 第 4 步：提交成功（网关聚合幂等 + 补偿链路） ──
     await tester.tap(find.byKey(const Key('transfer-submit')));
-    await tester.pumpAndSettle(const Duration(seconds: 5));
+    await tester.pumpAndSettle(const Duration(seconds: 25));
     await _shot(binding, 'web-04-success');
     expect(find.text('转账成功'), findsOneWidget, reason: '成功对话框出现');
     final dialogText = tester
@@ -82,7 +91,7 @@ void main() {
 
     // ── 第 5 步：明细出现新流水（runningBalance 变化） ──
     await tester.tap(find.byType(NavigationDestination).at(1));
-    await tester.pumpAndSettle(const Duration(seconds: 3));
+    await tester.pumpAndSettle(const Duration(seconds: 15));
     await _shot(binding, 'web-05-transactions');
     expect(find.textContaining(note), findsOneWidget,
         reason: '明细出现本次转账新流水');

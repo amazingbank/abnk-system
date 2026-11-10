@@ -1,4 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- release 构建必须显式声明（debug/profile 由 flutter 工具链自动注入，
+         P3.6 release 走查暴露：缺失时所有 socket 报 errno=1 EPERM） -->
+    <uses-permission android:name="android.permission.INTERNET"/>
     <application
         android:label="ABNK"
         android:name="${applicationName}"
