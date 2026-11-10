@@ -91,3 +91,29 @@ DNS 已生效（六条 A 记录 2026-11-10 就位），无需 `--resolve` 降级
 1. ghcr 五包可见性 public + 关联源仓库（org admin 网页操作，不阻塞）
 2. NSG 8080 规则可收紧（D7 直暴形态已随全栈切换退役，Azure Portal 操作）
 3. 审计门第 2 节曾拦截的生产 IP 泄漏已修复（`91f9191`，未推送即清除）
+
+---
+
+## 追记（2026-11-10 下午）：ghcr 挂账闭环 + multi-arch 补齐
+
+### 挂账 1 闭环
+
+- 可见性 public：用户网页操作完成——五包匿名 manifest 全 200，本机无凭据 `docker pull` 认证通过
+- 关联源仓库：用户网页操作完成（API 实测回读）——gateway/website/mweb/bo → `amazingbank/abnk-system`；fineract → `amazingbank/fineract`
+
+### multi-arch 补齐（`linux/amd64` + `linux/arm64`，latest tag）
+
+- Dockerfile 改造（`19bb0f6`）：gateway/bo/website builder 层钉 `$BUILDPLATFORM`（jar/npm/vite 产物架构无关，构建机原生跑零 QEMU）；mweb builder 已钉 amd64（Flutter SDK x64-only）；fineract runtime apt 层 QEMU 模拟（量小）
+- 服务器构建环境：`tonistiigi/binfmt --install arm64`（qemu-aarch64 注册）+ buildx builder `abnk-multiarch`（docker-container driver）
+- 五镜像 `--platform linux/amd64,linux/arm64` 构建并推送 **latest** tag（版本 tag 遵禁覆盖纪律不动；latest 首推非覆盖）：
+
+| 镜像 | latest manifest digest | 构建时长 |
+|---|---|---|
+| `abnk-fineract:latest` | `sha256:b2c7bdf02793` | 2m48s |
+| `abnk-website:latest` | `sha256:8e9544f93b98` | 45s |
+| `abnk-bo:latest` | `sha256:c5c7bc5350f0` | 53s |
+| `abnk-gateway:latest` | `sha256:eba5858a37ed` | 3m30s |
+| `abnk-mweb:latest` | `sha256:5ef1a3a776ee` | ~5 min |
+
+- 端到端验证：本机 Apple Silicon（arm64）无凭据 `docker pull` 两镜像（bo/mweb latest）成功且 `arch=arm64 os=linux` 自动选择 ✅（拉取后已清理）
+- 新增维护纪律：后续发版在服务器以同 buildx 命令更新 latest（双平台）；服务器重启后 binfmt 注册可能丢失，需重跑 `tonistiigi/binfmt --install arm64`
