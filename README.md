@@ -18,18 +18,18 @@ Fineract fork 必须与上游 `develop` 保持**季度级 rebase**（ADR-001/002
 
 | 目录 | 层 | 用途 | 引入阶段 | 状态 |
 |---|---|---|---|---|
-| `deploy/` | — | 环境编排（`compose/` 本地 · `k8s/` 生产规划） | Phase 0 | ✅ 活跃 |
+| `deploy/` | — | 环境编排（`compose/` 本地 · `prod/` 生产全栈 compose——P3.4 七容器；k8s 远期规划） | Phase 0 | ✅ 活跃 |
 | `scripts/` | — | 工程脚本 + API 封装库 | Phase 1 | ✅ 活跃 |
 | `artifacts/` | — | 中间产出物（按阶段归档） | Phase 1 | ✅ 活跃 |
-| `tests/` | — | 跨模块测试资产（smoke / e2e / tenant-isolation） | Phase 1 | ✅ 冒烟活跃 |
-| `custom/` | L2 | 定制模块源（同步到 fineract 仓编译） | Phase 2 | 骨架 |
-| `data/` | L1 | 本地化数据资产（COA / 日历 / seed，YAML + Schema） | Phase 2 | 占位 |
-| `channels/` | L3 | 渠道层：网关 + 全部渠道前端（ADR-008） | 2–5 | website ✅ |
+| `tests/` | — | 跨模块测试资产（smoke / gateway 集成（P2.7）/ poc 缺口剧本（P3.3）） | Phase 1 | ✅ 活跃 |
+| `custom/` | L2 | 定制模块源（同步到 fineract 仓编译） | Phase 2 | 骨架（P0.5 预埋） |
+| `data/` | L1 | 数据资产（POC 种子 `seed_poc.py` + 网关用户表——P0.3 交付） | Phase 2 | ✅ 活跃 |
+| `channels/` | L3 | 渠道层：网关 + 全部渠道前端（ADR-008） | 2–5 | 五目录全交付（website / gateway / mobile-banking / backoffice / shared） |
 | `services/` | L4 | 外围服务（通知 / 支付适配等，事件总线消费方） | Phase 4 | 占位 |
 | `ci/` | — | 质量门禁（GitHub Actions；宪法红线 R6 补位） | Phase 2 | 占位 |
 | `release/` | — | 发版资产（rebase 检查单 / 版本线） | Phase 2 末 | 占位 |
 | `observability/` | — | 监控 as-code（dashboards / alerts / runbooks） | Phase 3 | 占位 |
-| `docs/` | — | 工程操作文档（设计文档在 `.asdm`，只链接不复制） | Phase 2 | 占位 |
+| `docs/` | — | 工程操作文档（设计文档在 `.asdm`，只链接不复制） | Phase 2 | ✅ 活跃（port-allocation） |
 
 技术栈定案（2026-10-26）：ADR-007（信创兼容：主线开源 + 兼容层）、ADR-008（渠道层：SCG 网关 + React 前端 + 混合移动端）。
 

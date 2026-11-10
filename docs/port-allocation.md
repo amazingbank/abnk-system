@@ -20,7 +20,8 @@
 | 6250–6259 | 远程调试端口（JDWP / inspector） | 挂到进程，不是 HTTP 服务 |
 | 6260–6269 | 本地容器基础设施（`deploy/compose/`） | 中间件宿主映射端口 |
 | 6270–6279 | 预留 | |
-| 6280–6289 | 可观测性（`observability/`） | 本地 profile 宿主映射 |
+| 6280–6282 | 渠道前端扩展（mobile web 载体） | P1.3 起 6280 = mobile-banking web dev（`flutter run -d chrome`）；6281/6282 备用 |
+| 6283–6289 | 可观测性（`observability/`） | 本地 profile 宿主映射（原 6280–6282 段，2026-11-10 因 P1.3 实占腾挪） |
 | 6290–6299 | 临时 / 测试脚本 | 用完释放，仅登记不算占用 |
 
 ## 当前分配表
@@ -34,8 +35,7 @@
 | 6205 / 6206 | online-banking dev / preview | `channels/online-banking/` | 预留 Phase 4 |
 | 6207 / 6208 | counter dev / preview | `channels/counter/` | 预留 Phase 3 末 |
 | 6209 | mobile-banking H5 dev | `channels/mobile-banking/h5/` | 预留 Phase 5 |
-| 6210 | gateway HTTP（SCG） | `channels/gateway/` | 预留 Phase 3 |
-| 6211 | gateway actuator/management | 同上 | 预留 |
+| 6210 / 6211 | gateway HTTP / actuator（SCG） | `channels/gateway/` | 段内保留号**未启用**——P2.1 起网关 dev 实际跑 :8080（bootRun，见「62xx 外实占端口」节） |
 | 6220 | notification service | `services/` | 预留 Phase 4 |
 | 6221 | payment-adapter service | `services/` | 预留 Phase 4 |
 | 6250 | Fineract JDWP（宿主调试如需） | `fineract/`（当前默认 5000，容器内调试沿用；宿主远程调试迁移到此时须同步 fineract 仓） | 预留 |
@@ -43,7 +43,8 @@
 | 6261 | Keycloak | `deploy/compose/` 预留模板 | 预留 |
 | 6262 | Kafka | 同上 | 预留 |
 | 6263 | Valkey/Redis | 同上 | 预留 |
-| 6280 / 6281 / 6282 | Grafana / Prometheus / Loki（本地 profile） | `observability/` | 预留 Phase 3 |
+| 6280 | mobile-banking web dev 载体 | `channels/mobile-banking/`（`flutter run -d chrome`；P1.3 起生效） | ✅ 生效 |
+| 6283 / 6284 / 6285 | Grafana / Prometheus / Loki（本地 profile） | `observability/` | 预留 Phase 3 |
 
 ## 契约端口（本规范之外，刻意保持）
 
@@ -51,6 +52,18 @@
 |---|---|---|
 | **8443** | Fineract 主服务 | 本仓 ↔ fineract 仓的**唯一契约面**（`channels/README.md` 铁律 1：前端永不直连 8443，一律经 gateway）。且 asdm 其他工作区无人占用 8443（ke-index-repos 里的 fineract 索引副本不会常驻运行），无冲突 |
 | **5432** | abnk-pg（PostgreSQL） | `deploy/compose/` 与 Fineract 三方默认值对齐的**零环境变量覆盖**设计（见 `deploy/README.md`）。本地 PG 场景用 `ABNK_PG_PORT` 切到 6260 即可 |
+
+## 62xx 外实占端口（生产形态 / 容器栈——刻意例外）
+
+> 以下为本地「生产形态 / 全栈演练」容器与宿主进程实际占用，与 62xx「dev 调试段」并列存在。
+> 登记原则同「占号即登记」；与 ke-index-repos 的 8080–8085 非常驻范围有理论交叠，实测无冲突（索引副本不常驻）。
+
+| 端口 | 服务 | 引入 | 说明 |
+|---|---|---|---|
+| **8080** | gateway dev（bootRun） | P2.1 | `channels/gateway/` 宿主进程（`server.port=8080`）；6210 段内保留号未启用——网关 dev 全周期实测稳定占用 8080 |
+| **8081** | Fineract 生产形态 / 全栈演练回环 | P0.1 | prodform 栈 `0.0.0.0:8081`（P0.1–P3.3）；P3.4 起全栈演练栈 `127.0.0.1:8081`（drill override，种子/核对通道） |
+| **5433** | abnk-pg-prod（prodform PG） | P0.1 | `deploy/compose/docker-compose.prodform.yml` 宿主映射 |
+| **80 / 443** | 全栈演练入口 abnk-nginx | P3.4 | 本地 prod 演练栈唯一宿主端口绑定（TLS 终止 + Host 分流）；生产环境同端口在 abnk-vm001 侧 |
 
 ## 本地同时调试全家的启动顺序
 
@@ -73,7 +86,7 @@ cd abnk-system/channels/website && npm run dev             # :6201
 | asdm-agentlink-ws / asdm-platform-ws / asdm-portal-ws（同名项目三处 clone，配置相同） | 5173（admin-web）、5175（portal）、5180（phpMyAdmin）、5183（agentlink/agentorbit web）、5184（preview tunnel）、3001（server）、3002（billing）、8880–8889（admin 微服务群）、3306（MySQL）、19310（Loki）、19345（Faro） |
 | asdm-ontology-ws（AOS） | 3011（server）、3012（ke ui）、5194/5195/5197（web/web-lite/codegraph）、5199（phpMyAdmin）、33306（MySQL）、3911–3941 与 13111（测试临时） |
 | asdm-website-ws | 5273/5274（asdm-ai-2026）、5555（asdm-docs）、12345/13000/13100/14318/19090（telemetry 本地） |
-| amazingbank-ws | fineract 8443（契约）、5000（容器 JDWP）、3306/5432/9092/3000/3100/9090/4566/4200/61616 等（fineract 自带 compose，本地调试以 abnk-pg 替代其 PG）；abnk-system 5432（abnk-pg） |
+| amazingbank-ws | fineract 8443（契约）、5000（容器 JDWP）、3306/5432/9092/3000/3100/9090/4566/4200/61616 等（fineract 自带 compose，本地调试以 abnk-pg 替代其 PG）；abnk-system 5432（abnk-pg）、8080（gateway dev，P2.1 起）、8081（fineract 生产形态/演练，P0.1 起）、5433（abnk-pg-prod，P0.1 起）、80/443（全栈演练入口，P3.4 起） |
 | asdm-ke-index-repos（参考仓库索引，非常驻） | 8080–8085、8101、8201、8401、8800、8900、9000、9080、9090、17888、18888、30007 等 |
 | 部署映射（docker compose，宿主侧） | 19306、19080、16379、18080、19800/19801、31001 |
 

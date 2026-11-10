@@ -6,9 +6,10 @@
 
 | 位置 | 作用 |
 |---|---|
-| `compose/` | 本地/开发环境容器编排：`docker-compose.yml`（当前：`abnk-pg`；预留 Kafka / Keycloak / Valkey 接入模板）、`.env`（环境变量默认值，compose 自动读取）、`.gitignore`（排除 `.env.local` 与备份产物） |
-| `k8s/` | 生产部署（K8s + Helm，multi-arch，ADR-007）——Phase 4 建 |
-| `envs/` | 环境差异配置（dev/staging/prod）——Phase 3 建 |
+| `compose/` | 本地/开发环境容器编排：`docker-compose.yml`（当前：`abnk-pg`）、`docker-compose.prodform.yml`（本地 prod 形态：fineract WAR + abnk-pg-prod，P0.1 起；P3.4 后被全栈演练栈取代为联调默认载体）、`initdb/`（PG 预建库脚本）、`.env`（环境变量默认值，compose 自动读取）、`.gitignore`（排除 `.env.local` 与备份产物） |
+| `prod/` | **生产全栈 compose（P3.4 起）**：`compose-abnk-prod.yaml`（七容器：nginx 单入口 + website + gateway + fineract + pg-platform + bo + mweb，supersede 早期 `compose-abnk-platform.yaml` 平台栈）、`docker-compose.drill-override.yml`（本地演练专用 fineract 回环 8081）、`Dockerfile.fineract`、`env/`（abnk-fullstack.env.example 占位 + abnk-fullstack.drill.env 本地演练值） |
+
+> 生产部署流程与铁律见 `.asdm` 仓 `abnk-prod-deploy`（制品库 D8：镜像统一 ghcr.io/amazingbank 公共包）。本地全栈演练：`cd deploy/prod && docker compose -f compose-abnk-prod.yaml -f docker-compose.drill-override.yml --env-file env/abnk-fullstack.drill.env up -d`（对客基址 https://localhost，自签证书对在 gitignored `.drill-root/`）。
 
 ## 常用命令
 
