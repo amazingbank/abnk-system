@@ -37,6 +37,7 @@ ghcr 登录：PAT 经 stdin 注入 → `auths: ['ghcr.io']`
 
 推送：五镜像全部成功（首批批量 4 个瞬时 `denied`，逐个重试即过——非权限问题）
 挂账：ghcr 包可见性 public + 关联源仓库需 org admin 网页操作（org 包 REST API 实测 GET 200 / PATCH 404，不支持 visibility 修改）
+→ 2026-11-10 追记：可见性 public 已由用户网页完成——五包匿名 manifest 全 200（fineract:7b896ad6 / gateway:0.1.0 / website:0.1.2 / mweb:1.0.0 / bo:0.1.0），本机无凭据 docker pull 认证通过（错误为 arm64/x86_64 平台不匹配而非 401——匿名免登录生效）；源仓库关联仍挂账（PUT repositories API 亦 404，需各包 Package settings → Manage repository access 手动添加 abnk-system）
 
 ## VP3.5.5 IRON GATE
 
