@@ -28,7 +28,7 @@
     {
       "label": "客户 B（有效证照）+ 账户 + 定期账户施加深成功",
       "pass": true,
-      "evidence": "clientId=2 sav=3 fd=4 maturity=2027-11-10"
+      "evidence": "clientId=2 sav=3 fd=4 maturity=2027-11-12"
     },
     {
       "label": "客户 C 贷款施加深成功（发放后零还款）",
@@ -36,9 +36,9 @@
       "evidence": "loanId=1"
     },
     {
-      "label": "业务日期推进到 2027-01-19（首期 due 2026-12-10 + 40 天，单向不回拨）",
+      "label": "业务日期推进到 2027-01-21（首期 due 2026-12-12 + 40 天，单向不回拨）",
       "pass": true,
-      "evidence": "businessDate=2027-01-19"
+      "evidence": "businessDate=2027-01-21"
     },
     {
       "label": "executeJob Update Loan Arrears Ageing 触发（jobId=2）",
@@ -51,7 +51,7 @@
       "evidence": "HTTP 202 "
     },
     {
-      "label": "客户 C 贷款逾期天数 ≥40（业务日期 2027-01-19 − 首期 due 2026-12-10）",
+      "label": "客户 C 贷款逾期天数 ≥40（业务日期 2027-01-21 − 首期 due 2026-12-12）",
       "pass": true,
       "evidence": "days=40"
     },
@@ -68,7 +68,7 @@
     {
       "label": "overdueSinceDate 字段存在",
       "pass": true,
-      "evidence": "2026-12-10"
+      "evidence": "2026-12-12"
     },
     {
       "label": "gateway_users.json 三用户就位",
@@ -83,8 +83,8 @@
   ],
   "readback": {
     "businessDateAdvanced": {
-      "to": "2027-01-19",
-      "firstDueDate": "2026-12-10",
+      "to": "2027-01-21",
+      "firstDueDate": "2026-12-12",
       "daysAdvancedPastFirstDue": 40
     },
     "clientCLoan": {
@@ -95,16 +95,16 @@
         "classification": "ABNK_POC_OD",
         "minimumAgeDays": 1
       },
-      "overdueSinceDate": "2026-12-10",
+      "overdueSinceDate": "2026-12-12",
       "totalOverdue": 8791.58,
       "overdueDaysCalculated": 40,
-      "businessDate": "2027-01-19",
-      "firstDueDate": "2026-12-10"
+      "businessDate": "2027-01-21",
+      "firstDueDate": "2026-12-12"
     },
     "seed": {
       "clientA": {
         "clientId": 1,
-        "externalId": "ABNK-POC-A-1110073555",
+        "externalId": "ABNK-POC-A-1112174148",
         "identifierExpiry": "2020-01-01",
         "sourceAccount": 1,
         "targetAccount": 2,
@@ -112,17 +112,17 @@
       },
       "clientB": {
         "clientId": 2,
-        "externalId": "ABNK-POC-B-1110073555",
+        "externalId": "ABNK-POC-B-1112174148",
         "identifierExpiry": "2099-12-31",
         "savingsAccount": 3,
         "fixedDepositAccount": 4,
-        "fdMaturityDate": "2027-11-10"
+        "fdMaturityDate": "2027-11-12"
       },
       "clientC": {
         "clientId": 3,
-        "externalId": "ABNK-POC-C-1110073555",
+        "externalId": "ABNK-POC-C-1112174148",
         "loanId": 1,
-        "loanExternalId": "ABNK-POC-C-LN-1110073555"
+        "loanExternalId": "ABNK-POC-C-LN-1112174148"
       },
       "products": {
         "savingsProductId": 1,
@@ -143,10 +143,11 @@
       }
     }
   },
-  "runAt": "2026-11-10T07:35:55",
-  "baseUrl": "http://localhost:8081/fineract-provider/api/v1",
-  "tsSuffix": "1110073555",
-  "businessDateBeforeAdvance": "2026-11-10",
+  "runAt": "2026-11-12T17:41:48",
+  "baseUrl": "http://172.18.0.6:8080/fineract-provider/api/v1",
+  "tsSuffix": "1112174148",
+  "seedLang": "en-us",
+  "businessDateBeforeAdvance": "2026-11-12",
   "summary": {
     "allPassed": true,
     "assertCount": 16,
