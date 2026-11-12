@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 
 import '../../app_scope.dart';
 import '../../core/widgets/abnk_app_bar.dart';
+import '../../l10n/app_localizations.dart';
 import '../../core/errors/app_exception.dart';
 import '../../core/format/money.dart';
 import '../../core/theme/app_theme.dart';
@@ -80,19 +81,24 @@ class _FixedDepositPageState extends State<FixedDepositPage> {
       );
       if (!mounted) return;
       // 操作已完成：先停按钮 spinner，再弹结果对话框（对话框关闭时退页）。
+      // Done: stop the button spinner first, then show the result dialog
+      // (closing it pops the page).
+      final l10n = AppLocalizations.of(context)!;
       setState(() => _submitting = false);
       unawaited(showDialog<void>(
         context: context,
         builder: (dialogContext) => AlertDialog(
-          title: const Text('定期开户成功'),
+          title: Text(l10n.fdSuccessTitle),
           content: Text(
-            '新定期账户：0000**0${result.accountId}\n'
-            '到期日：${result.maturityDate}（对年对月对日）',
+            l10n.fdSuccessBody(
+              '0000**0${result.accountId}',
+              result.maturityDate,
+            ),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(),
-              child: const Text('知道了'),
+              child: Text(l10n.transferGotIt),
             ),
           ],
         ),
@@ -101,8 +107,15 @@ class _FixedDepositPageState extends State<FixedDepositPage> {
       }));
     } catch (e) {
       if (!mounted) return;
+      // 异常提示经 presenter 按当前语言查词条（Part03 任务 3.4 码化链路）。
+      // Error text resolves via the presenter in the current language
+      // (Part03 task 3.4 coded chain).
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppExceptionPresenter.present(e))),
+        SnackBar(
+          content: Text(
+            AppExceptionPresenter.present(e, AppLocalizations.of(context)!),
+          ),
+        ),
       );
       setState(() => _submitting = false);
     }
@@ -112,15 +125,18 @@ class _FixedDepositPageState extends State<FixedDepositPage> {
   Widget build(BuildContext context) {
     final products = _products;
     final savings = _savingsAccounts;
+    // 页面文案词条化（Part03 任务 3.4）。
+    // Page copy resolves via l10n (Part03 task 3.4).
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: AbnkColors.ivory,
-      appBar: abnkAppBar('定期存款'),
+      appBar: abnkAppBar(l10n.fdTitle),
       body: (products == null || savings == null)
           ? const Center(child: CircularProgressIndicator())
           : products.isEmpty
-              ? const _EmptyCard(message: '暂无可选定期产品')
+              ? _EmptyCard(message: l10n.fdNoProducts)
               : savings.isEmpty
-                  ? const _EmptyCard(message: '暂无活期账户作为转出账户')
+                  ? _EmptyCard(message: l10n.fdNoSourceAccount)
                   : Form(
                       key: _formKey,
                       child: ListView(
@@ -137,17 +153,21 @@ class _FixedDepositPageState extends State<FixedDepositPage> {
                             key: const Key('fd-source'),
                             isExpanded: true,
                             initialValue: _sourceAccountId,
-                            decoration:
-                                const InputDecoration(labelText: '转出活期账户'),
+                            decoration: InputDecoration(
+                                labelText: l10n.fdSourceAccountLabel),
                             items: [
                               for (final account in savings)
                                 DropdownMenuItem(
                                   value: account.id,
-                                  child: Text(
-                                    '${account.productName}（${account.accountNo}）'
-                                    ' · ${AbnkMoney.format(account.availableBalance)}',
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
+                                  child: Builder(builder: (itemContext) {
+                                    final l10n =
+                                        AppLocalizations.of(itemContext)!;
+                                    return Text(
+                                      '${l10n.accountTitle(account.productName, account.accountNo)}'
+                                      ' · ${AbnkMoney.format(account.availableBalance)}',
+                                      overflow: TextOverflow.ellipsis,
+                                    );
+                                  }),
                                 ),
                             ],
                             onChanged: (v) =>
@@ -163,21 +183,26 @@ class _FixedDepositPageState extends State<FixedDepositPage> {
                               FilteringTextInputFormatter.allow(
                                   RegExp(r'^\d+\.?\d{0,2}')),
                             ],
-                            decoration: const InputDecoration(
-                              labelText: '存入金额（CNY）',
+                            decoration: InputDecoration(
+                              labelText: l10n.fdAmountLabel,
                               prefixText: '¥ ',
                             ),
                             validator: (v) {
                               final amount = double.tryParse(v?.trim() ?? '');
-                              if (amount == null || amount <= 0) return '请输入有效金额';
+                              if (amount == null || amount <= 0) {
+                                return l10n.formAmountInvalid;
+                              }
                               final product = _selectedProduct;
                               if (product != null &&
                                   amount < product.minDepositAmount) {
-                                return '低于起存金额 ${AbnkMoney.format(product.minDepositAmount)}';
+                                return l10n.fdBelowMinDeposit(AbnkMoney
+                                    .format(product.minDepositAmount));
                               }
                               final source =
                                   savings.firstWhere((a) => a.id == _sourceAccountId);
-                              if (amount > source.availableBalance) return '超出可用余额';
+                              if (amount > source.availableBalance) {
+                                return l10n.formExceedsBalance;
+                              }
                               return null;
                             },
                           ),
@@ -195,7 +220,7 @@ class _FixedDepositPageState extends State<FixedDepositPage> {
                                     child:
                                         CircularProgressIndicator(strokeWidth: 2),
                                   )
-                                : const Text('开立定期账户'),
+                                : Text(l10n.fdSubmit),
                           ),
                         ],
                       ),
@@ -217,6 +242,9 @@ class _ProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // 产品卡片指标文案词条化（Part03 任务 3.4）。
+    // Product card metric labels resolve via l10n (Part03 task 3.4).
+    final l10n = AppLocalizations.of(context)!;
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       color: AbnkColors.warmwhite,
@@ -266,12 +294,16 @@ class _ProductCard extends StatelessWidget {
               const SizedBox(height: 12),
               Row(
                 children: [
-                  _Metric(label: '年利率', value: '${product.interestRate}%'),
-                  const SizedBox(width: 24),
-                  _Metric(label: '期限', value: '${product.depositPeriod} 个月'),
+                  _Metric(
+                      label: l10n.metricInterestRate,
+                      value: '${product.interestRate}%'),
                   const SizedBox(width: 24),
                   _Metric(
-                    label: '起存',
+                      label: l10n.metricTerm,
+                      value: l10n.monthsOption('${product.depositPeriod}')),
+                  const SizedBox(width: 24),
+                  _Metric(
+                    label: l10n.metricMinDeposit,
                     value: AbnkMoney.format(product.minDepositAmount),
                   ),
                 ],

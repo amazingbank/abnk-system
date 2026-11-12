@@ -16,7 +16,7 @@ class MockIdentityRepository implements IdentityRepository {
     final data = await FixtureBundle.load('identity.json');
     final raw = data[username];
     if (raw is! Map<String, dynamic>) {
-      throw const ValidationException('未找到证照信息');
+      throw const ValidationException(code: ErrCodes.validationIdentityMissing);
     }
     return IdentityInfo.fromJson(raw);
   }

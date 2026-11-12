@@ -1,5 +1,15 @@
 /// 证照（身份标识）模型——只读展示口径。
+///
+/// 证照状态展示文案经顶层函数 [identityStatusLabel] 提供（Part03 任务
+/// 3.4：label 决策上移 UI 层并接收 l10n，models 保持零 BuildContext 依赖）。
+///
+/// Identity model — read-only display. The status display label is provided
+/// by the top-level [identityStatusLabel] (Part03 task 3.4: the label
+/// decision moved up to the UI layer and takes the l10n, while models stay
+/// free of any BuildContext dependency).
 library;
+
+import '../../l10n/app_localizations.dart';
 
 enum IdentityStatus { valid, expiringSoon, expired }
 
@@ -33,10 +43,14 @@ class IdentityInfo {
   final IdentityStatus status;
   final String issuanceDate;
   final String expiryDate;
-
-  String get statusLabel => switch (status) {
-        IdentityStatus.valid => '有效',
-        IdentityStatus.expiringSoon => '临期',
-        IdentityStatus.expired => '已过期',
-      };
 }
+
+/// 证照状态 → 展示文案（Part03 任务 3.4：接收 l10n）。
+///
+/// Identity status → display label (Part03 task 3.4: takes the l10n).
+String identityStatusLabel(AppLocalizations l10n, IdentityStatus status) =>
+    switch (status) {
+      IdentityStatus.valid => l10n.identityStatusValid,
+      IdentityStatus.expiringSoon => l10n.identityStatusExpiringSoon,
+      IdentityStatus.expired => l10n.identityStatusExpired,
+    };

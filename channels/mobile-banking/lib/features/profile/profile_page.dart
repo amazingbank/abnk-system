@@ -43,19 +43,19 @@ class _ProfilePageState extends State<ProfilePage> {
     final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: AbnkColors.ivory,
-      appBar: abnkAppBar('我的'),
+      appBar: abnkAppBar(l10n.navProfile),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
           _ProfileCard(displayName: session.displayName),
           const SizedBox(height: 16),
-          const _SectionTitle('客户资料'),
+          _SectionTitle(l10n.profileCustomerInfo),
           _InfoCard(entries: [
-            ('用户名', session.username),
-            ('客户编号', '${session.clientId}'),
+            (l10n.fieldUsername, session.username),
+            (l10n.profileCustomerId, '${session.clientId}'),
           ]),
           const SizedBox(height: 16),
-          const _SectionTitle('证件信息（只读）'),
+          _SectionTitle(l10n.profileIdentitySection),
           FutureBuilder<IdentityInfo>(
             future: _identityFuture,
             builder: (context, snapshot) {
@@ -71,17 +71,17 @@ class _ProfilePageState extends State<ProfilePage> {
                 return Card(
                   child: Padding(
                     padding: const EdgeInsets.all(16),
-                    child: Text(
-                        AppExceptionPresenter.present(snapshot.error!)),
+                    child: Text(AppExceptionPresenter.present(
+                        snapshot.error!, l10n)),
                   ),
                 );
               }
               final identity = snapshot.data!;
               return _InfoCard(entries: [
-                ('证件类型', identity.documentTypeName),
-                ('证件号码', identity.documentKey),
-                ('签发日期', identity.issuanceDate),
-                ('有效期至', identity.expiryDate),
+                (l10n.profileDocType, identity.documentTypeName),
+                (l10n.profileDocNumber, identity.documentKey),
+                (l10n.profileIssueDate, identity.issuanceDate),
+                (l10n.profileExpiry, identity.expiryDate),
               ], trailing: _IdentityStatusChip(status: identity.status));
             },
           ),
@@ -109,11 +109,11 @@ class _ProfilePageState extends State<ProfilePage> {
               padding: const EdgeInsets.symmetric(vertical: 14),
             ),
             icon: const Icon(Icons.logout),
-            label: const Text('退出登录'),
+            label: Text(l10n.profileLogout),
           ),
           const SizedBox(height: 12),
           Text(
-            'ABNK 手机银行原型（mock 数据）',
+            l10n.profilePrototypeNote,
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.bodySmall!.copyWith(
                   color: AbnkColors.taupe400,
@@ -132,6 +132,7 @@ class _ProfileCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -167,7 +168,7 @@ class _ProfileCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'AMAZING BANK 个人客户',
+                  l10n.profileBadge,
                   style: AbnkFonts.eyebrow(
                     base: const TextStyle(
                       color: AbnkColors.taupe500,
@@ -348,10 +349,14 @@ class _IdentityStatusChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final (label, fg) = switch (status) {
-      IdentityStatus.valid => ('有效', AbnkColors.sage700),
-      IdentityStatus.expiringSoon => ('临期', AbnkColors.ochre700),
-      IdentityStatus.expired => ('已过期', AbnkColors.brick700),
+    // 证照状态 label 决策上移（Part03 任务 3.4）：接收 l10n 的顶层映射。
+    // The identity-status label decision moved up (Part03 task 3.4): a
+    // top-level mapping that takes the l10n.
+    final label = identityStatusLabel(AppLocalizations.of(context)!, status);
+    final fg = switch (status) {
+      IdentityStatus.valid => AbnkColors.sage700,
+      IdentityStatus.expiringSoon => AbnkColors.ochre700,
+      IdentityStatus.expired => AbnkColors.brick700,
     };
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),

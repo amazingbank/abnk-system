@@ -28,8 +28,13 @@ class GeneratedClient {
   /// 因此注入值携带的尾缀路径必须剥除，否则拼出重复前缀。
   static String _normalizeBaseUrl(String base) {
     final uri = Uri.parse(base);
+    // ABNK_API_BASE 是开发者侧配置错误，非用户可见文案（Part03 任务 3.4
+    // 顺带英文化，不进词条体系）。
+    // ABNK_API_BASE is a developer-side configuration error, not a
+    // user-facing text (anglicized in Part03 task 3.4, outside the l10n
+    // catalog).
     if (!uri.hasScheme || uri.host.isEmpty) {
-      throw ArgumentError('ABNK_API_BASE 必须是绝对 URL，实际值：$base');
+      throw ArgumentError('ABNK_API_BASE must be an absolute URL, got: $base');
     }
     // 用 origin 构造（勿用 replace(path: '')——空 query/fragment 会序列化
     // 出 `?#` 尾巴，与请求 path 拼接后路由前缀会被吞进 fragment）。
@@ -62,12 +67,21 @@ AppException mapApiError(Object error) {
     return const NetworkException();
   }
   final serverMessage = _serverMessage(response.data);
+  // 状态码兜底码化（Part03 任务 3.4）：serverMessage 透传优先（数据边界，
+  // D3——网关 body message 原样展示不翻译），无 message 时按码查词条。
+  // Status-code fallbacks are coded (Part03 task 3.4): the serverMessage
+  // passthrough wins first (data boundary, D3 — the gateway body message is
+  // shown verbatim, never translated); without one the code resolves the
+  // localized entry.
   return switch (response.statusCode) {
-    401 => AuthException(serverMessage ?? '登录已失效，请重新登录'),
-    403 => ForbiddenException(serverMessage ?? '无权限执行该操作'),
-    400 || 422 => ValidationException(serverMessage ?? '请求参数不正确'),
+    401 => AuthException(
+        code: ErrCodes.sessionExpired, serverMessage: serverMessage),
+    403 => ForbiddenException(serverMessage: serverMessage),
+    400 || 422 => ValidationException(
+        code: ErrCodes.validationBadRequest, serverMessage: serverMessage),
     _ => ServerException(
-        serverMessage ?? '服务异常（${response.statusCode}），请稍后重试'),
+        serverMessage: serverMessage,
+        params: {'status': '${response.statusCode}'}),
   };
 }
 

@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 
 import '../../app_scope.dart';
 import '../../core/widgets/abnk_app_bar.dart';
+import '../../l10n/app_localizations.dart';
 import '../../core/errors/app_exception.dart';
 import '../../core/format/money.dart';
 import '../../core/theme/app_theme.dart';
@@ -78,19 +79,24 @@ class _TransferPageState extends State<TransferPage> {
       ));
       if (!mounted) return;
       // 操作已完成：先停按钮 spinner，再弹结果对话框（对话框关闭时退页）。
+      // Done: stop the button spinner first, then show the result dialog
+      // (closing it pops the page).
+      final l10n = AppLocalizations.of(context)!;
       setState(() => _submitting = false);
       unawaited(showDialog<void>(
         context: context,
         builder: (dialogContext) => AlertDialog(
-          title: const Text('转账成功'),
+          title: Text(l10n.transferSuccessTitle),
           content: Text(
-            '流水号 ${result.transactionId}\n'
-            '转出账户新余额：${AbnkMoney.format(result.newSourceBalance)}',
+            l10n.transferSuccessBody(
+              '${result.transactionId}',
+              AbnkMoney.format(result.newSourceBalance),
+            ),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(),
-              child: const Text('知道了'),
+              child: Text(l10n.transferGotIt),
             ),
           ],
         ),
@@ -99,8 +105,15 @@ class _TransferPageState extends State<TransferPage> {
       }));
     } catch (e) {
       if (!mounted) return;
+      // 异常提示经 presenter 按当前语言查词条（Part03 任务 3.4 码化链路）。
+      // Error text resolves via the presenter in the current language
+      // (Part03 task 3.4 coded chain).
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppExceptionPresenter.present(e))),
+        SnackBar(
+          content: Text(
+            AppExceptionPresenter.present(e, AppLocalizations.of(context)!),
+          ),
+        ),
       );
       setState(() => _submitting = false);
     }
@@ -109,27 +122,30 @@ class _TransferPageState extends State<TransferPage> {
   @override
   Widget build(BuildContext context) {
     final accounts = _accounts;
+    // 页面文案词条化（Part03 任务 3.4）。
+    // Page copy resolves via l10n (Part03 task 3.4).
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: AbnkColors.ivory,
-      appBar: abnkAppBar('本人转账'),
+      appBar: abnkAppBar(l10n.transferTitle),
       body: accounts == null
           ? const Center(child: CircularProgressIndicator())
           : accounts.length < 2
-              ? const _NoAccountsCard()
+              ? _NoAccountsCard(message: l10n.transferNeedTwoAccounts)
               : Form(
                   key: _formKey,
                   child: ListView(
                     padding: const EdgeInsets.all(16),
                     children: [
                       _AccountDropdown(
-                        label: '转出账户',
+                        label: l10n.transferFromAccount,
                         value: _fromId,
                         accounts: accounts,
                         onChanged: (v) => setState(() => _fromId = v),
                       ),
                       const SizedBox(height: 16),
                       _AccountDropdown(
-                        label: '转入账户',
+                        label: l10n.transferToAccount,
                         value: _toId,
                         accounts: accounts,
                         onChanged: (v) => setState(() => _toId = v),
@@ -144,15 +160,19 @@ class _TransferPageState extends State<TransferPage> {
                           FilteringTextInputFormatter.allow(
                               RegExp(r'^\d+\.?\d{0,2}')),
                         ],
-                        decoration: const InputDecoration(
-                          labelText: '转账金额（CNY）',
+                        decoration: InputDecoration(
+                          labelText: l10n.transferAmountLabel,
                           prefixText: '¥ ',
                         ),
                         validator: (v) {
                           final amount = double.tryParse(v?.trim() ?? '');
-                          if (amount == null || amount <= 0) return '请输入有效金额';
+                          if (amount == null || amount <= 0) {
+                            return l10n.formAmountInvalid;
+                          }
                           final from = accounts.firstWhere((a) => a.id == _fromId);
-                          if (amount > from.availableBalance) return '超出可用余额';
+                          if (amount > from.availableBalance) {
+                            return l10n.formExceedsBalance;
+                          }
                           return null;
                         },
                       ),
@@ -161,8 +181,8 @@ class _TransferPageState extends State<TransferPage> {
                         key: const Key('transfer-note'),
                         controller: _noteController,
                         maxLength: 40,
-                        decoration: const InputDecoration(
-                          labelText: '附言（选填）',
+                        decoration: InputDecoration(
+                          labelText: l10n.transferNoteLabel,
                         ),
                       ),
                       const SizedBox(height: 24),
@@ -178,7 +198,7 @@ class _TransferPageState extends State<TransferPage> {
                                 height: 20,
                                 child: CircularProgressIndicator(strokeWidth: 2),
                               )
-                            : const Text('提交转账'),
+                            : Text(l10n.transferSubmit),
                       ),
                     ],
                   ),
@@ -187,8 +207,14 @@ class _TransferPageState extends State<TransferPage> {
   }
 }
 
+/// 账户不足空态卡片（Part03 任务 3.4：文案经参数注入，由调用方传词条）。
+///
+/// Empty-state card when there are not enough accounts (Part03 task 3.4:
+/// the copy is injected as a parameter carrying the localized entry).
 class _NoAccountsCard extends StatelessWidget {
-  const _NoAccountsCard();
+  const _NoAccountsCard({required this.message});
+
+  final String message;
 
   @override
   Widget build(BuildContext context) {
@@ -201,7 +227,7 @@ class _NoAccountsCard extends StatelessWidget {
             const Icon(Icons.info_outline, color: AbnkColors.taupe400, size: 40),
             const SizedBox(height: 12),
             Text(
-              '本人活期账户不足两个，暂无法转账',
+              message,
               style: Theme.of(context).textTheme.bodyMedium!.copyWith(
                     color: AbnkColors.espresso,
                   ),
@@ -236,11 +262,14 @@ class _AccountDropdown extends StatelessWidget {
         for (final account in accounts)
           DropdownMenuItem(
             value: account.id,
-            child: Text(
-              '${account.productName}（${account.accountNo}）'
-              ' · ${AbnkMoney.format(account.availableBalance)}',
-              overflow: TextOverflow.ellipsis,
-            ),
+            child: Builder(builder: (context) {
+              final l10n = AppLocalizations.of(context)!;
+              return Text(
+                '${l10n.accountTitle(account.productName, account.accountNo)}'
+                ' · ${AbnkMoney.format(account.availableBalance)}',
+                overflow: TextOverflow.ellipsis,
+              );
+            }),
           ),
       ],
       onChanged: onChanged,

@@ -7,6 +7,7 @@ import '../../core/theme/app_theme.dart';
 import '../../data/models/account.dart';
 import '../../data/models/transaction.dart';
 import '../../core/widgets/abnk_app_bar.dart';
+import '../../l10n/app_localizations.dart';
 
 /// 交易明细页——账户选择 + 流水列表（含 runningBalance 列）。
 ///
@@ -55,13 +56,16 @@ class _TransactionsPageState extends State<TransactionsPage> {
   Widget build(BuildContext context) {
     final accounts = _savingsAccounts;
     final selectedId = _selectedAccountId;
+    // 页面文案词条化（Part03 任务 3.4）。
+    // Page copy resolves via l10n (Part03 task 3.4).
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: AbnkColors.ivory,
-      appBar: abnkAppBar('交易明细'),
+      appBar: abnkAppBar(l10n.txTitle),
       body: (accounts == null)
           ? const Center(child: CircularProgressIndicator())
           : accounts.isEmpty
-              ? const Center(child: Text('暂无活期账户'))
+              ? Center(child: Text(l10n.txNoAccounts))
               : Column(
                   children: [
                     Padding(
@@ -71,13 +75,14 @@ class _TransactionsPageState extends State<TransactionsPage> {
                         isExpanded: true,
                         initialValue: selectedId,
                         decoration:
-                            const InputDecoration(labelText: '选择账户'),
+                            InputDecoration(labelText: l10n.txSelectAccount),
                         items: [
                           for (final account in accounts)
                             DropdownMenuItem(
                               value: account.id,
                               child: Text(
-                                '${account.productName}（${account.accountNo}）',
+                                l10n.accountTitle(
+                                    account.productName, account.accountNo),
                               ),
                             ),
                         ],
@@ -130,6 +135,7 @@ class _TransactionListState extends State<_TransactionList> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return FutureBuilder<List<TransactionItem>>(
       future: _future,
       builder: (context, snapshot) {
@@ -140,7 +146,8 @@ class _TransactionListState extends State<_TransactionList> {
           return Center(
             child: Padding(
               padding: const EdgeInsets.all(24),
-              child: Text(AppExceptionPresenter.present(snapshot.error!)),
+              child: Text(AppExceptionPresenter.present(
+                  snapshot.error!, AppLocalizations.of(context)!)),
             ),
           );
         }
@@ -148,7 +155,7 @@ class _TransactionListState extends State<_TransactionList> {
         if (items.isEmpty) {
           return Center(
             child: Text(
-              '暂无交易',
+              l10n.txEmpty,
               style: Theme.of(context).textTheme.bodyMedium!.copyWith(
                     color: AbnkColors.taupe500,
                   ),
@@ -185,6 +192,11 @@ class _TransactionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // 交易类型 label 决策上移（Part03 任务 3.4）：接收 l10n 的顶层映射。
+    // The transaction-type label decision moved up (Part03 task 3.4): a
+    // top-level mapping that takes the l10n.
+    final l10n = AppLocalizations.of(context)!;
+    final typeLabel = transactionTypeLabel(l10n, item.transactionType);
     final amountColor = item.isDebit ? AbnkColors.brick500 : AbnkColors.sage700;
     return ListTile(
       dense: true,
@@ -198,13 +210,13 @@ class _TransactionTile extends StatelessWidget {
         ),
       ),
       title: Text(
-        item.note ?? item.typeLabel,
+        item.note ?? typeLabel,
         style: Theme.of(context).textTheme.titleSmall!.copyWith(
               color: AbnkColors.char,
             ),
       ),
       subtitle: Text(
-        '${item.date} · ${item.typeLabel}',
+        '${item.date} · $typeLabel',
         style: Theme.of(context).textTheme.bodySmall!.copyWith(
               color: AbnkColors.taupe500,
             ),
@@ -223,7 +235,7 @@ class _TransactionTile extends StatelessWidget {
             ),
           ),
           Text(
-            '余额 ${AbnkMoney.format(item.runningBalance)}',
+            l10n.txBalanceLabel(AbnkMoney.format(item.runningBalance)),
             style: AbnkFonts.mono(
               base: const TextStyle(
                 fontSize: 11,

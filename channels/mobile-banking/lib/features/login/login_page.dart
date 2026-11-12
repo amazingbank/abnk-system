@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../app_scope.dart';
 import '../../core/errors/app_exception.dart';
 import '../../core/theme/app_theme.dart';
+import '../../l10n/app_localizations.dart';
 
 /// 登录页——简化登录（用户名 + 密码）；指纹 / 安全键盘为纯视觉占位
 /// （范围外，POC 演示增量承接）。
@@ -38,8 +39,15 @@ class _LoginPageState extends State<LoginPage> {
       );
     } catch (e) {
       if (!mounted) return;
+      // 异常提示经 presenter 按当前语言查词条（Part03 任务 3.4 码化链路）。
+      // Error text resolves via the presenter in the current language
+      // (Part03 task 3.4 coded chain).
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppExceptionPresenter.present(e))),
+        SnackBar(
+          content: Text(
+            AppExceptionPresenter.present(e, AppLocalizations.of(context)!),
+          ),
+        ),
       );
     } finally {
       if (mounted) setState(() => _submitting = false);
@@ -49,6 +57,9 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    // 页面文案词条化（Part03 任务 3.4）。
+    // Page copy resolves via l10n (Part03 task 3.4).
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: AbnkColors.ivory,
       body: SafeArea(
@@ -94,7 +105,7 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      '手机银行',
+                      l10n.loginTagline,
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.bodyMedium!.copyWith(
                             color: AbnkColors.espresso,
@@ -106,12 +117,13 @@ class _LoginPageState extends State<LoginPage> {
                       controller: _usernameController,
                       autofillHints: const [AutofillHints.username],
                       textInputAction: TextInputAction.next,
-                      decoration: const InputDecoration(
-                        labelText: '用户名',
-                        prefixIcon: Icon(Icons.person_outline),
+                      decoration: InputDecoration(
+                        labelText: l10n.fieldUsername,
+                        prefixIcon: const Icon(Icons.person_outline),
                       ),
-                      validator: (v) =>
-                          (v == null || v.trim().isEmpty) ? '请输入用户名' : null,
+                      validator: (v) => (v == null || v.trim().isEmpty)
+                          ? l10n.fieldUsernameRequired
+                          : null,
                     ),
                     const SizedBox(height: 16),
                     TextFormField(
@@ -122,17 +134,19 @@ class _LoginPageState extends State<LoginPage> {
                       textInputAction: TextInputAction.done,
                       onFieldSubmitted: (_) => _submit(),
                       decoration: InputDecoration(
-                        labelText: '密码',
+                        labelText: l10n.fieldPassword,
                         prefixIcon: const Icon(Icons.lock_outline),
                         suffixIcon: IconButton(
                           icon: Icon(
-                            _obscure ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                            _obscure
+                                ? Icons.visibility_off_outlined
+                                : Icons.visibility_outlined,
                           ),
                           onPressed: () => setState(() => _obscure = !_obscure),
                         ),
                       ),
                       validator: (v) =>
-                          (v == null || v.isEmpty) ? '请输入密码' : null,
+                          (v == null || v.isEmpty) ? l10n.fieldPasswordRequired : null,
                     ),
                     const SizedBox(height: 28),
                     FilledButton(
@@ -147,12 +161,12 @@ class _LoginPageState extends State<LoginPage> {
                               height: 20,
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
-                          : const Text('登 录'),
+                          : Text(l10n.loginSubmit),
                     ),
                     const SizedBox(height: 20),
                     // 指纹按钮——纯视觉占位（不接入 local_auth，POC 增量承接）。
                     Tooltip(
-                      message: '指纹登录（视觉占位）',
+                      message: l10n.loginFingerprintTooltip,
                       child: AbsorbPointer(
                         child: IconButton(
                           iconSize: 36,
@@ -164,7 +178,7 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      '指纹登录与安全键盘为视觉占位（POC 范围外）',
+                      l10n.loginPlaceholderNote,
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.bodySmall!.copyWith(
                             color: AbnkColors.taupe500,

@@ -6,6 +6,15 @@ import 'fixture_bundle.dart';
 
 /// [AccountRepository] 的 mock 实现。
 ///
+/// 校验异常经语义码（ErrCodes.validation.*）抛出（Part03 任务 3.4 码化），
+/// 用户可读文案由 UI 层按当前语言查词条；note 兜底数据串（「本人账户转账」
+/// 「定期开户」）属数据文案，随 Phase 4 fixtures 双语数据集处理。
+/// Mock implementation of [AccountRepository]. Validation failures throw
+/// semantic codes (ErrCodes.validation.*, coded in Part03 task 3.4) and the
+/// UI layer resolves the localized text; the fallback note data strings
+/// ("本人账户转账" / "定期开户") are data copy and move to the Phase 4
+/// bilingual fixtures.
+///
 /// 首次访问从 `fixtures/accounts.json` + `fixtures/transactions.json` 加载
 /// 种子快照并驻留内存；转账 / 定期开户会更新内存态（余额变动 + 新流水），
 /// 演示「交易成功 → 明细出现新流水」的完整闭环（对齐旅程 Step 8 口径）。
@@ -29,7 +38,7 @@ class MockAccountRepository implements AccountRepository {
     final txData = await FixtureBundle.load('transactions.json');
     final raw = accountsData[username];
     if (raw is! Map<String, dynamic>) {
-      throw const ValidationException('未找到账户信息');
+      throw const ValidationException(code: ErrCodes.validationAccountsMissing);
     }
     final savings = (raw['savingsAccounts'] as List)
         .whereType<Map<String, dynamic>>()
@@ -57,7 +66,10 @@ class MockAccountRepository implements AccountRepository {
   Account _account(int id) {
     final account = _accountsById[id];
     if (account == null) {
-      throw ValidationException('账户 $id 不存在');
+      throw ValidationException(
+          code: ErrCodes.validationAccountNotFound,
+          params: {'id': '$id'},
+        );
     }
     return account;
   }
@@ -134,7 +146,10 @@ class MockAccountRepository implements AccountRepository {
     await _ledgerAny();
     final list = _transactionsByAccount[accountId];
     if (list == null) {
-      throw ValidationException('账户 $accountId 不存在');
+      throw ValidationException(
+          code: ErrCodes.validationAccountNotFound,
+          params: {'id': '$accountId'},
+        );
     }
     return List.unmodifiable(list);
   }
@@ -155,13 +170,14 @@ class MockAccountRepository implements AccountRepository {
     final from = _account(request.fromAccountId);
     final to = _account(request.toAccountId);
     if (request.fromAccountId == request.toAccountId) {
-      throw const ValidationException('转出与转入账户不能相同');
+      throw const ValidationException(code: ErrCodes.validationSameAccounts);
     }
     if (request.amount <= 0) {
-      throw const ValidationException('转账金额必须大于 0');
+      throw const ValidationException(
+          code: ErrCodes.validationTransferAmountPositive);
     }
     if (request.amount > from.availableBalance) {
-      throw const ValidationException('余额不足');
+      throw const ValidationException(code: ErrCodes.validationInsufficientBalance);
     }
     _appendTransaction(
       from.id,
@@ -193,17 +209,21 @@ class MockAccountRepository implements AccountRepository {
         .where((p) => p['id'] == request.productId)
         .firstOrNull;
     if (product == null) {
-      throw ValidationException('定期产品 ${request.productId} 不存在');
+      throw ValidationException(
+          code: ErrCodes.validationProductNotFound,
+          params: {'id': '${request.productId}'},
+        );
     }
     final source = _account(request.sourceAccountId);
     if (request.amount <= 0) {
-      throw const ValidationException('存入金额必须大于 0');
+      throw const ValidationException(
+          code: ErrCodes.validationDepositAmountPositive);
     }
     if (request.amount < (product['minDepositAmount'] as num).toDouble()) {
-      throw ValidationException('低于起存金额');
+      throw const ValidationException(code: ErrCodes.validationBelowMinDeposit);
     }
     if (request.amount > source.availableBalance) {
-      throw const ValidationException('余额不足');
+      throw const ValidationException(code: ErrCodes.validationInsufficientBalance);
     }
 
     final depositPeriod = product['depositPeriod'] as int;

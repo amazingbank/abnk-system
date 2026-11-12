@@ -1,5 +1,15 @@
 /// 贷款产品 / 定期产品 / 贷款申请模型。
+///
+/// 还款方式展示文案经顶层函数 [repaymentMethodLabel] 提供（Part03 任务
+/// 3.4：label 决策上移 UI 层并接收 l10n，models 保持零 BuildContext 依赖）。
+///
+/// Loan / term-deposit product and application models. The repayment-method
+/// display label is provided by the top-level [repaymentMethodLabel]
+/// (Part03 task 3.4: the label decision moved up to the UI layer and takes
+/// the l10n, while models stay free of any BuildContext dependency).
 library;
+
+import '../../l10n/app_localizations.dart';
 
 /// 消费贷产品（对客收敛字段——隐藏内部配置）。
 class LoanProduct {
@@ -36,10 +46,16 @@ class LoanProduct {
   final double minPrincipalAmount;
   final double maxPrincipalAmount;
   final String repaymentMethod;
-
-  String get repaymentMethodLabel =>
-      repaymentMethod == 'EQUAL_INSTALLMENTS' ? '等额本息' : repaymentMethod;
 }
+
+/// 还款方式 → 展示文案（Part03 任务 3.4：接收 l10n，未知方式原样透传）。
+///
+/// Repayment method → display label (Part03 task 3.4: takes the l10n;
+/// unknown methods pass through verbatim).
+String repaymentMethodLabel(AppLocalizations l10n, String repaymentMethod) =>
+    repaymentMethod == 'EQUAL_INSTALLMENTS'
+        ? l10n.repaymentEqualInstallments
+        : repaymentMethod;
 
 /// 定期存款产品。
 class FixedDepositProduct {

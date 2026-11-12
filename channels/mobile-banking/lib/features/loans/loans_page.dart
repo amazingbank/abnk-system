@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../../app_scope.dart';
 import '../../core/widgets/abnk_app_bar.dart';
+import '../../l10n/app_localizations.dart';
 import '../../core/errors/app_exception.dart';
 import '../../core/format/money.dart';
 import '../../core/theme/app_theme.dart';
@@ -49,7 +50,7 @@ class _LoansPageState extends State<LoansPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AbnkColors.ivory,
-      appBar: abnkAppBar('消费贷款'),
+      appBar: abnkAppBar(AppLocalizations.of(context)!.loansTitle),
       body: FutureBuilder<List<LoanProduct>>(
         future: _future,
         builder: (context, snapshot) {
@@ -57,11 +58,15 @@ class _LoansPageState extends State<LoansPage> {
             return const Center(child: CircularProgressIndicator());
           }
           if (snapshot.hasError) {
-            return _ErrorCard(message: AppExceptionPresenter.present(snapshot.error!));
+            return _ErrorCard(
+                message: AppExceptionPresenter.present(
+                    snapshot.error!, AppLocalizations.of(context)!));
           }
           final products = snapshot.data!;
           if (products.isEmpty) {
-            return const Center(child: Text('暂无可选贷款产品'));
+            return Center(
+              child: Text(AppLocalizations.of(context)!.loansNoProducts),
+            );
           }
           return ListView(
             padding: const EdgeInsets.all(16),
@@ -87,6 +92,9 @@ class _ProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // 产品卡片指标文案词条化（Part03 任务 3.4）。
+    // Product card metric labels resolve via l10n (Part03 task 3.4).
+    final l10n = AppLocalizations.of(context)!;
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
       color: AbnkColors.warmwhite,
@@ -117,17 +125,27 @@ class _ProductCard extends StatelessWidget {
             const Divider(height: 24, color: AbnkColors.taupe200),
             Row(
               children: [
-                _Metric(label: '年利率', value: '${product.interestRate}%'),
+                _Metric(
+                    label: l10n.metricInterestRate,
+                    value: '${product.interestRate}%'),
                 const SizedBox(width: 24),
-                _Metric(label: '期限', value: '最长 ${product.termFrequency} 个月'),
+                _Metric(
+                    label: l10n.metricTerm,
+                    value:
+                        l10n.termUpTo('${product.termFrequency}')),
                 const SizedBox(width: 24),
-                _Metric(label: '还款方式', value: product.repaymentMethodLabel),
+                _Metric(
+                  label: l10n.metricRepaymentMethod,
+                  value: repaymentMethodLabel(l10n, product.repaymentMethod),
+                ),
               ],
             ),
             const SizedBox(height: 8),
             Text(
-              '额度 ${AbnkMoney.format(product.minPrincipalAmount)} ~ '
-              '${AbnkMoney.format(product.maxPrincipalAmount)}',
+              l10n.loanAmountRange(
+                AbnkMoney.format(product.minPrincipalAmount),
+                AbnkMoney.format(product.maxPrincipalAmount),
+              ),
               style: AbnkFonts.mono(
                 base: const TextStyle(
                   color: AbnkColors.espresso,
@@ -141,7 +159,7 @@ class _ProductCard extends StatelessWidget {
               child: FilledButton(
                 key: Key('loan-apply-${product.id}'),
                 onPressed: onApply,
-                child: const Text('申请贷款'),
+                child: Text(l10n.loanApply),
               ),
             ),
           ],
@@ -227,12 +245,24 @@ class _LoanApplySheetState extends State<_LoanApplySheet> {
       if (!mounted) return;
       Navigator.of(context).pop();
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('申请已提交（贷款编号 ${result.loanId}），等待审批')),
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(context)!
+                .loanAppliedMessage('${result.loanId}'),
+          ),
+        ),
       );
     } catch (e) {
       if (!mounted) return;
+      // 异常提示经 presenter 按当前语言查词条（Part03 任务 3.4 码化链路）。
+      // Error text resolves via the presenter in the current language
+      // (Part03 task 3.4 coded chain).
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppExceptionPresenter.present(e))),
+        SnackBar(
+          content: Text(
+            AppExceptionPresenter.present(e, AppLocalizations.of(context)!),
+          ),
+        ),
       );
     } finally {
       if (mounted) setState(() => _submitting = false);
@@ -242,6 +272,9 @@ class _LoanApplySheetState extends State<_LoanApplySheet> {
   @override
   Widget build(BuildContext context) {
     final product = widget.product;
+    // 表单文案词条化（Part03 任务 3.4）。
+    // Form copy resolves via l10n (Part03 task 3.4).
+    final l10n = AppLocalizations.of(context)!;
     return Form(
       key: _formKey,
       child: Column(
@@ -249,7 +282,7 @@ class _LoanApplySheetState extends State<_LoanApplySheet> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            '申请 ${product.name}',
+            l10n.loanApplyTitle(product.name),
             style: Theme.of(context).textTheme.titleLarge!.copyWith(
                   color: AbnkColors.char,
                   fontWeight: FontWeight.w700,
@@ -264,15 +297,21 @@ class _LoanApplySheetState extends State<_LoanApplySheet> {
             inputFormatters: [
               FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
             ],
-            decoration: const InputDecoration(
-              labelText: '申请金额（CNY）',
+            decoration: InputDecoration(
+              labelText: l10n.loanAmountLabel,
               prefixText: '¥ ',
             ),
             validator: (v) {
               final amount = double.tryParse(v?.trim() ?? '');
-              if (amount == null || amount <= 0) return '请输入有效金额';
-              if (amount < product.minPrincipalAmount) return '低于最低额度';
-              if (amount > product.maxPrincipalAmount) return '超出最高额度';
+              if (amount == null || amount <= 0) {
+                return l10n.formAmountInvalid;
+              }
+              if (amount < product.minPrincipalAmount) {
+                return l10n.loanBelowMinAmount;
+              }
+              if (amount > product.maxPrincipalAmount) {
+                return l10n.loanAboveMaxAmount;
+              }
               return null;
             },
           ),
@@ -280,11 +319,12 @@ class _LoanApplySheetState extends State<_LoanApplySheet> {
           DropdownButtonFormField<int>(
             key: const Key('loan-term'),
             initialValue: _termMonths,
-            decoration: const InputDecoration(labelText: '期限（月）'),
+            decoration: InputDecoration(labelText: l10n.loanTermLabel),
             items: [
               for (final m in [6, 12, 18, 24, 36])
                 if (m <= product.termFrequency)
-                  DropdownMenuItem(value: m, child: Text('$m 个月')),
+                  DropdownMenuItem(
+                      value: m, child: Text(l10n.monthsOption('$m'))),
             ],
             onChanged: (v) => setState(() => _termMonths = v ?? _termMonths),
           ),
@@ -293,7 +333,7 @@ class _LoanApplySheetState extends State<_LoanApplySheet> {
             key: const Key('loan-purpose'),
             controller: _purposeController,
             maxLength: 40,
-            decoration: const InputDecoration(labelText: '用途（选填）'),
+            decoration: InputDecoration(labelText: l10n.loanPurposeLabel),
           ),
           const SizedBox(height: 16),
           FilledButton(
@@ -308,7 +348,7 @@ class _LoanApplySheetState extends State<_LoanApplySheet> {
                     height: 20,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : const Text('提交申请'),
+                : Text(l10n.loanSubmit),
           ),
         ],
       ),

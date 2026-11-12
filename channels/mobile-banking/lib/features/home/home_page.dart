@@ -6,6 +6,7 @@ import '../../core/format/money.dart';
 import '../../core/theme/app_theme.dart';
 import '../../data/models/account.dart';
 import '../../core/widgets/abnk_app_bar.dart';
+import '../../l10n/app_localizations.dart';
 import '../fixed_deposit/fixed_deposit_page.dart';
 import '../transactions/transactions_page.dart';
 import '../transfer/transfer_page.dart';
@@ -53,23 +54,26 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     final session = AppScope.of(context).state.session!;
+    // 页面文案词条化（Part03 任务 3.4）。
+    // Page copy resolves via l10n (Part03 task 3.4).
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: AbnkColors.ivory,
-      appBar: abnkAppBar('ABNK 手机银行'),
+      appBar: abnkAppBar(l10n.appName),
       body: RefreshIndicator(
         onRefresh: _reload,
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
             Text(
-              '欢迎回来',
+              l10n.homeWelcome,
               style: AbnkFonts.eyebrow(
                 base: const TextStyle(color: AbnkColors.taupe500),
               ),
             ),
             const SizedBox(height: 4),
             Text(
-              '你好，${session.displayName}',
+              l10n.homeGreeting(session.displayName),
               style: Theme.of(context).textTheme.headlineSmall!.copyWith(
                     color: AbnkColors.char,
                     fontWeight: FontWeight.w700,
@@ -83,7 +87,9 @@ class _HomePageState extends State<HomePage> {
                   return const _BalanceCardPlaceholder();
                 }
                 if (snapshot.hasError) {
-                  return _ErrorCard(message: AppExceptionPresenter.present(snapshot.error!));
+                  return _ErrorCard(
+                    message: AppExceptionPresenter.present(
+                        snapshot.error!, AppLocalizations.of(context)!));
                 }
                 final data = snapshot.data!;
                 return Column(
@@ -105,11 +111,11 @@ class _HomePageState extends State<HomePage> {
                     ),
                     const SizedBox(height: 24),
                     if (data.fixedDepositAccounts.isNotEmpty) ...[
-                      _SectionTitle('定期账户'),
+                      _SectionTitle(l10n.homeFixedDepositsSection),
                       ...data.fixedDepositAccounts.map(_FixedDepositTile.new),
                       const SizedBox(height: 16),
                     ],
-                    _SectionTitle('活期账户'),
+                    _SectionTitle(l10n.homeSavingsSection),
                     ...data.savingsAccounts.map((a) => _AccountTile(
                           account: a,
                           onTap: () => _openTransactions(a),
@@ -132,6 +138,7 @@ class _TotalBalanceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -143,7 +150,7 @@ class _TotalBalanceCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            '活期总余额',
+            l10n.homeTotalSavingsBalance,
             style: AbnkFonts.eyebrow(
               base: const TextStyle(color: AbnkColors.espresso),
             ),
@@ -202,33 +209,34 @@ class _QuickActions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Row(
       children: [
         Expanded(
           child: _QuickAction(
             icon: Icons.swap_horiz,
-            label: '转账',
+            label: l10n.homeActionTransfer,
             onTap: onTransfer,
           ),
         ),
         Expanded(
           child: _QuickAction(
             icon: Icons.savings_outlined,
-            label: '定期',
+            label: l10n.homeActionTermDeposit,
             onTap: onFixedDeposit,
           ),
         ),
         Expanded(
           child: _QuickAction(
             icon: Icons.account_balance_outlined,
-            label: '贷款',
+            label: l10n.navLoans,
             onTap: onLoans,
           ),
         ),
         Expanded(
           child: _QuickAction(
             icon: Icons.receipt_long_outlined,
-            label: '明细',
+            label: l10n.navTransactions,
             onTap: onTransactions,
           ),
         ),
@@ -306,6 +314,7 @@ class _AccountTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       color: AbnkColors.warmwhite,
@@ -319,13 +328,14 @@ class _AccountTile extends StatelessWidget {
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         title: Text(
-          '${account.productName}（${account.accountNo}）',
+          l10n.accountTitle(account.productName, account.accountNo),
           style: Theme.of(context).textTheme.titleSmall!.copyWith(
                 color: AbnkColors.espresso,
               ),
         ),
         subtitle: Text(
-          '可用余额 ${AbnkMoney.format(account.availableBalance)}',
+          l10n.homeAvailableBalance(
+              AbnkMoney.format(account.availableBalance)),
           style: Theme.of(context).textTheme.bodySmall!.copyWith(
                 color: AbnkColors.taupe500,
               ),
@@ -352,6 +362,7 @@ class _FixedDepositTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       color: AbnkColors.warmwhite,
@@ -364,14 +375,16 @@ class _FixedDepositTile extends StatelessWidget {
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         title: Text(
-          '${account.productName}（${account.accountNo}）',
+          l10n.accountTitle(account.productName, account.accountNo),
           style: Theme.of(context).textTheme.titleSmall!.copyWith(
                 color: AbnkColors.espresso,
               ),
         ),
         subtitle: Text(
-          '年利率 ${account.interestRate?.toStringAsFixed(1)}% · '
-          '到期日 ${account.maturityDate ?? "-"}',
+          l10n.homeFdRateAndMaturity(
+            account.interestRate?.toStringAsFixed(1) ?? '-',
+            account.maturityDate ?? '-',
+          ),
           style: Theme.of(context).textTheme.bodySmall!.copyWith(
                 color: AbnkColors.taupe500,
               ),
