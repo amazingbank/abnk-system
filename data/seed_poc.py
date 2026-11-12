@@ -29,6 +29,15 @@ P0.2 实测坑位口径（capability-probe.json 归档，载荷必须遵守）�
   ABNK_BASE_URL=http://localhost:8081/fineract-provider/api/v1 python3 seed_poc.py
 输出：gateway_users.json（本目录）+ ../artifacts/phaseP0/seed-poc-evidence.json
 幂等：实体名/externalId/documentKey/mobileNo 带时间戳后缀；失败即停。
+
+种子语言（2026-11-13 发版拍板）：ABNK_SEED_LANG 选文案语言，缺省 en-us
+（线上业务数据英文单语口径——「业务数据不需要双语」）；zh-cn 显式回退保留
+（文案见 SEED_COPY 文案表——业务数据本体语言，D3 边界：后端存什么显示什么）。
+Seed language (release decision, 2026-11-13): ABNK_SEED_LANG picks the copy
+language, defaulting to en-us (line-of-business data in English, single
+language — "no bilingual business data needed"); zh-cn remains available as
+an explicit fallback (copy table below — the data's own language per the D3
+boundary: the backend stores, the frontend displays).
 """
 
 import hashlib
@@ -50,6 +59,45 @@ OD_CLASSIFICATION = "ABNK_POC_OD"                    # POC 逾期分档标识
 PBKDF2_ITERATIONS = 100000
 DATA_DIR = os.path.dirname(os.path.abspath(__file__))
 ART_DIR = os.path.join(DATA_DIR, "..", "artifacts", "phaseP0")
+
+# 种子语言（发版拍板缺省 en-us；文案语言只影响姓名/产品名/证照描述/note——
+# externalId/documentKey/mobileNo 与时间戳幂等后缀恒为 ASCII，不随语言变）。
+# Seed locale (defaults to en-us per the release call; the copy language only
+# affects names/product names/identifier descriptions/notes — externalIds,
+# documentKeys and mobileNo stay ASCII with the timestamp idempotency suffix).
+SEED_LANG = os.environ.get("ABNK_SEED_LANG", "en-us")
+
+# 文案表（zh-cn 为 2026-11-07 首次施加原文；en-us 为语义重写，D2 口径——
+# 姓名用拼音罗马化，产品名按英文银行业惯用表述，非逐字直译）。
+# Copy table (zh-cn preserves the first-seed copy from 2026-11-07; en-us is a
+# semantic rewrite per D2 — names romanized in pinyin, product names in
+# English banking idiom, never word-for-word).
+SEED_COPY = {
+    "zh-cn": {
+        "surname_a": "王", "surname_b": "李", "surname_c": "赵",
+        "product_savings": f"ABNK-POC活期{TS}",
+        "product_loan": f"ABNK-POC消费贷{TS}",
+        "product_fd": f"ABNK-POC定期{TS}",
+        "id_desc_expired": "身份证(已过期)",
+        "id_desc_valid": "身份证(有效)",
+        "note_source_deposit": "POC 源账户初始余额",
+        "note_control_deposit": "POC 对照客户余额",
+    },
+    "en-us": {
+        "surname_a": "Wang", "surname_b": "Li", "surname_c": "Zhao",
+        "product_savings": f"ABNK-POC Current Savings {TS}",
+        "product_loan": f"ABNK-POC Consumer Loan {TS}",
+        "product_fd": f"ABNK-POC Fixed Deposit {TS}",
+        "id_desc_expired": "National ID (expired)",
+        "id_desc_valid": "National ID (valid)",
+        "note_source_deposit": "POC source account initial deposit",
+        "note_control_deposit": "POC control client deposit",
+    },
+}
+
+if SEED_LANG not in SEED_COPY:
+    sys.exit(f"❌ 未知 ABNK_SEED_LANG: {SEED_LANG}（可选 zh-cn / en-us）")
+CP = SEED_COPY[SEED_LANG]
 
 # 施加断言与回读记录（→ seed-poc-evidence.json，无空字段；不含任何明文口令）
 EV = {"asserts": [], "readback": {}}
@@ -131,7 +179,7 @@ def document_type_id(cli, cid):
 def create_savings_product(cli):
     """储蓄产品：accountingRule=1（NONE）——P2.4 转账冲正「无科目纠缠」前提的种子侧声明。"""
     r = cli.post("/savingsproducts", {
-        "name": f"ABNK-POC活期{TS}", "shortName": f"A{TS[-3:]}",
+        "name": CP["product_savings"], "shortName": f"A{TS[-3:]}",
         "description": "POC seed savings (accounting NONE)",
         "currencyCode": "CNY", "digitsAfterDecimal": 2, "inMultiplesOf": 0,
         "nominalAnnualInterestRate": 1.5,
@@ -206,7 +254,7 @@ def create_delinquency_setup(cli):
 def create_loan_product(cli, bucket_id):
     """贷款产品：等额本息 + delinquencyBucketId（分档打标前提）。"""
     r = cli.post("/loanproducts", {
-        "name": f"ABNK-POC消费贷{TS}", "shortName": f"B{TS[-3:]}",
+        "name": CP["product_loan"], "shortName": f"B{TS[-3:]}",
         "description": "POC seed consumer loan (equal installments, delinquency bucket)",
         "currencyCode": "CNY", "digitsAfterDecimal": 2, "inMultiplesOf": 0,
         "principal": 50000, "minPrincipal": 1000, "maxPrincipal": 200000,
@@ -229,7 +277,7 @@ def create_loan_product(cli, bucket_id):
 def create_fixed_deposit_product(cli):
     """定期产品：坑③ depositAmount 必填 + 利率 chart（无 chart 则 maturityAmount 空悬）。"""
     r = cli.post("/fixeddepositproducts", {
-        "name": f"ABNK-POC定期{TS}", "shortName": f"C{TS[-3:]}",
+        "name": CP["product_fd"], "shortName": f"C{TS[-3:]}",
         "description": "POC seed fixed deposit (12-month tier)",
         "currencyCode": "CNY", "digitsAfterDecimal": 2, "inMultiplesOf": 0,
         "interestCompoundingPeriodType": 4, "interestPostingPeriodType": 4,
@@ -405,6 +453,7 @@ def main():
     EV["runAt"] = datetime.now().isoformat(timespec="seconds")
     EV["baseUrl"] = cli.base
     EV["tsSuffix"] = TS
+    EV["seedLang"] = SEED_LANG
     EV["businessDateBeforeAdvance"] = today
 
     # 分档三件套 + 产品族
@@ -414,21 +463,21 @@ def main():
     fd_product = create_fixed_deposit_product(cli)
 
     # ── 客户 A：过期证照 + 源/目标账户（源余额 10000）──
-    a_id = create_client(cli, "王", f"POC-A{TS}", today, f"ABNK-POC-A-{TS}")
+    a_id = create_client(cli, CP["surname_a"], f"POC-A{TS}", today, f"ABNK-POC-A-{TS}")
     doc = document_type_id(cli, a_id)
-    add_identifier(cli, a_id, doc, f"ID-A-{TS}", EXPIRED, "身份证(已过期)")
+    add_identifier(cli, a_id, doc, f"ID-A-{TS}", EXPIRED, CP["id_desc_expired"])
     a_src = create_savings_account(cli, a_id, sv_product, today, f"ABNK-POC-A-SRC-{TS}")
     a_dst = create_savings_account(cli, a_id, sv_product, today, f"ABNK-POC-A-DST-{TS}")
-    deposit(cli, a_src, 10000, today, "POC 源账户初始余额")
+    deposit(cli, a_src, 10000, today, CP["note_source_deposit"])
     bal_a = jget(cli.get(f"/savingsaccounts/{a_src}").data, "summary", "accountBalance")
     check("客户 A（过期证照）+ 源/目标账户施加深成功", a_src is not None and bal_a == 10000,
           f"clientId={a_id} src={a_src} dst={a_dst} 源余额={bal_a}")
 
     # ── 客户 B：有效证照 + 账户 5000 + 定期账户 10000 ──
-    b_id = create_client(cli, "李", f"POC-B{TS}", today, f"ABNK-POC-B-{TS}")
-    add_identifier(cli, b_id, doc, f"ID-B-{TS}", VALID, "身份证(有效)")
+    b_id = create_client(cli, CP["surname_b"], f"POC-B{TS}", today, f"ABNK-POC-B-{TS}")
+    add_identifier(cli, b_id, doc, f"ID-B-{TS}", VALID, CP["id_desc_valid"])
     b_sav = create_savings_account(cli, b_id, sv_product, today, f"ABNK-POC-B-SAV-{TS}")
-    deposit(cli, b_sav, 5000, today, "POC 对照客户余额")
+    deposit(cli, b_sav, 5000, today, CP["note_control_deposit"])
     b_fd = create_fd_account(cli, b_id, fd_product, today)
     fd_acct = cli.get(f"/fixeddepositaccounts/{b_fd}").data
     md = jget(fd_acct, "maturityDetail", default={}) or {}
@@ -438,8 +487,8 @@ def main():
           f"clientId={b_id} sav={b_sav} fd={b_fd} maturity={fd_maturity}")
 
     # ── 客户 C：逾期贷款（发放后不还款 → 日期推进 → 分档作业）──
-    c_id = create_client(cli, "赵", f"POC-C{TS}", today, f"ABNK-POC-C-{TS}")
-    add_identifier(cli, c_id, doc, f"ID-C-{TS}", VALID, "身份证(有效)")
+    c_id = create_client(cli, CP["surname_c"], f"POC-C{TS}", today, f"ABNK-POC-C-{TS}")
+    add_identifier(cli, c_id, doc, f"ID-C-{TS}", VALID, CP["id_desc_valid"])
     loan_id = create_overdue_loan(cli, c_id, ln_product, today)
 
     target, first_due = advance_business_date(cli, loan_id)
