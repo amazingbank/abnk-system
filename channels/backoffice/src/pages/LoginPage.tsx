@@ -2,7 +2,7 @@ import { Button, Card, Form, Input, App as AntApp, Typography } from 'antd';
 import { LockOutlined, UserOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/auth/AuthContext';
-import { interpolate, useErrors, useLogin } from '@/i18n';
+import { apiErrorMessage, interpolate, useLogin } from '@/i18n';
 
 interface LoginFormValues {
   username: string;
@@ -14,7 +14,6 @@ export default function LoginPage() {
   const { login } = useAuth();
   const { message } = AntApp.useApp();
   const t = useLogin();
-  const errors = useErrors();
 
   const onFinish = async (values: LoginFormValues) => {
     try {
@@ -22,7 +21,10 @@ export default function LoginPage() {
       message.success(interpolate(t.welcome, { name: session.displayName }));
       navigate('/clients', { replace: true });
     } catch (err) {
-      message.error(err instanceof Error ? err.message : errors.loginFailed);
+      // 错误码翻译收口：ApiError 按语言查词条，普通 Error 透传 message
+      // Error-code translation funnel: ApiError resolves per locale; plain
+      // Error messages pass through.
+      message.error(apiErrorMessage(err, 'loginFailed'));
     }
   };
 

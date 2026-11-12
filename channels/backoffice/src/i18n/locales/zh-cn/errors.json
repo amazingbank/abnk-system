@@ -1,5 +1,14 @@
 {
   "loginFailed": "登录失败",
   "clientDetailLoadFailed": "加载客户详情失败",
-  "identifierUpdateFailed": "证照更新失败"
+  "identifierUpdateFailed": "证照更新失败",
+  "auth.invalidCredentials": "用户名或口令错误",
+  "client.notFound": "客户不存在：clientId={clientId}",
+  "client.identifierNotFound": "证照不存在：clientId={clientId} identifierId={identifierId}",
+  "network.offline": "网络连接失败，请稍后重试",
+  "auth.sessionExpired": "登录已失效，请重新登录",
+  "auth.forbidden": "无权限执行该操作",
+  "resource.notFound": "请求的资源不存在",
+  "server.error": "服务异常（{status}），请稍后重试",
+  "unknown": "未知错误"
 }

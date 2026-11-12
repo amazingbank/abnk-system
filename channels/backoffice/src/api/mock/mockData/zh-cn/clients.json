@@ -1,5 +1,5 @@
 {
-  "_source": "P0.3 seed-poc-evidence.json (2026-11-07T10:43:47) — BO 运营视角快照（姓名/外部编号/证件号取种子实参：王/李/赵 POC-*，TS=1107104347；账户/贷款数值对齐 seed readback）；derivedStatus 由 expiryDate 对业务日期 2027-03-29 推导（客户 A=EXPIRED 2020-01-01 / B、C=VALID）",
+  "_source": "P0.3 seed-poc-evidence.json (2026-11-07T10:43:47) — BO 运营视角快照（姓名/外部编号/证件号取种子实参：王/李/赵 POC-*，TS=1107104347；账户/贷款数值对齐 seed readback）；derivedStatus 由 expiryDate 对业务日期 2027-03-29 推导（客户 A=EXPIRED 2020-01-01 / B、C=VALID）| EN: the English twin of this data set lives at mockData/en-us/clients.json (semantic rewrite per D2/D3, structure identical)",
   "businessDate": "2027-03-29",
   "clients": [
     {

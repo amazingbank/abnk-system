@@ -1,5 +1,14 @@
 {
   "loginFailed": "Sign-in failed",
   "clientDetailLoadFailed": "Failed to load client details",
-  "identifierUpdateFailed": "Failed to update the identifier"
+  "identifierUpdateFailed": "Failed to update the identifier",
+  "auth.invalidCredentials": "Invalid username or password",
+  "client.notFound": "Client not found (ID: {clientId})",
+  "client.identifierNotFound": "Identifier not found (client {clientId}, identifier {identifierId})",
+  "network.offline": "Network unreachable — please try again shortly",
+  "auth.sessionExpired": "Your session has expired — please sign in again",
+  "auth.forbidden": "You are not authorized to perform this action",
+  "resource.notFound": "The requested resource does not exist",
+  "server.error": "Server error ({status}) — please try again shortly",
+  "unknown": "Something went wrong"
 }

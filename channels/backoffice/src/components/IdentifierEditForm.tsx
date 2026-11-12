@@ -3,7 +3,7 @@ import { App as AntApp, Button, DatePicker, Form, Input, Space } from 'antd';
 import dayjs from 'dayjs';
 import { clientRepository } from '@/api';
 import type { ClientDetail, IdentifierUpdatePayload } from '@/api';
-import { interpolate, useClients, useErrors } from '@/i18n';
+import { apiErrorMessage, interpolate, useClients } from '@/i18n';
 
 interface IdentifierFormValues {
   expiryDate: dayjs.Dayjs;
@@ -25,7 +25,6 @@ export default function IdentifierEditForm({
 }) {
   const { message } = AntApp.useApp();
   const t = useClients();
-  const errors = useErrors();
   const [submitting, setSubmitting] = useState(false);
   const [form] = Form.useForm<IdentifierFormValues>();
 
@@ -56,7 +55,10 @@ export default function IdentifierEditForm({
       message.success(interpolate(t.identifier.updateSuccess, { expiryDate: updated.expiryDate }));
       await onSaved();
     } catch (err) {
-      message.error(err instanceof Error ? err.message : errors.identifierUpdateFailed);
+      // 错误码翻译收口：ApiError 按语言查词条，普通 Error 透传 message
+      // Error-code translation funnel: ApiError resolves per locale; plain
+      // Error messages pass through.
+      message.error(apiErrorMessage(err, 'identifierUpdateFailed'));
     } finally {
       setSubmitting(false);
     }

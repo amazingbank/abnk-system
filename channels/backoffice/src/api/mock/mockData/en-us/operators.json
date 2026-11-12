@@ -1,0 +1,6 @@
+{
+  "_source": "Mock demo credentials (prototype-only plaintext, same convention as the P1.3 fixtures demoUsers) — production uses PBKDF2 (data/gateway_users.json admin user, D2 simplified login); the BO operator role maps to the P2.5 gateway internal channel /bo/api/* auth. displayName is language-neutral English (user decision 2026-11-12: a single value that does not switch with the data set; bilingual data sets are Phase 2 task 2.2 / decision D3)",
+  "operators": [
+    { "username": "admin", "password": "password", "displayName": "ABNK Operations Admin", "role": "OPERATOR" }
+  ]
+}

@@ -18,7 +18,7 @@ import FixedDepositTable from '@/components/FixedDepositTable';
 import IdentifierCard from '@/components/IdentifierCard';
 import LoanCard from '@/components/LoanCard';
 import SavingsTable from '@/components/SavingsTable';
-import { interpolate, useClients, useErrors, useLoanOps } from '@/i18n';
+import { apiErrorMessage, interpolate, useClients, useLoanOps } from '@/i18n';
 
 export default function ClientDetailPage() {
   const { clientId } = useParams<{ clientId: string }>();
@@ -26,7 +26,6 @@ export default function ClientDetailPage() {
   const { message } = AntApp.useApp();
   const t = useClients();
   const loanOps = useLoanOps();
-  const errors = useErrors();
   const [detail, setDetail] = useState<ClientDetail | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -36,12 +35,15 @@ export default function ClientDetailPage() {
       try {
         setDetail(await clientRepository.getClientDetail(id));
       } catch (err) {
-        message.error(err instanceof Error ? err.message : errors.clientDetailLoadFailed);
+        // 错误码翻译收口：ApiError 按语言查词条，普通 Error 透传 message
+        // Error-code translation funnel: ApiError resolves per locale; plain
+        // Error messages pass through.
+        message.error(apiErrorMessage(err, 'clientDetailLoadFailed'));
       } finally {
         setLoading(false);
       }
     },
-    [message, errors.clientDetailLoadFailed],
+    [message],
   );
 
   useEffect(() => {

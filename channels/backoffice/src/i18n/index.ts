@@ -3,6 +3,7 @@
 // Unified i18n entry point. LocaleProvider is a component and must be imported
 // from '@/i18n/locale-provider' directly to satisfy the
 // react-refresh/only-export-components rule.
+export { apiErrorMessage } from './api-error';
 export { interpolate } from './interpolate';
 export { getCurrentLocale, resolveBrowserLocale } from './locale';
 export { useClients, useCommon, useErrors, useLocale, useLoanOps, useLogin } from './use-locale';

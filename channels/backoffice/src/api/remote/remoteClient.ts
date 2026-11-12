@@ -29,6 +29,7 @@ import type {
   SavingsAccountSummary,
 } from '../repositories/clientRepository';
 import { AxiosError } from 'axios';
+import { ApiError, ERR } from '../errors';
 import { toApiError, type GatewayClient } from './generatedClient';
 import {
   daysBetween,
@@ -146,7 +147,10 @@ export function createRemoteClientRepository(client: GatewayClient): ClientRepos
             .catch(() => null),
         ]);
         if (!rawClientResp?.id) {
-          throw new Error(`客户不存在：clientId=${clientId}`);
+          // 错误码化：文案与插值由 UI 层按语言处理（任务 2.1）。
+          // Error-coded: text and interpolation are handled per locale by the
+          // UI layer (task 2.1).
+          throw new ApiError(ERR.client.notFound, { clientId });
         }
         const businessDate = await getBusinessDate(client);
         const rawAccounts = accounts?.savingsAccounts ?? [];
@@ -213,7 +217,7 @@ export function createRemoteClientRepository(client: GatewayClient): ClientRepos
         };
       } catch (err) {
         if (err instanceof AxiosError && err.response?.status === 404) {
-          throw new Error(`客户不存在：clientId=${clientId}`);
+          throw new ApiError(ERR.client.notFound, { clientId });
         }
         throw toApiError(err);
       }
@@ -245,7 +249,10 @@ export function createRemoteClientRepository(client: GatewayClient): ClientRepos
         const updated =
           identifiers.find((it) => it.id === identifierId) ?? identifiers[0] ?? null;
         if (!updated) {
-          throw new Error(`证照不存在：clientId=${clientId} identifierId=${identifierId}`);
+          // 错误码化：双参数插值由 UI 层翻译处理（任务 2.1）。
+          // Error-coded: dual-param interpolation is translated by the UI
+          // layer (task 2.1).
+          throw new ApiError(ERR.client.identifierNotFound, { clientId, identifierId });
         }
         return mapIdentifier(updated, await getBusinessDate(client));
       } catch (err) {

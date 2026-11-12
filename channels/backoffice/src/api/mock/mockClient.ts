@@ -4,6 +4,7 @@
  * 证照更新改内存副本并推导到期状态（回显由页面重读详情实现）。
  */
 
+import { ApiError, ERR } from '../errors';
 import type {
   ClientRepository,
   ClientListQuery,
@@ -45,7 +46,10 @@ export const mockClientRepository: ClientRepository = {
     await delay(300);
     const found = clientStore.find((c) => c.clientId === clientId);
     if (!found) {
-      throw new Error(`客户不存在：clientId=${clientId}`);
+      // 错误码化：clientId 经 {clientId} 插值，文案由 UI 层翻译（任务 2.1）。
+      // Error-coded: clientId interpolates via {clientId}; text is translated
+      // by the UI layer (task 2.1).
+      throw new ApiError(ERR.client.notFound, { clientId });
     }
     return structuredClone(found);
   },
@@ -59,7 +63,10 @@ export const mockClientRepository: ClientRepository = {
     const client = clientStore.find((c) => c.clientId === clientId);
     const identifier = client?.identifier;
     if (!client || !identifier || identifier.identifierId !== identifierId) {
-      throw new Error(`证照不存在：clientId=${clientId} identifierId=${identifierId}`);
+      // 错误码化：双参数插值，文案由 UI 层翻译（任务 2.1）。
+      // Error-coded: dual-param interpolation; text is translated by the
+      // UI layer (task 2.1).
+      throw new ApiError(ERR.client.identifierNotFound, { clientId, identifierId });
     }
     identifier.expiryDate = payload.expiryDate;
     if (payload.documentKey) {

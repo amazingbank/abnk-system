@@ -12,11 +12,19 @@
  * - `rawGet`：转发面 raw 端点访问（businessdate / clients/{id}/accounts /
  *   fixeddepositaccounts/{id}——不在生成 client 的契约面内，与生成 client
  *   共用同一基址与 token 注入）；
- * - AxiosError → Error 的语义映射（页面层不感知 axios）。
+ * - AxiosError → Error 的语义映射（页面层不感知 axios）；状态码兜底自
+ *   任务 2.1 起改抛 ApiError 错误码，文案由 UI 层按语言翻译。
+ * - `rawGet`: access to raw forwarding-plane endpoints (businessdate /
+ *   clients/{id}/accounts / fixeddepositaccounts/{id} — outside the generated
+ *   client's contract surface, sharing its base URL and token injection);
+ * - semantic mapping of AxiosError onto Error (the page layer never sees
+ *   axios); since task 2.1 the status-code fallbacks throw ApiError codes,
+ *   with user-facing text translated per locale by the UI layer.
  */
 
 import axios, { AxiosError, type AxiosInstance } from 'axios';
 import { AuthApi, ClientsApi, Configuration, LoansApi } from '../generated';
+import { ApiError, ERR } from '../errors';
 
 const JWT_KEY = 'abnk-bo-jwt';
 
@@ -57,26 +65,40 @@ function extractServerMessage(data: unknown): string | null {
   return null;
 }
 
-/** Axios 异常 → Error 语义分发（remote repository 共用；页面层只看 message） */
+/**
+ * Axios 异常 → Error 语义分发（remote repository 共用）。
+ * 网关 body 的 message 字段是服务端数据，原样透传（D3 数据边界，不翻译）；
+ * 无 message 时按状态码映射为 ApiError 错误码，用户可读文案由 UI 层
+ * 翻译 helper（i18n/api-error.ts）按当前语言生成。
+ * Maps Axios errors onto semantic Errors (shared by remote repositories).
+ * The gateway body's "message" field is server-side data and is passed
+ * through verbatim (D3 data boundary, never translated); without a message,
+ * the status code maps to an ApiError code whose user-readable text is
+ * produced by the UI-layer translation helper (i18n/api-error.ts) in the
+ * current locale.
+ */
 export function toApiError(error: unknown): Error {
   if (error instanceof AxiosError) {
     const status = error.response?.status;
-    const serverMessage = extractServerMessage(error.response?.data);
     if (!error.response) {
-      return new Error('网络连接失败，请稍后重试');
+      return new ApiError(ERR.network.offline);
+    }
+    const serverMessage = extractServerMessage(error.response.data);
+    if (serverMessage !== null) {
+      return new Error(serverMessage);
     }
     if (status === 401) {
-      return new Error(serverMessage ?? '登录已失效，请重新登录');
+      return new ApiError(ERR.auth.sessionExpired);
     }
     if (status === 403) {
-      return new Error(serverMessage ?? '无权限执行该操作');
+      return new ApiError(ERR.auth.forbidden);
     }
     if (status === 404) {
-      return new Error(serverMessage ?? '请求的资源不存在');
+      return new ApiError(ERR.resource.notFound);
     }
-    return new Error(serverMessage ?? `服务异常（${status}），请稍后重试`);
+    return new ApiError(ERR.server.error, { status: status ?? 0 });
   }
-  return error instanceof Error ? error : new Error('未知错误');
+  return error instanceof Error ? error : new ApiError(ERR.unknown);
 }
 
 /** 网关 client 捆绑包（生成 client 三 API 组 + raw 转发访问） */
