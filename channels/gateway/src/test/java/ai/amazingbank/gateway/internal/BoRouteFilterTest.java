@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpHeaders;
 import org.springframework.mock.http.server.reactive.MockServerHttpRequest;
 import org.springframework.mock.web.server.MockServerWebExchange;
 import org.springframework.test.web.reactive.server.WebTestClient;
@@ -143,6 +144,20 @@ class BoRouteFilterTest {
         // 鉴权先行：无 token 由 BearerTokenFilter 401（先于通道隔离 403）
         webTestClient.get().uri("/bo/api/v1/clients")
                 .exchange().expectStatus().isUnauthorized()
+                .expectBody().jsonPath("$.error").isEqualTo("unauthorized");
+    }
+
+    @Test
+    void unauthorizedResponseCarriesCorsHeaders() {
+        // 错误路径 CORS 回显：401 短路在 SCG CorsWebFilter（order LOWEST）之前，
+        // 必须自带回显 ACAO——否则浏览器跨域读取不到错误体，SPA 把会话过期
+        // 误报成网络故障（gateway 0.1.3 实测：无 ACAO 的 401 被 CORS 拦截）
+        webTestClient.get().uri("/bo/api/v1/clients")
+                .header(HttpHeaders.ORIGIN, "https://bo.amazingbank.ai")
+                .exchange().expectStatus().isUnauthorized()
+                .expectHeader().valueEquals(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN,
+                        "https://bo.amazingbank.ai")
+                .expectHeader().valueEquals(HttpHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS, "true")
                 .expectBody().jsonPath("$.error").isEqualTo("unauthorized");
     }
 

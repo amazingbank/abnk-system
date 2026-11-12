@@ -77,6 +77,15 @@ public class BearerTokenFilter implements WebFilter, Ordered {
         ServerHttpResponse response = exchange.getResponse();
         response.setStatusCode(HttpStatus.UNAUTHORIZED);
         response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
+        // CORS 回显（错误路径）：本过滤器(-100)短路响应不经过 SCG CorsWebFilter
+        // （order LOWEST），浏览器跨域读取 401 需 ACAO——否则 SPA 把会话过期
+        // 误报成网络故障。口径同 globalcors：allowedOriginPatterns "*" +
+        // allowCredentials true（回显具体 Origin，非通配 *）。
+        String origin = exchange.getRequest().getHeaders().getFirst(HttpHeaders.ORIGIN);
+        if (origin != null && !origin.isBlank()) {
+            response.getHeaders().set(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, origin);
+            response.getHeaders().set(HttpHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS, "true");
+        }
         byte[] body = ("{\"error\":\"unauthorized\",\"message\":\"" + message + "\"}")
                 .getBytes(StandardCharsets.UTF_8);
         return response.writeWith(Mono.just(response.bufferFactory().wrap(body)));

@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { Alert, Button, Space, Table, Tag, Tooltip, Typography } from 'antd';
 import { loanRepository } from '@/api';
 import type { LoanOpsItem } from '@/api';
+import { ERR } from '@/api/errors';
+import { apiErrorMessage } from '@/i18n/api-error';
 import { formatMoney } from '@/utils/format';
 import { interpolate, useLoanOps } from '@/i18n';
 
@@ -13,11 +15,19 @@ export default function LoanOpsPage() {
   const t = useLoanOps();
   const [loans, setLoans] = useState<LoanOpsItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     loanRepository
       .listLoans()
-      .then(setLoans)
+      .then((items) => {
+        setLoans(items);
+        setError(null);
+      })
+      .catch((err) => {
+        // 失败必须可见：静默吞错会渲染成空表（"No data"），与"无数据"不可区分
+        setError(apiErrorMessage(err, ERR.unknown));
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -27,6 +37,7 @@ export default function LoanOpsPage() {
         {t.title}
       </Typography.Title>
       <Alert type="info" showIcon message={t.readonlyAlert} />
+      {error && <Alert type="error" showIcon message={error} />}
       <Table<LoanOpsItem>
         rowKey="loanId"
         loading={loading}
