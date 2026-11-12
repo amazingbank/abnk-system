@@ -6,6 +6,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 import org.springframework.core.Ordered;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpResponse;
@@ -47,6 +48,12 @@ public class BoRouteFilter implements WebFilter, Ordered {
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
         String path = exchange.getRequest().getPath().value();
         if (!path.startsWith(BO_PREFIX)) {
+            return chain.filter(exchange);
+        }
+        // CORS 预检直通（与 BearerTokenFilter 同口径）：预检不带 Bearer 头，
+        // 通道属性必然为空；此处若不直通会在 SCG CorsWebFilter 应答前以 403
+        // 短路预检，导致浏览器拦截真实请求（线上 bo 客户列表 No data 根因）。
+        if (HttpMethod.OPTIONS.equals(exchange.getRequest().getMethod())) {
             return chain.filter(exchange);
         }
         String channel = exchange.getAttribute(BearerTokenFilter.ATTR_CHANNEL);

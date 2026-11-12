@@ -118,6 +118,15 @@ class BoRouteFilterTest {
         assertEquals(HttpStatus.OK, exchange.getResponse().getStatusCode());
     }
 
+    @Test
+    void corsPreflightPassesThroughWithoutChannel() {
+        // CORS 预检直通：浏览器预检不带 Bearer 头（通道属性为空），
+        // 必须放行交由 SCG CorsWebFilter 应答，否则浏览器拦截真实请求
+        MockServerWebExchange exchange = exchange("OPTIONS", "/bo/api/v1/clients", null);
+        filter.filter(exchange, passThroughChain()).block();
+        assertEquals(HttpStatus.OK, exchange.getResponse().getStatusCode());
+    }
+
     // ── 全链路（真实 JWT + WebFilter 链，短路型断言）──────────
 
     @Test

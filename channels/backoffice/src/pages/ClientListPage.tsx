@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Button, Input, Space, Table, Typography } from 'antd';
+import { Alert, Button, Input, Space, Table, Typography } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { clientRepository } from '@/api';
 import type { ClientListResult, ClientSummary, IdentifierStatus } from '@/api';
+import { ERR } from '@/api/errors';
 import IdentifierStatusTag from '@/components/IdentifierStatusTag';
+import { apiErrorMessage } from '@/i18n/api-error';
 import { formatMoney } from '@/utils/format';
 import { interpolate, useClients } from '@/i18n';
 
@@ -13,11 +15,16 @@ export default function ClientListPage() {
   const t = useClients();
   const [data, setData] = useState<ClientListResult>({ total: 0, items: [] });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async (keyword: string) => {
     setLoading(true);
     try {
       setData(await clientRepository.listClients({ search: keyword || undefined }));
+      setError(null);
+    } catch (err) {
+      // 失败必须可见：静默吞错会渲染成空表（"No data"），与"无数据"不可区分
+      setError(apiErrorMessage(err, ERR.unknown));
     } finally {
       setLoading(false);
     }
@@ -41,6 +48,7 @@ export default function ClientListPage() {
           onSearch={(value) => void load(value)}
         />
       </div>
+      {error && <Alert type="error" showIcon message={error} />}
       <Table<ClientSummary>
         rowKey="clientId"
         loading={loading}
