@@ -26,6 +26,13 @@ spring:
               filters:
                 - StripPrefix=1                                                        # /bo/api/v1/clients -> /api/v1/clients
                 - PrefixPath=${ABNK_FINERACT_PREFIX:/fineract-provider}                 # -> /fineract-provider/api/v1/clients
+                # CORS 终结权归网关（去重保头序）：Fineract 下游（Spring Security CORS
+                # 回显 Origin）与 SCG globalcors CorsWebFilter 各加一套 CORS 头，
+                # Access-Control-Allow-Origin 出现两次——浏览器 Fetch 规范该头仅允许
+                # 单值，重复即整请求判失败（gateway 0.1.2 实测：curl 200 但浏览器
+                # "Failed to fetch"）。实测头序：网关 CorsWebFilter 先加、下游头
+                # unwind 后拷入，故 RETAIN_FIRST 保留网关权威的一套。
+                - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials Access-Control-Expose-Headers, RETAIN_FIRST
           # Fineract 租户头/Basic 双头由网关全局注入（权威来源在网关侧，
           # 客户端传入的同名头先剥后加，避免重复/伪造）
           default-filters:
