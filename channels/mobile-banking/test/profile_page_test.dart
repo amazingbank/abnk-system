@@ -25,6 +25,31 @@ void main() {
     expect(find.text('已过期'), findsOneWidget);
   });
 
+  testWidgets('我的页：语言区块标题与两选项展示（Part03 P3.3）',
+      (tester) async {
+    await loginAndSettle(tester);
+    await switchTab(tester, 3);
+
+    // 语言区块位于视口下方，先滚动可见（对齐退出登录测试的滚动口径）。
+    // The language section sits below the fold: scroll it into view first
+    // (same scrolling approach as the logout test).
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('profile-language-zh')),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+
+    // 语言切换区块：标题 + 中文/English 两选项（zh 态默认选中中文）。
+    // Language section: the title plus both options, with Chinese selected
+    // by default in the zh state.
+    expect(find.text('语言'), findsOneWidget);
+    expect(find.text('中文'), findsOneWidget);
+    expect(find.text('English'), findsOneWidget);
+    expect(find.byKey(const Key('profile-language-zh')), findsOneWidget);
+    expect(find.byKey(const Key('profile-language-en')), findsOneWidget);
+  });
+
   testWidgets('我的页：退出登录回到登录页', (tester) async {
     await loginAndSettle(tester);
     await switchTab(tester, 3);

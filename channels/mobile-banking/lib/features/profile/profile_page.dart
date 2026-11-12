@@ -5,6 +5,7 @@ import '../../core/errors/app_exception.dart';
 import '../../core/theme/app_theme.dart';
 import '../../data/models/identity.dart';
 import '../../core/widgets/abnk_app_bar.dart';
+import '../../l10n/app_localizations.dart';
 
 /// 我的页——客户资料（脱敏）+ 证照有效期（只读）+ 登出。
 ///
@@ -37,7 +38,9 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-    final session = AppScope.of(context).state.session!;
+    final state = AppScope.of(context).state;
+    final session = state.session!;
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: AbnkColors.ivory,
       appBar: abnkAppBar('我的'),
@@ -81,6 +84,20 @@ class _ProfilePageState extends State<ProfilePage> {
                 ('有效期至', identity.expiryDate),
               ], trailing: _IdentityStatusChip(status: identity.status));
             },
+          ),
+          const SizedBox(height: 16),
+          // 语言切换区块（Part03 P3.3）：形态对齐既有 _SectionTitle + 列表
+          // 卡片风格；选中态反映 state.locale，点击经 AppState.setLocale 整树
+          // 切换并持久化。页面其余中文文案属任务 3.4 范围，本任务不动。
+          // Language switcher section (Part03 P3.3): mirrors the existing
+          // _SectionTitle + list-card style; the selection reflects
+          // state.locale, and a tap switches the whole tree via
+          // AppState.setLocale with persistence. The remaining Chinese texts
+          // on this page belong to task 3.4 and are untouched here.
+          _SectionTitle(l10n.profileLanguageTitle),
+          _LanguageCard(
+            current: state.locale.languageCode,
+            onSelect: (locale) => state.setLocale(locale),
           ),
           const SizedBox(height: 24),
           OutlinedButton.icon(
@@ -182,6 +199,93 @@ class _SectionTitle extends StatelessWidget {
           base: const TextStyle(color: AbnkColors.taupe600),
         ),
       ),
+    );
+  }
+}
+
+/// 语言切换卡片（Part03 P3.3）——中文 / English 两选项，选中项带勾选尾标。
+///
+/// Language switcher card (Part03 P3.3): two options (中文 / English),
+/// the selected one carries a trailing check mark.
+class _LanguageCard extends StatelessWidget {
+  const _LanguageCard({required this.current, required this.onSelect});
+
+  /// 当前语言（zh/en 小写简码，D8）。
+  /// The current language (zh/en lowercase codes, D8).
+  final String current;
+
+  /// 选中回调——消费方传 AppState.setLocale（整树重建 + 持久化）。
+  /// Selection callback — the caller wires it to AppState.setLocale
+  /// (full-tree rebuild + persistence).
+  final ValueChanged<Locale> onSelect;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return Card(
+      color: AbnkColors.warmwhite,
+      elevation: 0,
+      margin: EdgeInsets.zero,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: const BorderSide(color: AbnkColors.taupe200),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: Column(
+          children: [
+            _LanguageOption(
+              key: const Key('profile-language-zh'),
+              label: l10n.profileLanguageZh,
+              selected: current == 'zh',
+              value: const Locale('zh'),
+              onSelect: onSelect,
+            ),
+            const Divider(height: 1, color: AbnkColors.taupe200),
+            _LanguageOption(
+              key: const Key('profile-language-en'),
+              label: l10n.profileLanguageEn,
+              selected: current == 'en',
+              value: const Locale('en'),
+              onSelect: onSelect,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _LanguageOption extends StatelessWidget {
+  const _LanguageOption({
+    super.key,
+    required this.label,
+    required this.selected,
+    required this.value,
+    required this.onSelect,
+  });
+
+  final String label;
+  final bool selected;
+  final Locale value;
+  final ValueChanged<Locale> onSelect;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      dense: true,
+      contentPadding: EdgeInsets.zero,
+      onTap: () => onSelect(value),
+      title: Text(
+        label,
+        style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+              color: AbnkColors.char,
+              fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+            ),
+      ),
+      trailing: selected
+          ? const Icon(Icons.check, color: AbnkColors.sage700, size: 20)
+          : null,
     );
   }
 }
