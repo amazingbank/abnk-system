@@ -34,6 +34,20 @@ dependencies:
   # 包名 openapi，路径依赖同仓 openapi-generated/，随契约冻结版锁定。
   # dio 为 remote 适配层直接消费（DioException 捕获与错误映射），显式声明。
   dio: ^5.7.0
+
+  # 官方 l10n 框架（Part03 P3）——提供 MaterialLocalizations 等 delegates，
+  # 使 Material 内建组件文案随 locale 切换；配合 generate: true 驱动 gen-l10n。
+  # Official l10n framework (Part03 P3): provides delegates such as
+  # MaterialLocalizations so built-in Material texts follow the locale,
+  # and pairs with generate: true to drive gen-l10n codegen.
+  flutter_localizations:
+    sdk: flutter
+
+  # intl 用 any 让 pub 按 SDK 配套解析版本（手动钉版会与 SDK 内置版本冲突），
+  # gen-l10n 的 placeholder 插值依赖此包。
+  # intl stays `any` so pub resolves the SDK-matched version (pinning conflicts
+  # with the bundled one); gen-l10n placeholder interpolation depends on it.
+  intl: any
   openapi:
     path: openapi-generated
 
@@ -61,6 +75,12 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
+
+  # 开启 l10n 代码生成（Part03 P3）——构建时自动运行 gen-l10n，
+  # 生成物位于 .dart_tool/flutter_gen/（合成包，不入 git）。
+  # Enables l10n codegen (Part03 P3): builds invoke gen-l10n automatically;
+  # outputs live in .dart_tool/flutter_gen/ (synthetic package, not in git).
+  generate: true
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in

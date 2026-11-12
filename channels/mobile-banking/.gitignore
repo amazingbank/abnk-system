@@ -47,3 +47,10 @@ app.*.map.json
 # Widget Preview related
 .widget_preview/
 .playwright-cli/
+
+# gen-l10n 生成物（Part03 P3）——Flutter 3.47 起合成包已移除，产物随 arb-dir
+# 输出到 lib/l10n/，构建时自动重生成，不入 git。
+# gen-l10n outputs (Part03 P3): the synthetic package was removed in Flutter 3.47,
+# so outputs land in lib/l10n/ next to the ARB sources; builds regenerate them,
+# hence they are not committed.
+lib/l10n/app_localizations*.dart

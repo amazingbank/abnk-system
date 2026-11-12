@@ -1,0 +1,11 @@
+# gen-l10n 配置（Part03 Phase 3）——中文为 template（D2 有意反转生态惯例），en 为语义重写译本。
+# 产物说明：Flutter 3.47 起合成包（.dart_tool/flutter_gen）已移除，生成物默认随
+# arb-dir 输出到 lib/l10n/（delegate 内嵌于 app_localizations.dart），已入 .gitignore。
+# gen-l10n configuration (Part03 Phase 3): Chinese is the template (D2, an intentional
+# reversal of the ecosystem convention), English is the semantically rewritten translation.
+# Output note: the synthetic package (.dart_tool/flutter_gen) was removed in Flutter 3.47,
+# so outputs land in lib/l10n/ next to the ARB sources (the delegate is embedded in
+# app_localizations.dart) and are gitignored.
+arb-dir: lib/l10n
+template-arb-file: app_zh.arb
+output-localization-file: app_localizations.dart
