@@ -18,11 +18,15 @@ import FixedDepositTable from '@/components/FixedDepositTable';
 import IdentifierCard from '@/components/IdentifierCard';
 import LoanCard from '@/components/LoanCard';
 import SavingsTable from '@/components/SavingsTable';
+import { interpolate, useClients, useErrors, useLoanOps } from '@/i18n';
 
 export default function ClientDetailPage() {
   const { clientId } = useParams<{ clientId: string }>();
   const navigate = useNavigate();
   const { message } = AntApp.useApp();
+  const t = useClients();
+  const loanOps = useLoanOps();
+  const errors = useErrors();
   const [detail, setDetail] = useState<ClientDetail | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -32,12 +36,12 @@ export default function ClientDetailPage() {
       try {
         setDetail(await clientRepository.getClientDetail(id));
       } catch (err) {
-        message.error(err instanceof Error ? err.message : '加载客户详情失败');
+        message.error(err instanceof Error ? err.message : errors.clientDetailLoadFailed);
       } finally {
         setLoading(false);
       }
     },
-    [message],
+    [message, errors.clientDetailLoadFailed],
   );
 
   useEffect(() => {
@@ -57,8 +61,11 @@ export default function ClientDetailPage() {
 
   if (!detail) {
     return (
-      <Empty description={`客户不存在：clientId=${clientId}`} style={{ padding: 64 }}>
-        <Button onClick={() => navigate('/clients')}>返回客户列表</Button>
+      <Empty
+        description={interpolate(t.detail.notFound, { clientId: clientId ?? '' })}
+        style={{ padding: 64 }}
+      >
+        <Button onClick={() => navigate('/clients')}>{t.detail.backToList}</Button>
       </Empty>
     );
   }
@@ -67,24 +74,34 @@ export default function ClientDetailPage() {
     <Space direction="vertical" size={16} style={{ width: '100%' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
         <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/clients')}>
-          返回
+          {t.detail.back}
         </Button>
         <Typography.Title level={4} style={{ margin: 0 }}>
-          客户详情 · {detail.displayName}
+          {interpolate(t.detail.title, { name: detail.displayName })}
         </Typography.Title>
       </div>
 
-      <Card title="客户信息" size="small">
+      <Card title={t.detail.infoCard} size="small">
         <Descriptions column={2} size="small">
-          <Descriptions.Item label="客户号">{detail.clientId}</Descriptions.Item>
-          <Descriptions.Item label="外部编号">{detail.externalId}</Descriptions.Item>
-          <Descriptions.Item label="姓名">
+          <Descriptions.Item label={t.detail.labels.clientId}>
+            {detail.clientId}
+          </Descriptions.Item>
+          <Descriptions.Item label={t.detail.labels.externalId}>
+            {detail.externalId}
+          </Descriptions.Item>
+          <Descriptions.Item label={t.detail.labels.name}>
             {detail.lastname} {detail.firstname}
           </Descriptions.Item>
-          <Descriptions.Item label="手机号">{detail.mobileNo}</Descriptions.Item>
-          <Descriptions.Item label="邮箱">{detail.emailAddress}</Descriptions.Item>
-          <Descriptions.Item label="所属机构">{detail.officeName}</Descriptions.Item>
-          <Descriptions.Item label="状态">
+          <Descriptions.Item label={t.detail.labels.mobileNo}>
+            {detail.mobileNo}
+          </Descriptions.Item>
+          <Descriptions.Item label={t.detail.labels.email}>
+            {detail.emailAddress}
+          </Descriptions.Item>
+          <Descriptions.Item label={t.detail.labels.office}>
+            {detail.officeName}
+          </Descriptions.Item>
+          <Descriptions.Item label={t.detail.labels.status}>
             <Tag>{detail.status}</Tag>
           </Descriptions.Item>
         </Descriptions>
@@ -92,11 +109,11 @@ export default function ClientDetailPage() {
 
       <IdentifierCard detail={detail} onSaved={() => load(detail.clientId)} />
 
-      <Card title="账户信息" size="small">
+      <Card title={t.detail.accountsCard} size="small">
         <Space direction="vertical" size={12} style={{ width: '100%' }}>
-          <Typography.Text strong>活期</Typography.Text>
+          <Typography.Text strong>{t.detail.savingsSection}</Typography.Text>
           <SavingsTable accounts={detail.savingsAccounts} />
-          <Typography.Text strong>定期</Typography.Text>
+          <Typography.Text strong>{t.detail.fixedSection}</Typography.Text>
           <FixedDepositTable accounts={detail.fixedDepositAccounts} />
         </Space>
       </Card>
@@ -104,8 +121,8 @@ export default function ClientDetailPage() {
       {detail.loan ? (
         <LoanCard loan={detail.loan} />
       ) : (
-        <Card title="贷款信息" size="small">
-          <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="无贷款记录" />
+        <Card title={loanOps.loanCardTitle} size="small">
+          <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={t.detail.noLoanRecord} />
         </Card>
       )}
     </Space>

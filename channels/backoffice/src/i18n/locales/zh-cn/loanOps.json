@@ -1,0 +1,33 @@
+{
+  "title": "贷款运营",
+  "readonlyAlert": "POC 基线只读——审批/放款为预埋操作位，P2.5 网关内部通道（/bo/api/*）接入后启用",
+  "columns": {
+    "loanId": "贷款号",
+    "client": "客户",
+    "product": "产品",
+    "principal": "本金",
+    "interestRate": "利率",
+    "termMonths": "期限(月)",
+    "status": "状态",
+    "action": "操作"
+  },
+  "overdueTag": "逾期 {days} 天（{classification}）",
+  "overdueTooltip": "逾期起算 {date} / 逾期总额 {amount}",
+  "actions": {
+    "approve": "审批",
+    "disburse": "放款",
+    "readonlyTooltip": "只读预埋位——P2.5 接入后启用"
+  },
+  "loanCardTitle": "贷款信息",
+  "loanCard": {
+    "loanId": "贷款号",
+    "externalId": "外部编号",
+    "product": "产品",
+    "status": "状态",
+    "principal": "本金",
+    "interestRate": "利率",
+    "overdueSince": "逾期起算日",
+    "totalOverdue": "逾期总额"
+  },
+  "dataNote": "数据口径：P0.3 种子快照（客户 C 贷款 6——业务日期 2027-03-29 下逾期 40 天，分档 ABNK_POC_OD）"
+}

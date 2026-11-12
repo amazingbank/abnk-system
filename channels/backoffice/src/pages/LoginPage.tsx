@@ -2,6 +2,7 @@ import { Button, Card, Form, Input, App as AntApp, Typography } from 'antd';
 import { LockOutlined, UserOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/auth/AuthContext';
+import { interpolate, useErrors, useLogin } from '@/i18n';
 
 interface LoginFormValues {
   username: string;
@@ -12,14 +13,16 @@ export default function LoginPage() {
   const navigate = useNavigate();
   const { login } = useAuth();
   const { message } = AntApp.useApp();
+  const t = useLogin();
+  const errors = useErrors();
 
   const onFinish = async (values: LoginFormValues) => {
     try {
       const session = await login(values.username, values.password);
-      message.success(`欢迎，${session.displayName}`);
+      message.success(interpolate(t.welcome, { name: session.displayName }));
       navigate('/clients', { replace: true });
     } catch (err) {
-      message.error(err instanceof Error ? err.message : '登录失败');
+      message.error(err instanceof Error ? err.message : errors.loginFailed);
     }
   };
 
@@ -54,36 +57,40 @@ export default function LoginPage() {
               margin: '8px 0 0',
             }}
           >
-            Backoffice 运营后台
+            {t.title}
           </Typography.Title>
         </div>
         <Form<LoginFormValues> layout="vertical" onFinish={(values) => void onFinish(values)}>
           <Form.Item
             name="username"
-            label="用户名"
-            rules={[{ required: true, message: '请输入用户名' }]}
+            label={t.username.label}
+            rules={[{ required: true, message: t.username.required }]}
           >
-            <Input prefix={<UserOutlined />} placeholder="运营账号" autoComplete="username" />
+            <Input
+              prefix={<UserOutlined />}
+              placeholder={t.username.placeholder}
+              autoComplete="username"
+            />
           </Form.Item>
           <Form.Item
             name="password"
-            label="口令"
-            rules={[{ required: true, message: '请输入口令' }]}
+            label={t.password.label}
+            rules={[{ required: true, message: t.password.required }]}
           >
             <Input.Password
               prefix={<LockOutlined />}
-              placeholder="口令"
+              placeholder={t.password.placeholder}
               autoComplete="current-password"
             />
           </Form.Item>
           <Form.Item style={{ marginBottom: 8 }}>
             <Button type="primary" htmlType="submit" block>
-              登录
+              {t.submit}
             </Button>
           </Form.Item>
         </Form>
         <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-          mock 演示口令：admin / password（原型专用明文，生产走 PBKDF2 凭据）
+          {t.mockHint}
         </Typography.Text>
       </Card>
     </div>

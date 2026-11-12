@@ -6,9 +6,11 @@ import { clientRepository } from '@/api';
 import type { ClientListResult, ClientSummary, IdentifierStatus } from '@/api';
 import IdentifierStatusTag from '@/components/IdentifierStatusTag';
 import { formatMoney } from '@/utils/format';
+import { interpolate, useClients } from '@/i18n';
 
 export default function ClientListPage() {
   const navigate = useNavigate();
+  const t = useClients();
   const [data, setData] = useState<ClientListResult>({ total: 0, items: [] });
   const [loading, setLoading] = useState(true);
 
@@ -29,11 +31,11 @@ export default function ClientListPage() {
     <Space direction="vertical" size={16} style={{ width: '100%' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Typography.Title level={4} style={{ margin: 0 }}>
-          客户列表
+          {t.list.title}
         </Typography.Title>
         <Input.Search
           allowClear
-          placeholder="搜索姓名 / 外部编号 / 手机号"
+          placeholder={t.list.searchPlaceholder}
           style={{ width: 300 }}
           prefix={<SearchOutlined />}
           onSearch={(value) => void load(value)}
@@ -43,25 +45,33 @@ export default function ClientListPage() {
         rowKey="clientId"
         loading={loading}
         dataSource={data.items}
-        pagination={{ total: data.total, pageSize: 10, showTotal: (t) => `共 ${t} 名客户` }}
+        pagination={{
+          total: data.total,
+          pageSize: 10,
+          showTotal: (total) => interpolate(t.list.paginationTotal, { total }),
+        }}
         onRow={(record) => ({
           onClick: () => navigate(`/clients/${record.clientId}`),
           style: { cursor: 'pointer' },
         })}
         columns={[
-          { title: '客户号', dataIndex: 'clientId', width: 90 },
-          { title: '姓名', dataIndex: 'displayName' },
-          { title: '外部编号', dataIndex: 'externalId' },
-          { title: '手机号', dataIndex: 'mobileNo', width: 130 },
+          { title: t.list.columns.clientId, dataIndex: 'clientId', width: 90 },
+          { title: t.list.columns.name, dataIndex: 'displayName' },
+          { title: t.list.columns.externalId, dataIndex: 'externalId' },
+          { title: t.list.columns.mobileNo, dataIndex: 'mobileNo', width: 130 },
           {
-            title: '证照状态',
+            title: t.list.columns.identifierStatus,
             dataIndex: 'identifierStatus',
             width: 110,
             render: (status: IdentifierStatus | null) => <IdentifierStatusTag status={status} />,
           },
-          { title: '证照到期日', dataIndex: 'identifierExpiryDate', width: 120 },
           {
-            title: '操作',
+            title: t.list.columns.identifierExpiryDate,
+            dataIndex: 'identifierExpiryDate',
+            width: 120,
+          },
+          {
+            title: t.list.columns.action,
             key: 'action',
             width: 80,
             render: (_, record) => (
@@ -73,15 +83,14 @@ export default function ClientListPage() {
                   navigate(`/clients/${record.clientId}`);
                 }}
               >
-                详情
+                {t.list.detailAction}
               </Button>
             ),
           },
         ]}
       />
       <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-        数据口径：P0.3 种子快照（王/李/赵 POC-A/B/C，业务日期 2027-03-29）；
-        证照状态由到期日对业务日期推导（基线只读展示）——金额格式示例 {formatMoney(10000)}
+        {interpolate(t.list.dataNote, { money: formatMoney(10000) })}
       </Typography.Text>
     </Space>
   );

@@ -1,0 +1,16 @@
+{
+  "title": "Backoffice Operations Console",
+  "username": {
+    "label": "Username",
+    "placeholder": "Operations account",
+    "required": "Please enter your username"
+  },
+  "password": {
+    "label": "Password",
+    "placeholder": "Password",
+    "required": "Please enter your password"
+  },
+  "submit": "Sign in",
+  "welcome": "Welcome, {name}",
+  "mockHint": "Mock demo credentials: admin / password (prototype-only plaintext; production uses PBKDF2 credentials)"
+}

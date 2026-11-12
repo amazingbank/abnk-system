@@ -7,18 +7,28 @@ import {
 } from '@ant-design/icons';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/auth/AuthContext';
+import { useCommon } from '@/i18n';
+import LanguageToggle from '@/components/LanguageToggle';
 
 const { Header, Sider, Content } = Layout;
 
-const MENU_ITEMS = [
-  { key: '/clients', icon: <TeamOutlined />, label: '客户列表' },
-  { key: '/loan-ops', icon: <AccountBookOutlined />, label: '贷款运营' },
-];
+// 侧栏菜单项（key 即路由，label 读 common 词条随语言切换）。
+// Sidebar menu items (the key is the route; labels come from the common
+// dictionary and follow the locale).
+function useMenuItems() {
+  const common = useCommon();
+  return [
+    { key: '/clients', icon: <TeamOutlined />, label: common.nav.menu.clients },
+    { key: '/loan-ops', icon: <AccountBookOutlined />, label: common.nav.menu.loanOps },
+  ];
+}
 
 export default function BoLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const { session, logout } = useAuth();
+  const common = useCommon();
+  const menuItems = useMenuItems();
 
   const selectedKey = location.pathname.startsWith('/loan-ops') ? '/loan-ops' : '/clients';
 
@@ -53,32 +63,35 @@ export default function BoLayout() {
               color: 'var(--abnk-color-text)',
             }}
           >
-            Backoffice 运营后台
+            {common.header.title}
           </span>
         </div>
-        <Dropdown
-          menu={{
-            items: [
-              {
-                key: 'logout',
-                icon: <LogoutOutlined />,
-                label: '退出登录',
-                onClick: () => void logout(),
-              },
-            ],
-          }}
-        >
-          <Button icon={<UserOutlined />}>
-            <span style={{ marginLeft: 4 }}>{session?.displayName ?? '未登录'}</span>
-          </Button>
-        </Dropdown>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <LanguageToggle />
+          <Dropdown
+            menu={{
+              items: [
+                {
+                  key: 'logout',
+                  icon: <LogoutOutlined />,
+                  label: common.user.logout,
+                  onClick: () => void logout(),
+                },
+              ],
+            }}
+          >
+            <Button icon={<UserOutlined />}>
+              <span style={{ marginLeft: 4 }}>{session?.displayName ?? common.user.anonymous}</span>
+            </Button>
+          </Dropdown>
+        </div>
       </Header>
       <Layout>
         <Sider width={200}>
           <Menu
             mode="inline"
             selectedKeys={[selectedKey]}
-            items={MENU_ITEMS}
+            items={menuItems}
             onClick={({ key }) => navigate(key)}
             style={{ height: '100%', borderRight: 0, paddingTop: 8 }}
           />

@@ -1,0 +1,5 @@
+{
+  "loginFailed": "Sign-in failed",
+  "clientDetailLoadFailed": "Failed to load client details",
+  "identifierUpdateFailed": "Failed to update the identifier"
+}

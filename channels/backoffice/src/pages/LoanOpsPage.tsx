@@ -3,12 +3,14 @@ import { Alert, Button, Space, Table, Tag, Tooltip, Typography } from 'antd';
 import { loanRepository } from '@/api';
 import type { LoanOpsItem } from '@/api';
 import { formatMoney } from '@/utils/format';
+import { interpolate, useLoanOps } from '@/i18n';
 
 /**
  * 贷款运营页（任务 P1.4）——（只读）审批/放款操作位：
  * POC 基线不提供写操作，按钮为禁用预埋位，P2.5 网关内部通道接入后启用。
  */
 export default function LoanOpsPage() {
+  const t = useLoanOps();
   const [loans, setLoans] = useState<LoanOpsItem[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -22,46 +24,50 @@ export default function LoanOpsPage() {
   return (
     <Space direction="vertical" size={16} style={{ width: '100%' }}>
       <Typography.Title level={4} style={{ margin: 0 }}>
-        贷款运营
+        {t.title}
       </Typography.Title>
-      <Alert
-        type="info"
-        showIcon
-        message="POC 基线只读——审批/放款为预埋操作位，P2.5 网关内部通道（/bo/api/*）接入后启用"
-      />
+      <Alert type="info" showIcon message={t.readonlyAlert} />
       <Table<LoanOpsItem>
         rowKey="loanId"
         loading={loading}
         dataSource={loans}
         pagination={false}
         columns={[
-          { title: '贷款号', dataIndex: 'loanId', width: 90 },
-          { title: '客户', dataIndex: 'clientName' },
-          { title: '产品', dataIndex: 'productName' },
+          { title: t.columns.loanId, dataIndex: 'loanId', width: 90 },
+          { title: t.columns.client, dataIndex: 'clientName' },
+          { title: t.columns.product, dataIndex: 'productName' },
           {
-            title: '本金',
+            title: t.columns.principal,
             dataIndex: 'principal',
             align: 'right',
             render: (v: number) => formatMoney(v),
           },
           {
-            title: '利率',
+            title: t.columns.interestRate,
             dataIndex: 'interestRate',
             width: 80,
             render: (v: number) => `${v.toFixed(1)}%`,
           },
-          { title: '期限(月)', dataIndex: 'termMonths', width: 90 },
+          { title: t.columns.termMonths, dataIndex: 'termMonths', width: 90 },
           {
-            title: '状态',
+            title: t.columns.status,
             key: 'status',
             width: 240,
             render: (_, record) => (
               <Space size={4} wrap>
                 <Tag color={record.inArrears ? 'warning' : 'success'}>{record.status}</Tag>
                 {record.inArrears && (
-                  <Tooltip title={`逾期起算 ${record.overdueSinceDate} / 逾期总额 ${formatMoney(record.totalOverdue)}`}>
+                  <Tooltip
+                    title={interpolate(t.overdueTooltip, {
+                      date: record.overdueSinceDate ?? '—',
+                      amount: formatMoney(record.totalOverdue),
+                    })}
+                  >
                     <Tag color="error">
-                      逾期 {record.overdueDays} 天（{record.delinquencyClassification ?? '—'}）
+                      {interpolate(t.overdueTag, {
+                        days: record.overdueDays,
+                        classification: record.delinquencyClassification ?? '—',
+                      })}
                     </Tag>
                   </Tooltip>
                 )}
@@ -69,19 +75,19 @@ export default function LoanOpsPage() {
             ),
           },
           {
-            title: '操作',
+            title: t.columns.action,
             key: 'action',
             width: 200,
             render: () => (
               <Space size={8}>
-                <Tooltip title="只读预埋位——P2.5 接入后启用">
+                <Tooltip title={t.actions.readonlyTooltip}>
                   <Button size="small" disabled>
-                    审批
+                    {t.actions.approve}
                   </Button>
                 </Tooltip>
-                <Tooltip title="只读预埋位——P2.5 接入后启用">
+                <Tooltip title={t.actions.readonlyTooltip}>
                   <Button size="small" disabled>
-                    放款
+                    {t.actions.disburse}
                   </Button>
                 </Tooltip>
               </Space>
@@ -90,7 +96,7 @@ export default function LoanOpsPage() {
         ]}
       />
       <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-        数据口径：P0.3 种子快照（客户 C 贷款 6——业务日期 2027-03-29 下逾期 40 天，分档 ABNK_POC_OD）
+        {t.dataNote}
       </Typography.Text>
     </Space>
   );

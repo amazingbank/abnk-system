@@ -1,0 +1,33 @@
+{
+  "title": "Loan Operations",
+  "readonlyAlert": "The POC baseline is read-only — approve and disburse are reserved placeholders, to be enabled once the P2.5 gateway internal channel (/bo/api/*) is wired in",
+  "columns": {
+    "loanId": "Loan ID",
+    "client": "Client",
+    "product": "Product",
+    "principal": "Principal",
+    "interestRate": "Interest Rate",
+    "termMonths": "Term (months)",
+    "status": "Status",
+    "action": "Actions"
+  },
+  "overdueTag": "Overdue for {days} days ({classification})",
+  "overdueTooltip": "Overdue since {date} / total overdue {amount}",
+  "actions": {
+    "approve": "Approve",
+    "disburse": "Disburse",
+    "readonlyTooltip": "Read-only placeholder — enabled after P2.5 integration"
+  },
+  "loanCardTitle": "Loan",
+  "loanCard": {
+    "loanId": "Loan ID",
+    "externalId": "External ID",
+    "product": "Product",
+    "status": "Status",
+    "principal": "Principal",
+    "interestRate": "Interest Rate",
+    "overdueSince": "Overdue Since",
+    "totalOverdue": "Total Overdue"
+  },
+  "dataNote": "Data source: P0.3 seed snapshot (client C loan 6 — 40 days overdue as of the business date 2027-03-29, classified ABNK_POC_OD)"
+}

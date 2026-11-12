@@ -1,0 +1,75 @@
+{
+  "list": {
+    "title": "Clients",
+    "searchPlaceholder": "Search by name, external ID, or mobile number",
+    "paginationTotal": "Total {total} clients",
+    "columns": {
+      "clientId": "Client ID",
+      "name": "Name",
+      "externalId": "External ID",
+      "mobileNo": "Mobile Number",
+      "identifierStatus": "Identifier Status",
+      "identifierExpiryDate": "Identifier Expiry Date",
+      "action": "Actions"
+    },
+    "detailAction": "Details",
+    "dataNote": "Data source: P0.3 seed snapshot (Wang/Li/Zhao POC-A/B/C, business date 2027-03-29); identifier status is derived from the expiry date against the business date (read-only baseline) — money format sample: {money}"
+  },
+  "detail": {
+    "back": "Back",
+    "title": "Client Details · {name}",
+    "notFound": "Client not found: clientId={clientId}",
+    "backToList": "Back to client list",
+    "infoCard": "Client Profile",
+    "labels": {
+      "clientId": "Client ID",
+      "externalId": "External ID",
+      "name": "Name",
+      "mobileNo": "Mobile Number",
+      "email": "Email",
+      "office": "Branch",
+      "status": "Status"
+    },
+    "accountsCard": "Accounts",
+    "savingsSection": "Current Accounts",
+    "fixedSection": "Fixed Deposits",
+    "noLoanRecord": "No loan records"
+  },
+  "identifier": {
+    "cardTitle": "Identity Documents (editable)",
+    "labels": {
+      "documentType": "Document Type",
+      "documentKey": "Document Number",
+      "issuanceDate": "Issue Date",
+      "expiryDate": "Expiry Date",
+      "recordStatus": "Record Status",
+      "derivedStatus": "Expiry Status (derived)"
+    },
+    "editHint": "Identifier editing (mock submit with echo-back) — expiry status is derived from the expiry date against the business date (2027-03-29)",
+    "noIdentifier": "No identity document registered for this client",
+    "expiryRequired": "Please select an expiry date",
+    "documentKeyLabel": "Document number (optional)",
+    "documentKeyPlaceholder": "Fill in only when changing it",
+    "descriptionLabel": "Description (optional)",
+    "descriptionPlaceholder": "Description",
+    "submit": "Save changes",
+    "updateSuccess": "Identifier updated (expiry date {expiryDate})"
+  },
+  "status": {
+    "unregistered": "Unregistered",
+    "expired": "Expired",
+    "valid": "Valid"
+  },
+  "account": {
+    "noSavings": "No current accounts",
+    "noFixed": "No fixed deposits",
+    "columns": {
+      "accountNo": "Account Number",
+      "product": "Product",
+      "balance": "Balance",
+      "status": "Status",
+      "interestRate": "Interest Rate",
+      "maturityDate": "Maturity Date"
+    }
+  }
+}

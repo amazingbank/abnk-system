@@ -3,6 +3,7 @@ import { App as AntApp, Button, DatePicker, Form, Input, Space } from 'antd';
 import dayjs from 'dayjs';
 import { clientRepository } from '@/api';
 import type { ClientDetail, IdentifierUpdatePayload } from '@/api';
+import { interpolate, useClients, useErrors } from '@/i18n';
 
 interface IdentifierFormValues {
   expiryDate: dayjs.Dayjs;
@@ -23,6 +24,8 @@ export default function IdentifierEditForm({
   onSaved: () => Promise<void>;
 }) {
   const { message } = AntApp.useApp();
+  const t = useClients();
+  const errors = useErrors();
   const [submitting, setSubmitting] = useState(false);
   const [form] = Form.useForm<IdentifierFormValues>();
 
@@ -50,10 +53,10 @@ export default function IdentifierEditForm({
         detail.identifier.identifierId,
         payload,
       );
-      message.success(`证照已更新（到期日 ${updated.expiryDate}）`);
+      message.success(interpolate(t.identifier.updateSuccess, { expiryDate: updated.expiryDate }));
       await onSaved();
     } catch (err) {
-      message.error(err instanceof Error ? err.message : '证照更新失败');
+      message.error(err instanceof Error ? err.message : errors.identifierUpdateFailed);
     } finally {
       setSubmitting(false);
     }
@@ -64,21 +67,29 @@ export default function IdentifierEditForm({
       <Space size={12} wrap align="start">
         <Form.Item
           name="expiryDate"
-          label="到期日"
-          rules={[{ required: true, message: '请选择到期日' }]}
+          label={t.identifier.labels.expiryDate}
+          rules={[{ required: true, message: t.identifier.expiryRequired }]}
           style={{ marginBottom: 0 }}
         >
           <DatePicker />
         </Form.Item>
-        <Form.Item name="documentKey" label="证件号（可选）" style={{ marginBottom: 0 }}>
-          <Input placeholder="变更时填写" style={{ width: 200 }} />
+        <Form.Item
+          name="documentKey"
+          label={t.identifier.documentKeyLabel}
+          style={{ marginBottom: 0 }}
+        >
+          <Input placeholder={t.identifier.documentKeyPlaceholder} style={{ width: 200 }} />
         </Form.Item>
-        <Form.Item name="description" label="说明（可选）" style={{ marginBottom: 0 }}>
-          <Input placeholder="说明" style={{ width: 220 }} />
+        <Form.Item
+          name="description"
+          label={t.identifier.descriptionLabel}
+          style={{ marginBottom: 0 }}
+        >
+          <Input placeholder={t.identifier.descriptionPlaceholder} style={{ width: 220 }} />
         </Form.Item>
         <Form.Item style={{ marginBottom: 0 }}>
           <Button type="primary" htmlType="submit" loading={submitting}>
-            保存证照变更
+            {t.identifier.submit}
           </Button>
         </Form.Item>
       </Space>

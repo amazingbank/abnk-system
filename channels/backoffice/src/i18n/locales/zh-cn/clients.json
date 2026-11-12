@@ -1,0 +1,75 @@
+{
+  "list": {
+    "title": "客户列表",
+    "searchPlaceholder": "搜索姓名 / 外部编号 / 手机号",
+    "paginationTotal": "共 {total} 名客户",
+    "columns": {
+      "clientId": "客户号",
+      "name": "姓名",
+      "externalId": "外部编号",
+      "mobileNo": "手机号",
+      "identifierStatus": "证照状态",
+      "identifierExpiryDate": "证照到期日",
+      "action": "操作"
+    },
+    "detailAction": "详情",
+    "dataNote": "数据口径：P0.3 种子快照（王/李/赵 POC-A/B/C，业务日期 2027-03-29）；证照状态由到期日对业务日期推导（基线只读展示）——金额格式示例 {money}"
+  },
+  "detail": {
+    "back": "返回",
+    "title": "客户详情 · {name}",
+    "notFound": "客户不存在：clientId={clientId}",
+    "backToList": "返回客户列表",
+    "infoCard": "客户信息",
+    "labels": {
+      "clientId": "客户号",
+      "externalId": "外部编号",
+      "name": "姓名",
+      "mobileNo": "手机号",
+      "email": "邮箱",
+      "office": "所属机构",
+      "status": "状态"
+    },
+    "accountsCard": "账户信息",
+    "savingsSection": "活期",
+    "fixedSection": "定期",
+    "noLoanRecord": "无贷款记录"
+  },
+  "identifier": {
+    "cardTitle": "证照信息（可编辑）",
+    "labels": {
+      "documentType": "证照类型",
+      "documentKey": "证件号",
+      "issuanceDate": "签发日",
+      "expiryDate": "到期日",
+      "recordStatus": "记录状态",
+      "derivedStatus": "到期状态（推导）"
+    },
+    "editHint": "证照编辑（mock 提交回显）——到期状态由到期日对业务日期（2027-03-29）推导",
+    "noIdentifier": "该客户未登记证照",
+    "expiryRequired": "请选择到期日",
+    "documentKeyLabel": "证件号（可选）",
+    "documentKeyPlaceholder": "变更时填写",
+    "descriptionLabel": "说明（可选）",
+    "descriptionPlaceholder": "说明",
+    "submit": "保存证照变更",
+    "updateSuccess": "证照已更新（到期日 {expiryDate}）"
+  },
+  "status": {
+    "unregistered": "未登记",
+    "expired": "已过期",
+    "valid": "有效"
+  },
+  "account": {
+    "noSavings": "无活期账户",
+    "noFixed": "无定期账户",
+    "columns": {
+      "accountNo": "账号",
+      "product": "产品",
+      "balance": "余额",
+      "status": "状态",
+      "interestRate": "利率",
+      "maturityDate": "到期日"
+    }
+  }
+}

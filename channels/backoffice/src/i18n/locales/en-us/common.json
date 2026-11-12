@@ -1,0 +1,24 @@
+{
+  "meta": {
+    "title": "ABNK Backoffice · Operations Console"
+  },
+  "nav": {
+    "menu": {
+      "clients": "Clients",
+      "loanOps": "Loan Operations"
+    }
+  },
+  "header": {
+    "title": "Backoffice Operations Console"
+  },
+  "user": {
+    "logout": "Sign out",
+    "anonymous": "Not signed in"
+  },
+  "language": {
+    "switchTo": {
+      "en-us": "Switch to English",
+      "zh-cn": "切换到中文"
+    }
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "title": "Backoffice 运营后台",
+  "username": {
+    "label": "用户名",
+    "placeholder": "运营账号",
+    "required": "请输入用户名"
+  },
+  "password": {
+    "label": "口令",
+    "placeholder": "口令",
+    "required": "请输入口令"
+  },
+  "submit": "登录",
+  "welcome": "欢迎，{name}",
+  "mockHint": "mock 演示口令：admin / password（原型专用明文，生产走 PBKDF2 凭据）"
+}

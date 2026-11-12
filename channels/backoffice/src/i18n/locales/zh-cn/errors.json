@@ -1,0 +1,5 @@
+{
+  "loginFailed": "登录失败",
+  "clientDetailLoadFailed": "加载客户详情失败",
+  "identifierUpdateFailed": "证照更新失败"
+}
