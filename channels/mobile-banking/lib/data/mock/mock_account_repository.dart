@@ -4,6 +4,7 @@ import '../models/transaction.dart';
 import '../repositories/account_repository.dart';
 import 'data_locale.dart';
 import 'fixture_bundle.dart';
+import 'resettable.dart';
 
 /// [AccountRepository] 的 mock 实现。
 ///
@@ -26,7 +27,7 @@ import 'fixture_bundle.dart';
 /// state (balance updates + new ledger entries) to demonstrate the full
 /// "transaction succeeds → a new entry appears in the detail view" loop
 /// (per journey step 8).
-class MockAccountRepository implements AccountRepository {
+class MockAccountRepository implements AccountRepository, Resettable {
   MockAccountRepository({this.latency = const Duration(milliseconds: 400)});
 
   final Duration latency;
@@ -36,6 +37,23 @@ class MockAccountRepository implements AccountRepository {
   final Map<int, Account> _accountsById = {};
   int _nextTxnId = 100;
   int _nextFdAccountId = 200;
+
+  // ── 数据集切换重置（Phase 7 D3 修订） ────────────────────────
+  // Data-set-switch reset (Phase 7 D3 revision)
+
+  /// 清空账本/流水/账户缓存与 id 计数器（回种子态；下次访问按
+  /// [FixtureBundle.activeDir] 重新装载——即切换后的数据集）。
+  /// EN: clears the ledgers, transactions, accounts caches and id counters
+  /// (back to the seed; the next access reloads per
+  /// [FixtureBundle.activeDir] — the switched data set).
+  @override
+  void reset() {
+    _ledgers.clear();
+    _transactionsByAccount.clear();
+    _accountsById.clear();
+    _nextTxnId = 100;
+    _nextFdAccountId = 200;
+  }
 
   // ── 内部状态装载 ────────────────────────────────────────────
 

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 
+import { reseedDataSet } from '../api/mock/mockStore';
 import { LOCALE_HTML_LANG, resolveBrowserLocale, setCurrentLocale } from './locale';
 import { LocaleContext } from './locale-context';
 import { DEFAULT_LOCALE, LOCALES, RESOURCES, type Locale } from './resources';
@@ -79,6 +80,19 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
   // Switches the locale: persists the choice (degrading gracefully to a
   // session-only effect when storage is unavailable) and re-renders in place
   // via setState — no page refresh, no route change.
+  //
+  // D3 修订（Part03 Phase 7，2026-11-12 用户拍板）：用户手动切换 UI 语言
+  // 时数据集随切（zh-cn/en-us），mock 内存态经 reseedDataSet 重置；初始
+  // 挂载（存储/系统探测路径）不经过本函数——初始数据语言 = 构建期
+  // ABNK_DATA_LOCALE 注入（默认英文），与 UI 初始语言独立。remote 模式
+  // 下 mockStore 未被消费，此调用为幂等空操作。
+  // D3 revision (Part03 Phase 7, user's call 2026-11-12): a manual UI-language
+  // switch swaps the mock data set along with it (zh-cn/en-us), resetting the
+  // in-memory state via reseedDataSet; the initial mount (stored/system
+  // detection path) never passes through here — the initial data locale is
+  // the build-time ABNK_DATA_LOCALE injection (English by default),
+  // independent of the initial UI locale. Under remote mode the mockStore is
+  // not consumed, making this call an idempotent no-op.
   const setLocale = useCallback((next: Locale) => {
     try {
       window.localStorage.setItem(LOCALE_STORAGE_KEY, next);
@@ -86,6 +100,7 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
       // 存储不可用：本次会话内生效即可。
       // Storage unavailable: effective within this session is enough.
     }
+    reseedDataSet(next);
     setLocaleState(next);
   }, []);
 

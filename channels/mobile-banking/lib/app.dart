@@ -36,7 +36,20 @@ class AbnkApp extends StatelessWidget {
           locale: state.locale,
           debugShowCheckedModeBanner: false,
           theme: AbnkTheme.light(),
-          home: state.isLoggedIn ? const MainScaffold() : const LoginPage(),
+          // 数据纪元 remount（Phase 7 D3 修订）：key = AppState.dataEpoch——
+          // 用户切换语言（= 数据集随切 + 内存态重置）时 home 子树整建、页面
+          // State 重建、future 重新拉取（页面 future 在 initState 缓存，不感知
+          // locale）。登录会话在 AppState 不受重建影响。
+          // Data-epoch remount (Phase 7 D3 revision): the key is
+          // AppState.dataEpoch — a language switch (= data-set swap +
+          // in-memory reset) rebuilds the home subtree, recreating page
+          // States so their futures refetch (page futures are cached in
+          // initState, unaware of the locale). The login session lives in
+          // AppState and survives the rebuild.
+          home: KeyedSubtree(
+            key: ValueKey('data-epoch-${state.dataEpoch}'),
+            child: state.isLoggedIn ? const MainScaffold() : const LoginPage(),
+          ),
         ),
       ),
     );

@@ -41,6 +41,13 @@ const String _fixedDepositOpenNoteZh = '\u5b9a\u671f\u5f00\u6237';
 String fixtureDirFor(String locale) =>
     locale == 'en-us' ? 'en-us' : 'zh-cn';
 
+/// UI 语言码（zh/en）→ 数据集码（zh-cn/en-us）映射（Phase 7 D3 修订：
+/// 用户手动切换 UI 语言时数据集随切）。
+/// Maps a UI locale code (zh/en) to a data-set code (zh-cn/en-us) — the
+/// Phase 7 D3 revision: a manual UI-language switch swaps the data set too.
+String dataLocaleCodeFor(String uiLanguageCode) =>
+    uiLanguageCode.toLowerCase().startsWith('zh') ? 'zh-cn' : 'en-us';
+
 /// 转账无备注时的明细兜底 note（数据文案，决策 D2/D3——随数据集语言走，
 /// 不查 UI 词条）。en 为语义重写：本人账户转账 → Self transfer。
 /// EN: the fallback transaction note used when a transfer carries no user

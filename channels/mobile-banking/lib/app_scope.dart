@@ -1,6 +1,9 @@
 import 'package:flutter/widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'data/mock/data_locale.dart';
+import 'data/mock/fixture_bundle.dart';
+import 'data/mock/resettable.dart';
 import 'data/models/user.dart';
 import 'data/repositories/account_repository.dart';
 import 'data/repositories/auth_repository.dart';
@@ -42,6 +45,15 @@ class AppState extends ChangeNotifier {
   /// async bootstrap, or a mock instance in tests.
   final SharedPreferences? _prefs;
 
+  /// 数据纪元（Phase 7 D3 修订）：用户手动切换语言时自增——AbnkApp 以其为
+  /// home 子树的 ValueKey，强制页面 State 重建、数据重新拉取（页面 future
+  /// 在 initState 缓存，不感知 locale）。
+  /// Data epoch (Phase 7 D3 revision): bumped on every manual language
+  /// switch — AbnkApp uses it as the ValueKey of the home subtree, forcing
+  /// page States to rebuild and refetch (page futures are cached in
+  /// initState and unaware of the locale).
+  int dataEpoch = 0;
+
   Session? _session;
 
   Session? get session => _session;
@@ -66,9 +78,33 @@ class AppState extends ChangeNotifier {
   /// whole tree via notifyListeners (ListenableBuilder → MaterialApp.locale),
   /// then persists it under [abnkLocaleKey]; without an injected store the
   /// switch simply does not persist.
+  ///
+  /// Phase 7 D3 修订（2026-11-12 用户拍板）：用户手动切换时数据集随切——
+  /// [FixtureBundle.activate] 换目录 + Resettable repository 内存态清零 +
+  /// [dataEpoch] 自增（AbnkApp 侧按 epoch 重建页面子树、重拉数据）。初始
+  /// 数据语言 = 编译期 dataLocale 常量注入（与 UI 初始语言独立——zh 系统
+  /// 用户首屏可为中文 UI + 英文数据）。remote 模式下无 Resettable 实现，
+  /// 切换只影响 UI 词条（数据来自真实服务端，D3 边界）。
+  /// Phase 7 revision of decision D3 (user's call, 2026-11-12): a manual
+  /// switch also swaps the data set — [FixtureBundle.activate] flips the
+  /// directory, Resettable repositories drop their in-memory state, and
+  /// [dataEpoch] increments (AbnkApp rebuilds the page subtree per the epoch
+  /// and refetches). The initial data locale stays the compile-time dataLocale
+  /// injection, independent of the initial UI locale (a zh-system user may
+  /// land on a Chinese UI with English data). Under remote mode nothing is
+  /// Resettable, so the switch only affects UI strings (server data, D3
+  /// boundary).
   Future<void> setLocale(Locale value) async {
     if (value == locale) return;
     locale = value;
+    // 数据集随切 + 内存态重置（mock 模式；remote 模式下无 Resettable 实现者）。
+    // The data set follows and in-memory state resets (mock mode; under
+    // remote mode nothing implements Resettable).
+    FixtureBundle.activate(dataLocaleCodeFor(value.languageCode));
+    for (final repo in [auth, identity, account, loan]) {
+      if (repo is Resettable) repo.reset();
+    }
+    dataEpoch += 1;
     notifyListeners();
     final prefs = _prefs;
     if (prefs == null) return;

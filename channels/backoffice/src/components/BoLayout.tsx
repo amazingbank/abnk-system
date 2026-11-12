@@ -7,6 +7,7 @@ import {
 } from '@ant-design/icons';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/auth/AuthContext';
+import { dataEpoch } from '@/api/mock/mockStore';
 import { useCommon } from '@/i18n';
 import LanguageToggle from '@/components/LanguageToggle';
 
@@ -97,7 +98,17 @@ export default function BoLayout() {
           />
         </Sider>
         <Content style={{ padding: 24, maxWidth: 1180 }}>
-          <Outlet />
+          {/* 数据纪元 remount（D3 修订，Part03 Phase 7）：key = mockStore.dataEpoch
+              ——用户切换语言（= reseedDataSet 切数据集）时页面子树重建、数据
+              重新拉取（页面 useEffect 仅 mount 取数，不感知 locale）。本组件
+              消费 useCommon 随 context 重渲染，live binding 读到的 epoch 即最新。
+              EN: data-epoch remount (D3 revision, Part03 Phase 7): the key is
+              mockStore.dataEpoch — a language switch (= a reseedDataSet data-set
+              swap) remounts the page subtree so the data refetches (page effects
+              fetch on mount only, unaware of the locale). This component consumes
+              useCommon and re-renders with the context, so the live binding reads
+              the latest epoch. */}
+          <Outlet key={dataEpoch} />
         </Content>
       </Layout>
     </Layout>
