@@ -2,8 +2,12 @@ import '../models/loan.dart';
 import '../repositories/loan_repository.dart';
 import 'fixture_bundle.dart';
 
-/// [LoanRepository] 的 mock 实现——产品来自 `fixtures/loan_products.json`
-/// （P0.3 种子：消费贷 productId=11 / 定期产品=20）。
+/// [LoanRepository] 的 mock 实现——产品来自
+/// `fixtures/<locale>/loan_products.json`（P0.3 种子：消费贷 productId=11 /
+/// 定期产品=20）。
+/// EN: mock [LoanRepository] — products come from
+/// `fixtures/<locale>/loan_products.json` (P0.3 seeds: consumer loan
+/// productId=11 / fixed-deposit product=20).
 class MockLoanRepository implements LoanRepository {
   MockLoanRepository({this.latency = const Duration(milliseconds: 300)});
 

@@ -2,22 +2,30 @@ import '../../core/errors/app_exception.dart';
 import '../models/account.dart';
 import '../models/transaction.dart';
 import '../repositories/account_repository.dart';
+import 'data_locale.dart';
 import 'fixture_bundle.dart';
 
 /// [AccountRepository] 的 mock 实现。
 ///
 /// 校验异常经语义码（ErrCodes.validation.*）抛出（Part03 任务 3.4 码化），
-/// 用户可读文案由 UI 层按当前语言查词条；note 兜底数据串（「本人账户转账」
-/// 「定期开户」）属数据文案，随 Phase 4 fixtures 双语数据集处理。
+/// 用户可读文案由 UI 层按当前语言查词条；note 兜底数据串（转账 / 定期
+/// 开户）已迁 data_locale.dart 双语映射（Part03 任务 4.2，随数据集语言走）。
 /// Mock implementation of [AccountRepository]. Validation failures throw
 /// semantic codes (ErrCodes.validation.*, coded in Part03 task 3.4) and the
 /// UI layer resolves the localized text; the fallback note data strings
-/// ("本人账户转账" / "定期开户") are data copy and move to the Phase 4
-/// bilingual fixtures.
+/// (transfer / fixed-deposit opening) now live as bilingual mappings in
+/// data_locale.dart (Part03 task 4.2, following the data-set locale).
 ///
-/// 首次访问从 `fixtures/accounts.json` + `fixtures/transactions.json` 加载
-/// 种子快照并驻留内存；转账 / 定期开户会更新内存态（余额变动 + 新流水），
-/// 演示「交易成功 → 明细出现新流水」的完整闭环（对齐旅程 Step 8 口径）。
+/// 首次访问从 `fixtures/<locale>/accounts.json` 与
+/// `fixtures/<locale>/transactions.json` 加载种子快照并驻留内存；转账 /
+/// 定期开户会更新内存态（余额变动 + 新流水），演示「交易成功 → 明细出现
+/// 新流水」的完整闭环（对齐旅程 Step 8 口径）。
+/// EN: first access loads the seed snapshot from
+/// `fixtures/<locale>/accounts.json` + `fixtures/<locale>/transactions.json`
+/// into memory; transfers and fixed-deposit openings mutate the in-memory
+/// state (balance updates + new ledger entries) to demonstrate the full
+/// "transaction succeeds → a new entry appears in the detail view" loop
+/// (per journey step 8).
 class MockAccountRepository implements AccountRepository {
   MockAccountRepository({this.latency = const Duration(milliseconds: 400)});
 
@@ -183,13 +191,13 @@ class MockAccountRepository implements AccountRepository {
       from.id,
       'Withdrawal',
       request.amount,
-      request.note ?? '本人账户转账',
+      request.note ?? transferNoteFor(dataLocale),
     );
     _appendTransaction(
       to.id,
       'Deposit',
       request.amount,
-      request.note ?? '本人账户转账',
+      request.note ?? transferNoteFor(dataLocale),
     );
     return TransferResult(
       transactionId: _nextTxnId - 2,
@@ -228,7 +236,12 @@ class MockAccountRepository implements AccountRepository {
 
     final depositPeriod = product['depositPeriod'] as int;
     final newAccountId = _nextFdAccountId++;
-    _appendTransaction(source.id, 'Withdrawal', request.amount, '定期开户');
+    _appendTransaction(
+      source.id,
+      'Withdrawal',
+      request.amount,
+      fixedDepositOpenNoteFor(dataLocale),
+    );
     final newAccount = Account(
       id: newAccountId,
       accountNo: '0000**0$newAccountId',

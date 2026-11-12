@@ -9,7 +9,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # build number separated by a plus sign.
 # In Android, build-name is used as versionName while build-number used as versionCode.
 # In iOS, build-name is used as CFBundleShortVersionString while build-number is used as CFBundleVersion.
-version: 1.0.0+1
+version: 1.0.1+2
 
 environment:
   sdk: ^3.13.7
@@ -95,12 +95,15 @@ flutter:
   uses-material-design: true
 
   # ABNK mock fixtures（P0.3 种子快照导出，mock repository 数据源）
+  # 双语数据集：zh-cn / en-us 两套目录，目录级声明递归包含全部 JSON；
+  # 数据集由 --dart-define=ABNK_DATA_LOCALE 编译期选择（Phase 4 任务 4.2 接线）。
+  # EN: ABNK mock fixtures (P0.3 seed snapshot export, the mock repository data
+  # source); bilingual data sets under zh-cn/ and en-us/, declared at the
+  # directory level; the active set is selected at compile time via
+  # --dart-define=ABNK_DATA_LOCALE (wired up in Phase 4 task 4.2).
   assets:
-    - fixtures/me.json
-    - fixtures/identity.json
-    - fixtures/accounts.json
-    - fixtures/transactions.json
-    - fixtures/loan_products.json
+    - fixtures/zh-cn/
+    - fixtures/en-us/
     # 自托管字体资产目录——google_fonts 在 allowRuntimeFetching=false 时按
     # 「族名去空格-变体名.ttf」文件名约定经 AssetManifest 命中（实测源码口径）。
     - assets/fonts/

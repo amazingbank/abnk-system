@@ -1,0 +1,19 @@
+{
+  "_source": "P0.3 seed-poc-evidence.json — 客户 A identifierExpiry=2020-01-01（过期）/ 客户 B identifierExpiry=2099-12-31（有效）；status 为快照时点的只读状态值 | EN: client A identifier expired 2020-01-01 / client B identifier valid through 2099-12-31; status is a read-only snapshot value; the English twin data set lives at fixtures/en-us/identity.json (semantic rewrite per D2/D3, structure identical)",
+  "alice": {
+    "documentTypeId": 1,
+    "documentTypeName": "身份证",
+    "documentKey": "3301**********001X",
+    "status": "EXPIRED",
+    "issuanceDate": "2015-01-01",
+    "expiryDate": "2020-01-01"
+  },
+  "bob": {
+    "documentTypeId": 1,
+    "documentTypeName": "身份证",
+    "documentKey": "3301**********002X",
+    "status": "VALID",
+    "issuanceDate": "2020-06-01",
+    "expiryDate": "2099-12-31"
+  }
+}

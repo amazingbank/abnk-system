@@ -3,8 +3,11 @@ import '../models/user.dart';
 import '../repositories/auth_repository.dart';
 import 'fixture_bundle.dart';
 
-/// [AuthRepository] 的 mock 实现——凭据来自 `fixtures/me.json` 的
+/// [AuthRepository] 的 mock 实现——凭据来自 `fixtures/<locale>/me.json` 的
 /// demoUsers 段（原型专用明文口令，生产走 PBKDF2 凭据校验，D2 决策）。
+/// EN: mock [AuthRepository] — credentials come from the demoUsers section
+/// of `fixtures/<locale>/me.json` (prototype-only plaintext passwords;
+/// production authenticates with PBKDF2, decision D2).
 class MockAuthRepository implements AuthRepository {
   MockAuthRepository({this.latency = const Duration(milliseconds: 300)});
 

@@ -23,8 +23,8 @@
 #
 # 构建（仓库根执行）：
 #   docker build -f channels/backoffice/Dockerfile \
-#     -t abnk-bo:0.1.0 channels/backoffice
-#   （tag 源 = package.json version 0.1.0，patch 递增纪律同 website Iron Rule 4）
+#     -t abnk-bo:0.1.1 channels/backoffice
+#   （tag 源 = package.json version 0.1.1，patch 递增纪律同 website Iron Rule 4）
 
 # ---------- builder ----------
 # multi-arch：builder 钉构建机架构（npm build 产物为静态文件，架构无关）
@@ -34,9 +34,12 @@ COPY package.json package-lock.json ./
 RUN npm ci --no-audit --no-fund
 COPY . .
 # remote 模式开关注入（构建期烘焙进 import.meta.env）
-# 数据集语言注入：ARG 先声明后引用（builder 阶段 RUN 之前）
-# Data-set locale injection: declare ARG before referencing it (ahead of the builder-stage RUN)
-ARG ABNK_DATA_LOCALE=zh-cn
+# 数据集语言注入：ARG 先声明后引用（builder 阶段 RUN 之前）；缺省值
+# en-us = 发版拍板（2026-11-12）：应用数据默认英文，显式 --build-arg 可覆盖
+# Data-set locale injection: declare ARG before referencing it (ahead of the
+# builder-stage RUN); the en-us default is the release decision (2026-11-12) —
+# app data defaults to English, overridable via an explicit --build-arg
+ARG ABNK_DATA_LOCALE=en-us
 RUN VITE_ABNK_API_BASE=https://api.amazingbank.ai VITE_ABNK_DATA_LOCALE=$ABNK_DATA_LOCALE npm run build
 
 # ---------- runtime ----------

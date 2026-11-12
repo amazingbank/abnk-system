@@ -15,10 +15,19 @@
 #    分流直达网关；跨 origin 由网关 CorsConfig 放行（P3.1 web 载体 :6280 → :8080
 #    已实测同机制）。本地演练（VP3.4.4）不回放浏览器内容，仅验健康。
 #
+# ⚠️ mock 数据集语言（Part03 Phase 4 任务 4.2，决策 D3）：`ABNK_DATA_LOCALE`
+#    经 ARG + `--dart-define` 编译期烙入 fixtures/<locale>/ 数据集选择
+#    （zh-cn / en-us，与 backoffice 的 VITE_ABNK_DATA_LOCALE 同源变量）；
+#    运行时 UI 语言切换不切数据集。
+#    EN: mock data-set locale (decision D3): ABNK_DATA_LOCALE is baked in at
+#    build time via ARG + --dart-define, selecting the fixtures/<locale>/
+#    data set (zh-cn / en-us) — the same deployment variable the backoffice
+#    consumes; runtime UI language switching never switches the data set.
+#
 # 构建（仓库根执行）：
 #   docker build -f channels/mobile-banking/Dockerfile \
-#     -t abnk-mweb:1.0.0 channels/mobile-banking
-#   （tag 源 = pubspec.yaml version 1.0.0+1，build number 不入 tag）
+#     -t abnk-mweb:1.0.1 channels/mobile-banking
+#   （tag 源 = pubspec.yaml version 1.0.1+2，build number 不入 tag）
 # check=skip=FromPlatformFlagConstDisallowed
 
 # ⚠️ 构建阶段固定 linux/amd64：Flutter 官方 stable Linux 归档仅发布 x64
@@ -28,6 +37,12 @@
 FROM --platform=linux/amd64 ubuntu:24.04 AS build
 ARG FLUTTER_VERSION=3.47.9
 ARG FLUTTER_SHA256=25ed8c3c29d51a7353f2a944310b478af8214920639524b19c50a19e6c044c5a
+# mock 数据集语言（zh-cn / en-us）——构建期经 --dart-define 烙入（D3 口径）；
+# 缺省值 en-us = 发版拍板（2026-11-12）：应用数据默认英文，显式 --build-arg 可覆盖
+# EN: mock data-set locale (zh-cn / en-us), baked in via --dart-define (D3);
+# the en-us default is the release decision (2026-11-12) — app data defaults
+# to English, overridable via an explicit --build-arg
+ARG ABNK_DATA_LOCALE=en-us
 # Flutter 工具链依赖（官方 Linux 安装前提：bash/curl/git/unzip/xz-utils）
 RUN apt-get update && apt-get install -y --no-install-recommends \
       ca-certificates curl git unzip xz-utils \
@@ -54,7 +69,8 @@ COPY . .
 # dart2js 读不到依赖包，实测 vector_math 等 No such file or directory）
 RUN --mount=type=cache,target=/root/.pub-cache \
     flutter build web --release \
-      --dart-define=ABNK_API_BASE=https://api.amazingbank.ai
+      --dart-define=ABNK_API_BASE=https://api.amazingbank.ai \
+      --dart-define=ABNK_DATA_LOCALE=$ABNK_DATA_LOCALE
 
 FROM nginx:1.27-alpine
 COPY --from=build /app/build/web /usr/share/nginx/html

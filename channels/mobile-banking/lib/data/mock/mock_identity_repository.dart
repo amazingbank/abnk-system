@@ -3,8 +3,12 @@ import '../models/identity.dart';
 import '../repositories/identity_repository.dart';
 import 'fixture_bundle.dart';
 
-/// [IdentityRepository] 的 mock 实现——数据来自 `fixtures/identity.json`
-/// （P0.3 种子快照：客户 A 过期 / 客户 B 有效）。
+/// [IdentityRepository] 的 mock 实现——数据来自
+/// `fixtures/<locale>/identity.json`（P0.3 种子快照：客户 A 过期 /
+/// 客户 B 有效）。
+/// EN: mock [IdentityRepository] — data comes from
+/// `fixtures/<locale>/identity.json` (P0.3 seed snapshot: client A
+/// expired / client B valid).
 class MockIdentityRepository implements IdentityRepository {
   MockIdentityRepository({this.latency = const Duration(milliseconds: 250)});
 

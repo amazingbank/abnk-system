@@ -1,0 +1,29 @@
+{
+  "_source": "English semantic rewrite of P0.3 seed-poc-evidence.json (2026-11-07T10:43:47) — mock fixture snapshot (decisions D2/D3: the demo-user notes are rewritten in English banking idiom, never word-for-word; credentials are prototype-only plaintext, mock-only, production uses PBKDF2 via data/gateway_users.json); the Chinese source data set lives at fixtures/zh-cn/me.json (structure identical)",
+  "demoUsers": [
+    { "username": "alice", "password": "password", "displayName": "Alice Green", "note": "Maps to seed client A, whose ID has expired — the primary journey user" },
+    { "username": "bob", "password": "password", "displayName": "Bob Brown", "note": "Maps to seed client B with a valid ID — the control group" }
+  ],
+  "users": {
+    "alice": {
+      "clientId": 28,
+      "externalId": "ABNK-POC-A-1107104347",
+      "firstname": "Alice",
+      "lastname": "Green",
+      "displayName": "Alice Green",
+      "mobileNo": "135******01",
+      "emailAddress": "alice@example.com",
+      "officeName": "Head Office"
+    },
+    "bob": {
+      "clientId": 29,
+      "externalId": "ABNK-POC-B-1107104347",
+      "firstname": "Bob",
+      "lastname": "Brown",
+      "displayName": "Bob Brown",
+      "mobileNo": "135******02",
+      "emailAddress": "bob@example.com",
+      "officeName": "Head Office"
+    }
+  }
+}

@@ -1,5 +1,5 @@
 {
-  "_source": "P0.3 seed-poc-evidence.json — loanProductId=11（ABNK-POC消费贷1107104347，等额本息 + delinquencyBucketId）/ fixedDepositProductId=20（ABNK-POC定期1107104347，含利率 chart）",
+  "_source": "P0.3 seed-poc-evidence.json — loanProductId=11（ABNK-POC消费贷1107104347，等额本息 + delinquencyBucketId）/ fixedDepositProductId=20（ABNK-POC定期1107104347，含利率 chart）| EN: loanProductId=11 (ABNK consumer loan, amortizing with equal monthly installments) / fixedDepositProductId=20 (ABNK fixed deposit with an interest-rate chart); the English twin data set lives at fixtures/en-us/loan_products.json (semantic rewrite per D2/D3, structure identical)",
   "loanProducts": [
     {
       "id": 11,

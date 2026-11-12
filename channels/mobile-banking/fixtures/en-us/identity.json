@@ -1,0 +1,19 @@
+{
+  "_source": "English semantic rewrite of P0.3 seed-poc-evidence.json (decisions D2/D3: the document type is rendered in its English banking name; client A's identifier expired 2020-01-01 / client B's is valid through 2099-12-31; status is a read-only snapshot value); the Chinese source data set lives at fixtures/zh-cn/identity.json (structure identical)",
+  "alice": {
+    "documentTypeId": 1,
+    "documentTypeName": "National ID",
+    "documentKey": "3301**********001X",
+    "status": "EXPIRED",
+    "issuanceDate": "2015-01-01",
+    "expiryDate": "2020-01-01"
+  },
+  "bob": {
+    "documentTypeId": 1,
+    "documentTypeName": "National ID",
+    "documentKey": "3301**********002X",
+    "status": "VALID",
+    "issuanceDate": "2020-06-01",
+    "expiryDate": "2099-12-31"
+  }
+}

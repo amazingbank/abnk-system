@@ -1,5 +1,5 @@
 {
-  "_source": "P0.3 seed-poc-evidence.json (2026-11-07T10:43:47) — mock fixture snapshot; demo 口令为原型专用明文（mock-only），生产走 PBKDF2 凭据（data/gateway_users.json）",
+  "_source": "P0.3 seed-poc-evidence.json (2026-11-07T10:43:47) — mock fixture snapshot; demo 口令为原型专用明文（mock-only），生产走 PBKDF2 凭据（data/gateway_users.json）| EN: mock fixture snapshot exported from the P0.3 seed evidence; the English twin data set lives at fixtures/en-us/me.json (semantic rewrite per D2/D3, structure identical)",
   "demoUsers": [
     { "username": "alice", "password": "password", "displayName": "Alice Green", "note": "映射种子客户 A（证照已过期——旅程主线用户）" },
     { "username": "bob", "password": "password", "displayName": "Bob Brown", "note": "映射种子客户 B（证照有效——对照组）" }

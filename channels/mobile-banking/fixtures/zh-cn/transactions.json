@@ -1,5 +1,5 @@
 {
-  "_source": "P0.2 capability-probe.json VP0.2.4 实测 item 字段口径（id/date/transactionType/amount/runningBalance/note）+ P0.3 种子余额快照",
+  "_source": "P0.2 capability-probe.json VP0.2.4 实测 item 字段口径（id/date/transactionType/amount/runningBalance/note）+ P0.3 种子余额快照 | EN: item field contract (id/date/transactionType/amount/runningBalance/note) measured in the P0.2 capability probe, plus the P0.3 seed balance snapshot; the English twin data set lives at fixtures/en-us/transactions.json (semantic rewrite per D2/D3, structure identical)",
   "11": [
     {
       "id": 21,

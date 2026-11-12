@@ -1,0 +1,26 @@
+{
+  "_source": "English semantic rewrite of P0.3 seed-poc-evidence.json (decisions D2/D3: product names and descriptions rewritten in English banking idiom, never word-for-word; loanProductId=11, the ABNK consumer loan, amortizing with equal monthly installments plus a delinquency bucket; fixedDepositProductId=20, the ABNK fixed deposit with an interest-rate chart); the Chinese source data set lives at fixtures/zh-cn/loan_products.json (structure identical)",
+  "loanProducts": [
+    {
+      "id": 11,
+      "name": "ABNK Consumer Loan",
+      "description": "Amortizing personal loan with equal monthly installments, due on the same day each month",
+      "interestRate": 12.0,
+      "termFrequency": 12,
+      "termPeriodFrequencyType": "MONTHS",
+      "minPrincipalAmount": 1000.00,
+      "maxPrincipalAmount": 500000.00,
+      "repaymentMethod": "EQUAL_INSTALLMENTS"
+    }
+  ],
+  "fixedDepositProducts": [
+    {
+      "id": 20,
+      "name": "ABNK Fixed Deposit",
+      "description": "Lump-sum term deposit with interest paid out at maturity on the same calendar day",
+      "interestRate": 3.0,
+      "depositPeriod": 12,
+      "minDepositAmount": 1000.00
+    }
+  ]
+}

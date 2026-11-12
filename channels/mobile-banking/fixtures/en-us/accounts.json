@@ -1,11 +1,11 @@
 {
-  "_source": "P0.3 seed-poc-evidence.json — 客户 A：sourceAccount=11（余额 10000.0）/ targetAccount=12；客户 B：savingsAccount=13（余额 5000）+ fixedDepositAccount=14（maturity=2028-01-17）",
+  "_source": "English semantic rewrite of P0.3 seed-poc-evidence.json (decisions D2/D3: product names rewritten in English banking idiom, never word-for-word; client A: sourceAccount=11 with balance 10000.0 / targetAccount=12; client B: savingsAccount=13 with balance 5000 + fixedDepositAccount=14 maturing 2028-01-17); the Chinese source data set lives at fixtures/zh-cn/accounts.json (structure identical)",
   "alice": {
     "savingsAccounts": [
       {
         "id": 11,
         "accountNo": "0000**0011",
-        "productName": "ABNK 活期储蓄",
+        "productName": "ABNK Current Savings",
         "accountType": "SAVINGS",
         "currency": "CNY",
         "accountBalance": 10000.00,
@@ -15,7 +15,7 @@
       {
         "id": 12,
         "accountNo": "0000**0012",
-        "productName": "ABNK 活期储蓄",
+        "productName": "ABNK Current Savings",
         "accountType": "SAVINGS",
         "currency": "CNY",
         "accountBalance": 0.00,
@@ -30,7 +30,7 @@
       {
         "id": 13,
         "accountNo": "0000**0013",
-        "productName": "ABNK 活期储蓄",
+        "productName": "ABNK Current Savings",
         "accountType": "SAVINGS",
         "currency": "CNY",
         "accountBalance": 5000.00,
@@ -42,7 +42,7 @@
       {
         "id": 14,
         "accountNo": "0000**0014",
-        "productName": "ABNK 定期存款",
+        "productName": "ABNK Fixed Deposit",
         "accountType": "FIXED_DEPOSIT",
         "currency": "CNY",
         "accountBalance": 10000.00,
