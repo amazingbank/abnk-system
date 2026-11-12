@@ -48,6 +48,13 @@ dependencies:
   # intl stays `any` so pub resolves the SDK-matched version (pinning conflicts
   # with the bundled one); gen-l10n placeholder interpolation depends on it.
   intl: any
+
+  # locale 持久化（Part03 P3.2）——存储用户语言偏好（key=abnk.locale），
+  # web 载体落到 localStorage，移动载体落到平台 KV 存储。
+  # Locale persistence (Part03 P3.2): stores the user's language preference
+  # (key=abnk.locale) — backed by localStorage on web and platform KV stores
+  # on the mobile targets.
+  shared_preferences: ^2.3.0
   openapi:
     path: openapi-generated
 
