@@ -14,7 +14,7 @@
 
 运行：cd abnk-system/scripts/prodform && \
   ABNK_BASE_URL=http://localhost:8081/fineract-provider/api/v1 python3 probe_poc.py
-输出：../../artifacts/phaseP0/capability-probe.json（探查矩阵，无空字段）
+输出：本地 output/capability-probe.json（探查矩阵，无空字段；gitignore 排除）；收口归档 .asdm/workspace/docs/Sprints/v0.0.1/part02/artifacts/phaseP0/capability-probe.json
 幂等：实体名/externalId/documentKey 带 TS 后缀；日期载荷一律带 locale+dateFormat（漏 locale 即 400 实测坑）。
 
 契约依据：Fineract 源码 Swagger 注解与集成测试 helper（生产形态栈 /api-docs 实测返回空 paths，
@@ -45,7 +45,7 @@ TS = datetime.now().strftime("%m%d%H%M%S")                # 幂等后缀（与�
 D_FMT = {"locale": "en", "dateFormat": "yyyy-MM-dd"}
 EXPIRED = "2020-01-01"                                     # 证照初始过期日
 VALID = "2099-12-31"                                       # PUT 目标有效期
-ART = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "artifacts", "phaseP0")
+ART = os.path.join(os.path.dirname(os.path.abspath(__file__)), "output")  # 本地输出目录；收口归档 .asdm/workspace/docs/Sprints/v0.0.1/part02/artifacts/phaseP0/
 
 
 def jget(data, *path, default=None):

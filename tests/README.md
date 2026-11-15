@@ -12,5 +12,5 @@
 
 ```bash
 cd tests/smoke && python3 smoke_test.py    # 前置：deploy/compose 起好 + Fineract devRun
-# 报告落 ../../artifacts/phase1/report-<ts>.json（幂等，可重复运行）
+# 报告落本地 output/report-<ts>.json（幂等，可重复运行；收口归档 .asdm/workspace/docs/Sprints/v0.0.1/part01/artifacts/）
 ```

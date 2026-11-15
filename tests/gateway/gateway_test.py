@@ -12,7 +12,7 @@
 - 演示口令经环境变量 ABNK_DEMO_CREDENTIALS 注入（指向 P0.3 归档处
   asdm-training/docs/workshops/sessions/20251110-KBankPOC/gateway-demo-passwords.json），不入剧本代码与报告 JSON
 - 幂等后缀 TS 模式：转账 externalId 携带毫秒时间戳，剧本可重复执行
-- 报告 JSON 归档 artifacts/phaseP2/gateway-report-<ts>.json（token 字段一律脱敏）
+- 报告 JSON 本地 output/gateway-report-<ts>.json（gitignore 排除；token 一律脱敏）；收口归档 .asdm/workspace/docs/Sprints/v0.0.1/part02/artifacts/phaseP2/
 - 退出码：0 = 全部通过；1 = 任一断言失败（fail-fast）；2 = 前置缺失
 
 用法：
@@ -31,7 +31,7 @@ from datetime import datetime
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 REPO_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, "..", ".."))
-REPORT_DIR = os.path.join(REPO_ROOT, "artifacts", "phaseP2")
+REPORT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "output")  # 本地输出；收口归档 .asdm/workspace/docs/Sprints/v0.0.1/part02/artifacts/phaseP2/
 
 GW_BASE = os.environ.get("ABNK_GATEWAY_BASE", "http://localhost:8080").rstrip("/")
 FINERACT_HEALTH = os.environ.get(

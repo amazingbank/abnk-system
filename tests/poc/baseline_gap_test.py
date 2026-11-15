@@ -20,7 +20,7 @@ POC 开场要演示「证件过期客户转账依然成功」——缺口存在�
   externalId 隔离，各落一笔新交易，不触发网关幂等重放）
 - 转账金额小额 10；脚本末尾不做余额回滚（单向，声明）——运行口径见 P3.3 改动详情
 - Fineract 侧核对为独立通道（不经网关）：直连生产形态栈 REST（Basic + 租户头）
-- 报告 JSON 归档 artifacts/phaseP3/gap-report-<ts>.json（token 字段一律脱敏）
+- 报告 JSON 本地 output/gap-report-<ts>.json（gitignore 排除；token 一律脱敏）；收口归档 .asdm/workspace/docs/Sprints/v0.0.1/part02/artifacts/phaseP3/
 - 退出码：0 = 全部通过（缺口证据成立）；1 = 任一断言失败（fail-fast）；2 = 前置缺失
 
 用法：
@@ -47,7 +47,7 @@ from datetime import datetime
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 REPO_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, "..", ".."))
-REPORT_DIR = os.path.join(REPO_ROOT, "artifacts", "phaseP3")
+REPORT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "output")  # 本地输出；收口归档 .asdm/workspace/docs/Sprints/v0.0.1/part02/artifacts/phaseP3/
 
 GW_BASE = os.environ.get("ABNK_GATEWAY_BASE", "http://localhost:8080").rstrip("/")
 FIN_BASE = os.environ.get(

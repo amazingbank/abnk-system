@@ -6,7 +6,7 @@
       → 推进业务日期 → 触发日终 COB(+计息作业) → 查日终效果 → 关户(负向断言)
 
 运行：cd abnk-system/tests/smoke && python3 smoke_test.py
-报告：../../artifacts/phase1/report-<ts>.json
+报告：本地 output/report-<ts>.json（gitignore 排除）；收口归档 .asdm/workspace/docs/Sprints/v0.0.1/part01/artifacts/
 幂等：实体名带时间戳后缀，可重复运行。
 """
 
@@ -34,7 +34,7 @@ def jget(data, *path, default=None):
 
 def main():
     cli = Client()
-    art_dir = os.path.join(os.path.dirname(__file__), "..", "..", "artifacts", "phase1")
+    art_dir = os.path.join(os.path.dirname(__file__), "output")  # 本地输出；收口归档 .asdm/workspace/docs/Sprints/v0.0.1/part01/artifacts/
     os.makedirs(art_dir, exist_ok=True)
     report_path = os.path.join(art_dir, f"report-{TS}.json")
     run = StepRunner(report_path)

@@ -19,9 +19,8 @@ Fineract fork 必须与上游 `develop` 保持**季度级 rebase**（ADR-001/002
 | 目录 | 层 | 用途 | 引入阶段 | 状态 |
 |---|---|---|---|---|
 | `deploy/` | — | 环境编排（`compose/` 本地 · `prod/` 生产全栈 compose——P3.4 七容器；k8s 远期规划） | Phase 0 | ✅ 活跃 |
-| `scripts/` | — | 工程脚本 + API 封装库 | Phase 1 | ✅ 活跃 |
-| `artifacts/` | — | 中间产出物（按阶段归档） | Phase 1 | ✅ 活跃 |
-| `tests/` | — | 跨模块测试资产（smoke / gateway 集成（P2.7）/ poc 缺口剧本（P3.3）） | Phase 1 | ✅ 活跃 |
+| `scripts/` | — | 工程脚本 + API 封装库（报告本地 `output/` 输出，收口归档 `.asdm/workspace/docs/Sprints/v0.0.1/partXX/artifacts/`） | Phase 1 | ✅ 活跃 |
+| `tests/` | — | 跨模块测试资产（smoke / gateway 集成（P2.7）/ poc 缺口剧本（P3.3）——报告同上两段式） | Phase 1 | ✅ 活跃 |
 | `custom/` | L2 | 定制模块源（同步到 fineract 仓编译） | Phase 2 | 骨架（P0.5 预埋） |
 | `data/` | L1 | 数据资产（POC 种子 `seed_poc.py` + 网关用户表——P0.3 交付） | Phase 2 | ✅ 活跃 |
 | `channels/` | L3 | 渠道层：网关 + 全部渠道前端（ADR-008） | 2–5 | 五目录全交付（website / gateway / mobile-banking / backoffice / shared） |
@@ -36,8 +35,8 @@ Fineract fork 必须与上游 `develop` 保持**季度级 rebase**（ADR-001/002
 ## 入库纪律
 
 - **交付物**（代码/脚本/配置）：一律入库
-- **中间产出物**：可复现、可 diff 的小文件（JSON 快照/报告）入库到 `artifacts/`；大文件与本地路径相关产物由 `.gitignore` 排除
-- 产物目录按阶段命名：`artifacts/phase1/`、`artifacts/phase2/`...
+- **中间产出物（过程证据）已出仓**（2026-11-16）：原 `artifacts/` 全量迁入 `.asdm` 过程资产仓，按 Part 分桶归档于 `.asdm/workspace/docs/Sprints/v0.0.1/partXX/artifacts/`——**Part = 文档 + 证据的自包含交付单元**
+- 本仓脚本/测试报告走两段式：本地 `output/` 输出（`.gitignore` 排除）→ 任务收口时显式归档上述 `.asdm` 位置；大文件与本地路径相关产物继续由 `.gitignore` 排除
 - **数据不入库**：数据库内容只存快照（导出 JSON），不存 dump；`data/` 放的是**施加到系统的定义**（YAML 源），不是数据
 
 ## 与其他仓库的分工
