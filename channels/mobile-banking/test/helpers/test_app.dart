@@ -41,6 +41,7 @@ void seedFixtureBundle() {
 }
 
 /// 测试用 app 装配——mock repository 零延迟注入。
+/// Test app assembly — mock repositories injected with zero latency.
 AppState testAppState() => AppState(
       auth: MockAuthRepository(latency: Duration.zero),
       identity: MockIdentityRepository(latency: Duration.zero),
@@ -54,6 +55,7 @@ Widget buildTestApp() {
 }
 
 /// 走登录主路径：alice / password → 首页就绪。
+/// Drives the main login path: alice / password → home page ready.
 Future<void> loginAndSettle(WidgetTester tester) async {
   await tester.pumpWidget(buildTestApp());
   await tester.enterText(find.byKey(const Key('login-username')), 'alice');
@@ -64,6 +66,9 @@ Future<void> loginAndSettle(WidgetTester tester) async {
 
 /// 切换主脚手架页签（IndexedStack 未选中页签对默认 finder 不可见）。
 /// 0=首页 1=明细 2=贷款 3=我的。
+/// Switches the main scaffold's tab (unselected IndexedStack tabs are
+/// invisible to the default finder).
+/// 0 = Home, 1 = Transactions, 2 = Loans, 3 = Profile.
 Future<void> switchTab(WidgetTester tester, int index) async {
   await tester.tap(find.byType(NavigationDestination).at(index));
   await tester.pumpAndSettle();

@@ -8,6 +8,22 @@
 /// - 登录态 token 注入：登录成功后写入 Bearer 拦截器（scheme 名
 ///   `bearerAuth`），登出清除；
 /// - DioException → AppException 的语义映射（页面层不感知 Dio）。
+///
+/// Generated-client adapter (P3.1) — the single consumption entry for the
+/// P2.6 `openapi-generated` package.
+///
+/// Responsibilities:
+/// - holds the `Openapi` instance and dispatches the API groups on demand
+///   (auth/me/accounts/loans);
+/// - injected base-URL normalization: the planned value of
+///   `--dart-define=ABNK_API_BASE` carries the `/abnk/api/v1` suffix, while
+///   the generated client's request paths already include every prefix
+///   (dio concatenates baseUrl+path as strings), so only the origin is kept
+///   to avoid duplicated prefixes;
+/// - logged-in token injection: after login the token goes into the Bearer
+///   interceptor (scheme name `bearerAuth`); cleared on logout;
+/// - semantic mapping of DioException onto AppException (the page layer
+///   never sees Dio).
 library;
 
 import 'package:dio/dio.dart';
@@ -26,6 +42,14 @@ class GeneratedClient {
   /// 生成 client 的路径模板（如 `/abnk/api/v1/me`、`/login`）已携带
   /// 全部路由前缀，dio 的 url 组合是 `baseUrl + path` 字符串拼接，
   /// 因此注入值携带的尾缀路径必须剥除，否则拼出重复前缀。
+  ///
+  /// Normalizes the injected base URL down to the origin
+  /// (scheme://host:port).
+  ///
+  /// The generated client's path templates (e.g. `/abnk/api/v1/me`,
+  /// `/login`) already carry the full route prefix, and dio composes urls by
+  /// string-concatenating `baseUrl + path`, so any suffix path on the
+  /// injected value must be stripped — otherwise prefixes get duplicated.
   static String _normalizeBaseUrl(String base) {
     final uri = Uri.parse(base);
     // ABNK_API_BASE 是开发者侧配置错误，非用户可见文案（Part03 任务 3.4
@@ -38,6 +62,10 @@ class GeneratedClient {
     }
     // 用 origin 构造（勿用 replace(path: '')——空 query/fragment 会序列化
     // 出 `?#` 尾巴，与请求 path 拼接后路由前缀会被吞进 fragment）。
+    // Build from the origin (do not use replace(path: '') — an empty
+    // query/fragment would serialize into a trailing `?#`, and once
+    // concatenated with the request path the route prefix would be swallowed
+    // into the fragment).
     return Uri(scheme: uri.scheme, host: uri.host, port: uri.port).toString();
   }
 
@@ -47,9 +75,13 @@ class GeneratedClient {
   gen.LoansApi get loans => _openapi.getLoansApi();
 
   /// 登录成功后注入 JWT（Bearer 拦截器按 scheme 名 `bearerAuth` 匹配）。
+  /// Injects the JWT after a successful login (the Bearer interceptor
+  /// matches by the scheme name `bearerAuth`).
   void setToken(String token) => _openapi.setBearerAuth('bearerAuth', token);
 
   /// 登出清除 JWT（后续请求不再携带 Authorization 头）。
+  /// Clears the JWT on logout (subsequent requests carry no Authorization
+  /// header).
   void clearToken() => _openapi.removeBearerAuth('bearerAuth');
 }
 
@@ -57,6 +89,14 @@ class GeneratedClient {
 ///
 /// 页面层只消费 [AppException] 体系（AppExceptionPresenter），与 mock
 /// 实现抛出的异常类型完全一致——接线后页面零改动的保障之一。
+///
+/// Semantic dispatch of Dio exceptions onto [AppException] (shared by the
+/// remote repositories).
+///
+/// The page layer only consumes the [AppException] hierarchy
+/// (AppExceptionPresenter), exactly matching the exception types thrown by
+/// the mock implementations — one of the guarantees that pages need zero
+/// changes after wiring.
 AppException mapApiError(Object error) {
   if (error is! DioException) {
     return const NetworkException();
@@ -64,6 +104,7 @@ AppException mapApiError(Object error) {
   final response = error.response;
   if (response == null) {
     // 无响应体：连接失败 / 超时 / 请求被取消。
+    // No response body: connection failure / timeout / request cancelled.
     return const NetworkException();
   }
   final serverMessage = _serverMessage(response.data);
@@ -86,6 +127,8 @@ AppException mapApiError(Object error) {
 }
 
 /// 尝试从网关 ErrorResponse（status/error/message）提取用户可读信息。
+/// Attempts to extract the user-readable message from the gateway's
+/// ErrorResponse (status/error/message).
 String? _serverMessage(Object? data) {
   if (data is Map<String, dynamic>) {
     final message = data['message'];

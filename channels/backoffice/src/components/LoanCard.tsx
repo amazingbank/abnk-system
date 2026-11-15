@@ -3,7 +3,10 @@ import type { LoanSummary } from '@/api';
 import { formatMoney } from '@/utils/format';
 import { interpolate, useLoanOps } from '@/i18n';
 
-/** 贷款信息卡（客户详情页——含逾期分档展示） */
+/**
+ * 贷款信息卡（客户详情页——含逾期分档展示）
+ * Loan summary card (client detail page — with arrears-band display).
+ */
 export default function LoanCard({ loan }: { loan: LoanSummary }) {
   const t = useLoanOps();
 

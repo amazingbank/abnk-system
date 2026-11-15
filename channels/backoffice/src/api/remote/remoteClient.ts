@@ -2,6 +2,11 @@
  * ClientRepository 的 remote 实现（任务 P3.2）——契约内部面 `/bo/api/v1/clients*`
  * 经网关全量转发（P2.5 转发面定案），raw Fineract 形态在本适配层组装为
  * P1.4 repository 接口形态（页面零感知）。
+ * Remote implementation of ClientRepository (task P3.2) — the contract's
+ * internal face `/bo/api/v1/clients*` is forwarded wholesale through the
+ * gateway (per the P2.5 forwarding decision), and this adapter assembles
+ * raw Fineract shapes into the P1.4 repository interface (pages stay
+ * completely unaware).
  *
  * 组装链（契约 ClientDetail/ClientListResult 的字段反推依据）：
  * - 列表：`GET /clients?search=`（raw 分页）+ 每客户首证照并发补齐
@@ -15,6 +20,25 @@
  *   必填的 locale/dateFormat 由本层注入（契约面不暴露、转发面不注入，
  *   P0.2 VP0.2.1 / P2.5 VP2.5.3 归档实测口径），PUT 响应为变更回执
  *   （resourceId/changes），非证照形态——回读 identifiers 后映射返回。
+ * Assembly chain (the basis for reverse-engineering the fields of the
+ * ClientDetail/ClientListResult contracts):
+ * - List: `GET /clients?search=` (raw pagination) plus a concurrent
+ *   first-identifier fetch per client (`GET /clients/{id}/identifiers` —
+ *   data for the identifier status column; the forwarding layer offers no
+ *   aggregation, so the adapter fills it in; failures degrade to null
+ *   without blocking the page);
+ * - Detail: `GET /clients/{id}` + identifiers + `GET /clients/{id}/accounts`
+ *   (rawGet — not on the generated-client contract surface) plus the loan
+ *   `GET /loans/{id}`; fixed-deposit maturity date/interest rate are filled
+ *   in via `GET /fixeddepositaccounts/{id}` (the /accounts projection has
+ *   no maturityDate);
+ * - Identifier update: `PUT /clients/{id}/identifiers/{identifierId}` —
+ *   the locale/dateFormat fields Fineract requires are injected by this
+ *   layer (not exposed on the contract surface, not injected by the
+ *   forwarding layer; per the archived field-test conclusions of P0.2
+ *   VP0.2.1 / P2.5 VP2.5.3). The PUT response is a change receipt
+ *   (resourceId/changes), not an identifier shape — the identifiers are
+ *   re-read and mapped before returning.
  */
 
 import type {
@@ -45,10 +69,18 @@ import {
   type RawSavingsAccount,
 } from './fineractRaw';
 
-/** 定期账户判据（/accounts 投影 depositType.code，P3.2 探查实测） */
+/**
+ * 定期账户判据（/accounts 投影 depositType.code，P3.2 探查实测）
+ * Fixed-deposit account predicate (depositType.code on the /accounts
+ * projection; verified during P3.2 probing).
+ */
 const FIXED_DEPOSIT_CODE = 'depositAccountType.fixedDeposit';
 
-/** raw 证照 → 契约 ClientIdentifier（含到期状态推导 + 记录状态映射） */
+/**
+ * raw 证照 → 契约 ClientIdentifier（含到期状态推导 + 记录状态映射）
+ * Raw identifier → contract ClientIdentifier (with expiry-status
+ * derivation and record-status mapping).
+ */
 function mapIdentifier(raw: RawIdentifier, businessDate: string): ClientIdentifier {
   const expiryDate = normalizeDate(raw.expiryDate) ?? '';
   return {
@@ -64,7 +96,11 @@ function mapIdentifier(raw: RawIdentifier, businessDate: string): ClientIdentifi
   };
 }
 
-/** raw 贷款 → 契约 LoanSummary（逾期天数 = 业务日期 − 逾期起算日） */
+/**
+ * raw 贷款 → 契约 LoanSummary（逾期天数 = 业务日期 − 逾期起算日）
+ * Raw loan → contract LoanSummary (days in arrears = business date −
+ * arrears start date).
+ */
 function mapLoan(raw: RawLoanLike, businessDate: string): LoanSummary {
   const overdueSinceDate = normalizeDate(raw.summary?.overdueSinceDate);
   return {
@@ -83,7 +119,10 @@ function mapLoan(raw: RawLoanLike, businessDate: string): LoanSummary {
   };
 }
 
-/** raw 活期账户 → 契约 SavingsAccountSummary */
+/**
+ * raw 活期账户 → 契约 SavingsAccountSummary
+ * Raw savings account → contract SavingsAccountSummary.
+ */
 function mapSavings(acct: RawSavingsAccount): SavingsAccountSummary {
   return {
     id: acct.id,
@@ -104,6 +143,9 @@ export function createRemoteClientRepository(client: GatewayClient): ClientRepos
         const rows = page.pageItems ?? [];
         const businessDate = await getBusinessDate(client);
         // 首证照并发补齐（N+1 转发面无聚合——POC 数据量口径）；单项失败降级 null
+        // Concurrent first-identifier fill-in (N+1 — the forwarding layer has
+        // no aggregation, acceptable at POC data volumes); single failures
+        // degrade to null.
         const firstIdentifiers = await Promise.all(
           rows.map((row) =>
             client.clients
@@ -164,6 +206,8 @@ export function createRemoteClientRepository(client: GatewayClient): ClientRepos
           }
         }
         // 定期账户补齐到期日/利率（/accounts 投影无 maturityDate——FD 详情端点）
+        // Fill in fixed-deposit maturity date/interest rate (the /accounts
+        // projection has no maturityDate — use the FD detail endpoint).
         const fdDetails = await Promise.all(
           fixedDeposits.map((fd) =>
             client
@@ -173,6 +217,8 @@ export function createRemoteClientRepository(client: GatewayClient): ClientRepos
         );
         const firstIdentifier = identifiersResp[0] ?? null;
         // 贷款：首笔账户贷款（active 优先）→ 详情端点补齐逾期分档
+        // Loan: the first account loan (active first) → the detail endpoint
+        // fills in the arrears band.
         const loanRefs = accounts?.loanAccounts ?? [];
         const loanRef =
           loanRefs.find((a) => a.status?.active === true) ?? loanRefs[0] ?? null;
@@ -230,6 +276,8 @@ export function createRemoteClientRepository(client: GatewayClient): ClientRepos
     ): Promise<ClientIdentifier> {
       try {
         // Fineract PUT 必填参数由本层注入（网关转发面不注入——P2.5 实测口径）
+        // Fineract's mandatory PUT parameters are injected here (the gateway
+        // forwarding layer does not inject them — per P2.5 field testing).
         const wirePayload = {
           expiryDate: payload.expiryDate,
           documentKey: payload.documentKey,
@@ -243,6 +291,8 @@ export function createRemoteClientRepository(client: GatewayClient): ClientRepos
           wirePayload as IdentifierUpdatePayload,
         );
         // PUT 响应为变更回执——回读证照清单后映射（回显由页面重读详情实现）
+        // The PUT response is a change receipt — re-read the identifier list
+        // and map it (the echo is achieved by the page reloading the detail).
         const identifiers = (
           await client.clients.listClientIdentifiers(clientId)
         ).data as unknown as RawIdentifier[];

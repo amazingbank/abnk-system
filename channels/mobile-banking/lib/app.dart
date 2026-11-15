@@ -9,6 +9,10 @@ import 'main_scaffold.dart';
 /// ABNK 手机银行 App 入口组件。
 ///
 /// [state] 由调用方注入（main 用 mock 实现；测试用快速 mock 或替换实现）。
+/// Entry widget of the ABNK mobile-banking app.
+///
+/// [state] is injected by the caller (main supplies the mock
+/// implementations; tests supply fast mocks or substitutes).
 class AbnkApp extends StatelessWidget {
   const AbnkApp({super.key, required this.state});
 

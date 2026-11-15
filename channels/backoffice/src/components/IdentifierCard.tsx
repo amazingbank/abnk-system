@@ -4,7 +4,11 @@ import IdentifierEditForm from '@/components/IdentifierEditForm';
 import IdentifierStatusTag from '@/components/IdentifierStatusTag';
 import { useClients } from '@/i18n';
 
-/** 证照信息卡（详情页）——只读展示 + 编辑表单（expiry_date 录入，mock 提交回显） */
+/**
+ * 证照信息卡（详情页）——只读展示 + 编辑表单（expiry_date 录入，mock 提交回显）
+ * Identifier card (detail page) — read-only display plus an edit form
+ * (expiry_date entry with mock-submit echo).
+ */
 export default function IdentifierCard({
   detail,
   onSaved,

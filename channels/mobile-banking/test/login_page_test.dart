@@ -7,6 +7,8 @@ import 'helpers/test_app.dart';
 void main() {
   setUpAll(() {
     // 与 main.dart 同口径：测试内禁运行时字体拉取，走自托管资产。
+    // Same policy as main.dart: runtime font fetching is disabled in tests;
+    // use the self-hosted assets.
     GoogleFonts.config.allowRuntimeFetching = false;
   });
 
@@ -15,6 +17,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // ASDM logo（assets/brand/asdm-logo.png）出现在品牌标题上方。
+    // The ASDM logo (assets/brand/asdm-logo.png) sits above the brand title.
     expect(find.byKey(const Key('login-logo')), findsOneWidget);
     expect(find.text('Amazing Bank'), findsOneWidget);
     expect(find.text('手机银行'), findsOneWidget);

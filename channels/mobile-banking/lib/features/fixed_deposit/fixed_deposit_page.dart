@@ -13,6 +13,8 @@ import '../../data/models/account.dart';
 import '../../data/models/loan.dart';
 
 /// 定期开户页——定期产品展示（利率 / 期限 / 起存金额）+ 开户表单。
+/// Fixed-deposit page — product display (interest rate / term / minimum
+/// opening amount) plus the account-opening form.
 class FixedDepositPage extends StatefulWidget {
   const FixedDepositPage({super.key});
 

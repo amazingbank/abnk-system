@@ -15,6 +15,8 @@ import { applyAbnkCssVariables } from './theme/abnkTheme';
 import AppProviders from './AppProviders';
 
 // 设计系统 tokens（P1.2 单一事实源）注入：AntD 主题 + CSS 变量层
+// Inject design-system tokens (the P1.2 single source of truth):
+// AntD theme + CSS variable layer.
 applyAbnkCssVariables();
 
 ReactDOM.createRoot(document.getElementById('root')!).render(

@@ -8,6 +8,20 @@
 #    （网关 CorsConfig + OPTIONS 直通已在 P3.1/P3.2 放行验证）。注入网关 origin
 #    https://api.amazingbank.ai，经入口 nginx 的 api Host 分流直达网关。
 #
+# Container image for ABNK Backoffice (the operations console, a Vite React SPA).
+#
+# Multi-stage self-contained build: the builder stage runs npm ci + vite build
+# (node 22, aligned with the local dev toolchain v22.23.1), and the artifact
+# stage serves statically via nginx. The pattern mirrors
+# channels/website/Dockerfile.
+#
+# ⚠️ API base-URL policy (a field-tested correction to the plan's "relative
+#    path"): per the P3.2 dataSource/generatedClient contract, an absolute
+#    `VITE_ABNK_API_BASE` means a direct cross-origin connection (the
+#    gateway's CorsConfig + OPTIONS pass-through were verified in P3.1/P3.2).
+#    The gateway origin https://api.amazingbank.ai is injected, reaching the
+#    gateway directly via the entry nginx's api Host routing.
+#
 # 数据集语言注入（Part03 Phase 2 任务 2.2，决策 D3）：部署侧变量
 # ABNK_DATA_LOCALE 经 ARG 传入，构建期烘焙为 VITE_ABNK_DATA_LOCALE
 # （Vite 前缀铁律：进 import.meta.env 必须 VITE_ 前缀，两名字并存 =
@@ -25,15 +39,24 @@
 #   docker build -f channels/backoffice/Dockerfile \
 #     -t abnk-bo:0.1.1 channels/backoffice
 #   （tag 源 = package.json version 0.1.1，patch 递增纪律同 website Iron Rule 4）
+#
+# Build (run from the repo root):
+#   docker build -f channels/backoffice/Dockerfile \
+#     -t abnk-bo:0.1.1 channels/backoffice
+#   (tag source = package.json version 0.1.1; patch-increment discipline
+#    follows website's Iron Rule 4)
 
 # ---------- builder ----------
 # multi-arch：builder 钉构建机架构（npm build 产物为静态文件，架构无关）
+# multi-arch: the builder stage is pinned to the build machine's platform
+# (npm build output is static files, platform-independent)
 FROM --platform=$BUILDPLATFORM node:22-alpine AS build
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci --no-audit --no-fund
 COPY . .
 # remote 模式开关注入（构建期烘焙进 import.meta.env）
+# Remote-mode switch injection (baked into import.meta.env at build time)
 # 数据集语言注入：ARG 先声明后引用（builder 阶段 RUN 之前）；缺省值
 # en-us = 发版拍板（2026-11-12）：应用数据默认英文，显式 --build-arg 可覆盖
 # Data-set locale injection: declare ARG before referencing it (ahead of the

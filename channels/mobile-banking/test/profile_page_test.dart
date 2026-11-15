@@ -15,11 +15,14 @@ void main() {
     await switchTab(tester, 3);
 
     // 客户资料
+    // Customer profile
     expect(find.text('Alice Green'), findsOneWidget);
     expect(find.text('用户名'), findsOneWidget);
     expect(find.text('alice'), findsOneWidget);
 
     // 证照信息（P0.3 种子：客户 A 证照 2020-01-01 过期）
+    // Identifier information (P0.3 seed: customer A's identifier expired on
+    // 2020-01-01)
     expect(find.text('证件信息（只读）'), findsOneWidget);
     expect(find.text('2020-01-01'), findsOneWidget);
     expect(find.text('已过期'), findsOneWidget);

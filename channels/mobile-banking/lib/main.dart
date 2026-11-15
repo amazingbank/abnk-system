@@ -38,6 +38,9 @@ Locale resolveInitialLocale(
 Future<void> main() async {
   // 自托管字体口径（P1.2 锁定）：禁运行时拉取，字体经 assets/fonts/
   // 内置打包进产物（对齐官网 no-CDN 约束）。
+  // Self-hosted font policy (locked in P1.2): runtime fetching is disabled;
+  // fonts are bundled into the artifact via assets/fonts/ (aligned with the
+  // website's no-CDN constraint).
   GoogleFonts.config.allowRuntimeFetching = false;
   // 异步启动前置（Part03 P3.2）：读取语言偏好（shared_preferences）前必须
   // 完成绑定初始化。
@@ -47,6 +50,11 @@ Future<void> main() async {
   // 走查口径（P3.1）：自动化浏览器走查经 `--dart-define=ABNK_ENABLE_SEMANTICS=true`
   // 显式启用语义树（新 Flutter web 无可见 Enable accessibility 按钮，AT 探测
   // 无法自动触发）；默认关闭，不影响生产产物。
+  // Walkthrough policy (P3.1): automated browser walkthroughs opt into the
+  // semantics tree explicitly via `--dart-define=ABNK_ENABLE_SEMANTICS=true`
+  // (new Flutter web has no visible Enable accessibility button, so
+  // assistive-tech probes cannot trigger it); off by default, leaving
+  // production artifacts unaffected.
   if (kIsWeb && const bool.fromEnvironment('ABNK_ENABLE_SEMANTICS')) {
     SemanticsBinding.instance.ensureSemantics();
   }

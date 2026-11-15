@@ -10,6 +10,12 @@ import '../../l10n/app_localizations.dart';
 /// 我的页——客户资料（脱敏）+ 证照有效期（只读）+ 登出。
 ///
 /// 显式不做：证照过期标红横幅（POC 演示增量）；本页状态 chip 为中性只读展示。
+/// Profile page — customer details (masked) + identifier validity
+/// (read-only) + sign-out.
+///
+/// Explicitly out of scope: the red identifier-expiry banner (a POC demo
+/// increment); the status chip on this page stays a neutral read-only
+/// display.
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
 

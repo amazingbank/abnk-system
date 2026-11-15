@@ -13,6 +13,7 @@ library;
 import '../../l10n/app_localizations.dart';
 
 /// 单笔交易明细。
+/// A single transaction entry.
 class TransactionItem {
   const TransactionItem({
     required this.id,

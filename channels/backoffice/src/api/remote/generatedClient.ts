@@ -14,6 +14,21 @@
  *   共用同一基址与 token 注入）；
  * - AxiosError → Error 的语义映射（页面层不感知 axios）；状态码兜底自
  *   任务 2.1 起改抛 ApiError 错误码，文案由 UI 层按语言翻译。
+ *
+ * Generated-client adapter (task P3.2) — the single consumption entry for the
+ * P2.6 `src/api/generated` package.
+ *
+ * Responsibilities (mirroring mobile P3.1's generated_client.dart):
+ * - holds the `Configuration` and dispatches the API groups (auth / clients /
+ *   loans) — the logged-in token is injected as the Bearer header via the
+ *   `accessToken` callback (security scheme `bearerAuth`);
+ * - base-URL normalization: in remote mode the base URL is a same-origin
+ *   relative path (vite proxy in dev, same-domain reverse proxy in
+ *   production); the generated client's request paths already carry the full
+ *   `/bo/...` prefix, so basePath only prepends for absolute base URLs
+ *   (e.g. http://localhost:8080);
+ * - JWT persistence: sessionStorage (aligned with AuthProvider's session
+ *   persistence — survives page refresh; cleared on logout);
  * - `rawGet`: access to raw forwarding-plane endpoints (businessdate /
  *   clients/{id}/accounts / fixeddepositaccounts/{id} — outside the generated
  *   client's contract surface, sharing its base URL and token injection);
@@ -36,25 +51,39 @@ function readJwt(): string | null {
   }
 }
 
-/** 登录成功后持久化 JWT（后续请求自动携带 Bearer 头） */
+/**
+ * 登录成功后持久化 JWT（后续请求自动携带 Bearer 头）
+ * Persists the JWT after a successful login (subsequent requests carry the
+ * Bearer header automatically).
+ */
 export function setJwt(token: string): void {
   try {
     sessionStorage.setItem(JWT_KEY, token);
   } catch {
     // 持久化失败不阻断登录（降级为内存外的会话态）
+    // A persistence failure must not block login (degrades to a session
+    // outside of storage).
   }
 }
 
-/** 登出清除 JWT */
+/**
+ * 登出清除 JWT
+ * Clears the JWT on logout.
+ */
 export function clearJwt(): void {
   try {
     sessionStorage.removeItem(JWT_KEY);
   } catch {
     // 同上——无操作
+    // Same as above — nothing to do.
   }
 }
 
-/** 网关错误体（{"error":..., "message":...}）提取用户可读信息 */
+/**
+ * 网关错误体（{"error":..., "message":...}）提取用户可读信息
+ * Extracts the user-readable message from a gateway error body
+ * ({"error":..., "message":...}).
+ */
 function extractServerMessage(data: unknown): string | null {
   if (data && typeof data === 'object' && 'message' in data) {
     const message = (data as { message?: unknown }).message;
@@ -101,7 +130,11 @@ export function toApiError(error: unknown): Error {
   return error instanceof Error ? error : new ApiError(ERR.unknown);
 }
 
-/** 网关 client 捆绑包（生成 client 三 API 组 + raw 转发访问） */
+/**
+ * 网关 client 捆绑包（生成 client 三 API 组 + raw 转发访问）
+ * Gateway client bundle (the three generated API groups plus raw
+ * forwarding-plane access).
+ */
 export interface GatewayClient {
   auth: AuthApi;
   clients: ClientsApi;
@@ -112,6 +145,9 @@ export interface GatewayClient {
 /**
  * 构造网关 client。`apiBase` 已由 dataSource 规范化：
  * `''` = 同源相对路径（dev proxy / 同域反代），绝对 URL = 跨 origin 直连。
+ * Builds the gateway client. `apiBase` is already normalized by dataSource:
+ * `''` = same-origin relative path (dev proxy / same-domain reverse proxy);
+ * an absolute URL = direct cross-origin connection.
  */
 export function createGatewayClient(apiBase: string): GatewayClient {
   const configuration = new Configuration({

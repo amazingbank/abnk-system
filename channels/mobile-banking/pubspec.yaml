@@ -28,11 +28,20 @@ dependencies:
 
   # ABNK 设计系统字体栈（P1.2 主题依赖）——字体文件自托管于 assets/fonts/
   # （对齐官网 no-CDN 口径），google_fonts 仅做族名匹配，运行时拉取已禁用。
+  # ABNK design-system font stack (a P1.2 theme dependency) — font files are
+  # self-hosted under assets/fonts/ (aligned with the website's no-CDN
+  # policy); google_fonts only matches family names, and runtime fetching is
+  # disabled.
   google_fonts: ^6.3.1
 
   # ABNK 生成 client（P2.6 契约生成物，P3.1 接线的 remote 数据层载体）——
   # 包名 openapi，路径依赖同仓 openapi-generated/，随契约冻结版锁定。
   # dio 为 remote 适配层直接消费（DioException 捕获与错误映射），显式声明。
+  # ABNK generated client (the P2.6 contract artifact, the remote data-layer
+  # carrier wired in P3.1) — package name openapi, a path dependency on the
+  # in-repo openapi-generated/, locked to the frozen contract version.
+  # dio is consumed directly by the remote adapter layer (DioException
+  # capture and error mapping), hence declared explicitly.
   dio: ^5.7.0
 
   # 官方 l10n 框架（Part03 P3）——提供 MaterialLocalizations 等 delegates，
@@ -63,11 +72,16 @@ dev_dependencies:
     sdk: flutter
 
   # 三载体走查（P1.3 VP1.3.5/VP1.3.6）——flutter drive 驱动 UI 并截屏归档
+  # Three-carrier walkthroughs (P1.3 VP1.3.5/VP1.3.6) — flutter drive drives
+  # the UI and archives screenshots
   integration_test:
     sdk: flutter
 
   # 启动器图标生成（iOS AppIcon + Android mipmap/自适应图标）——
   # 源图 assets/brand/app-icon-1024.png（ASDM logo，SVG 矢量栅格化）
+  # Launcher icon generation (iOS AppIcon + Android mipmap/adaptive icons) —
+  # source image assets/brand/app-icon-1024.png (the ASDM logo, rasterized
+  # from SVG)
   flutter_launcher_icons: ^0.14.4
 
   # The "flutter_lints" package above contains a set of recommended lints to
@@ -106,12 +120,21 @@ flutter:
     - fixtures/en-us/
     # 自托管字体资产目录——google_fonts 在 allowRuntimeFetching=false 时按
     # 「族名去空格-变体名.ttf」文件名约定经 AssetManifest 命中（实测源码口径）。
+    # Self-hosted font asset directory — with allowRuntimeFetching=false,
+    # google_fonts resolves files via AssetManifest using the
+    # "family-name-no-spaces-variant.ttf" filename convention (per the
+    # verified source).
     - assets/fonts/
     # ASDM 品牌 logo（登录页展示；SVG 矢量 1024 栅格化，透明底）
+    # ASDM brand logo (shown on the login page; rasterized from SVG at 1024,
+    # transparent background)
     - assets/brand/asdm-logo.png
 
   # ABNK 自托管字体（no-CDN 口径）——fonts 段注册直连族名（供
   # fontFamilyFallback 与非 google_fonts 路径使用），文件与 assets 段共用。
+  # ABNK self-hosted fonts (no-CDN policy) — the fonts section registers the
+  # direct family names (for fontFamilyFallback and non-google_fonts paths);
+  # the files are shared with the assets section.
   fonts:
     - family: Oxanium
       fonts:

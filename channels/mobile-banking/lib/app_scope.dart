@@ -19,6 +19,12 @@ const String abnkLocaleKey = 'abnk.locale';
 ///
 /// 页面层只经 [AppScope.of] 取依赖与状态，不直接构造 repository
 /// （P3.1 接线 = 在 main 处把 mock 实现换成生成 client，页面零改动）。
+/// App state — holds the repository set and the login session.
+///
+/// The page layer only obtains dependencies and state through [AppScope.of]
+/// and never constructs repositories itself (the P3.1 wiring swaps the mock
+/// implementations for the generated client in main, leaving pages
+/// untouched).
 class AppState extends ChangeNotifier {
   AppState({
     required this.auth,
@@ -113,6 +119,7 @@ class AppState extends ChangeNotifier {
 }
 
 /// repository + 会话的依赖注入入口。
+/// Dependency-injection entry for repositories and the session.
 class AppScope extends InheritedNotifier<AppState> {
   const AppScope({super.key, required super.notifier, required super.child});
 

@@ -14,14 +14,17 @@ void main() {
     await loginAndSettle(tester);
 
     // 活期总余额（alice：10000 + 0）
+    // Total savings balance (alice: 10000 + 0)
     expect(find.text('活期总余额'), findsOneWidget);
     expect(find.text('¥10,000.00'), findsWidgets);
 
     // 账户卡片（源/目标账户，P0.3 种子：account 11 / 12）
+    // Account cards (source/target accounts; P0.3 seed: account 11 / 12)
     expect(find.textContaining('0000**0011'), findsOneWidget);
     expect(find.textContaining('0000**0012'), findsOneWidget);
 
     // 快捷操作四入口
+    // The four quick-action entries
     expect(find.text('转账'), findsOneWidget);
     expect(find.text('定期'), findsOneWidget);
   });

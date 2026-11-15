@@ -15,6 +15,7 @@ void main() {
     await switchTab(tester, 1);
 
     // alice 默认账户 11（存入 10000 → 余额 10000）
+    // alice's default account 11 (deposit 10000 → balance 10000)
     expect(find.text('初始存入'), findsOneWidget);
     expect(find.text('2027-01-17 · 存入'), findsOneWidget);
     expect(find.text('+¥10,000.00'), findsOneWidget);
@@ -26,6 +27,7 @@ void main() {
     await switchTab(tester, 1);
 
     // 切换到账户 12（空流水）
+    // Switch to account 12 (empty statement)
     await tester.tap(find.byKey(const Key('tx-account')));
     await tester.pumpAndSettle();
     await tester.tap(find.textContaining('0000**0012').last);

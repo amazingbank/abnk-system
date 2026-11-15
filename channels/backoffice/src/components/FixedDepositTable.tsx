@@ -3,7 +3,10 @@ import type { FixedDepositSummary } from '@/api';
 import { formatMoney } from '@/utils/format';
 import { useClients } from '@/i18n';
 
-/** 定期账户表（客户详情页） */
+/**
+ * 定期账户表（客户详情页）
+ * Fixed-deposit account table (client detail page).
+ */
 export default function FixedDepositTable({ accounts }: { accounts: FixedDepositSummary[] }) {
   const t = useClients();
 

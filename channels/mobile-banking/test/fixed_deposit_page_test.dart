@@ -17,11 +17,13 @@ void main() {
     await tester.pumpAndSettle();
 
     // 产品卡片（P0.3 种子：定期产品 20）
+    // Product card (P0.3 seed: fixed-deposit product 20)
     expect(find.text('ABNK 定期存款'), findsOneWidget);
     expect(find.text('3.0%'), findsOneWidget);
     expect(find.text('12 个月'), findsOneWidget);
 
     // 提交开户
+    // Submit the opening
     await tester.enterText(find.byKey(const Key('fd-amount')), '5000');
     await tester.tap(find.byKey(const Key('fd-submit')));
     await tester.pumpAndSettle();

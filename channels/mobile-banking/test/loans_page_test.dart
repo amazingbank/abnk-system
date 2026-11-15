@@ -17,6 +17,7 @@ void main() {
     expect(find.text('等额本息'), findsOneWidget);
 
     // 打开申请表单并提交
+    // Open the application form and submit
     await tester.tap(find.byKey(const Key('loan-apply-11')));
     await tester.pumpAndSettle();
 

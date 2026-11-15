@@ -12,6 +12,7 @@ class MockAuthRepository implements AuthRepository {
   MockAuthRepository({this.latency = const Duration(milliseconds: 300)});
 
   /// 模拟网关往返延迟。
+  /// Simulated gateway round-trip latency.
   final Duration latency;
 
   @override

@@ -56,6 +56,7 @@ class MockAccountRepository implements AccountRepository, Resettable {
   }
 
   // ── 内部状态装载 ────────────────────────────────────────────
+  // ── Internal state loading ─────────────────────────────────
 
   Future<_Ledger> _ledger(String username) async {
     final cached = _ledgers[username];
@@ -139,6 +140,8 @@ class MockAccountRepository implements AccountRepository, Resettable {
   }
 
   /// 对年对月对日到期（P0.2 实测口径：激活日 + N 个月，日 Clamp 到月末）。
+  /// Same-date-of-month maturity (the P0.2 field-tested rule: activation
+  /// date + N months, with the day clamped to the end of the month).
   static String _maturityAfterMonths(int months) {
     final now = DateTime.now();
     var year = now.year;
@@ -153,6 +156,7 @@ class MockAccountRepository implements AccountRepository, Resettable {
   }
 
   // ── 接口实现 ────────────────────────────────────────────────
+  // ── Interface implementation ───────────────────────────────
 
   @override
   Future<AccountSummary> getAccounts(String username) async {
@@ -285,6 +289,8 @@ class MockAccountRepository implements AccountRepository, Resettable {
 }
 
 /// 单用户的内存账本（活期 + 定期账户引用）。
+/// The in-memory ledger for one user (savings + fixed-deposit account
+/// references).
 class _Ledger {
   _Ledger({required this.savingsAccounts, required this.fixedDepositAccounts});
 
@@ -292,6 +298,8 @@ class _Ledger {
   List<Account> fixedDepositAccounts;
 
   /// 账户对象在内存中被 copyWith 替换后，同步引用。
+  /// Syncs the references after account objects are replaced in memory via
+  /// copyWith.
   void refreshFrom(Map<int, Account> accountsById) {
     savingsAccounts = savingsAccounts
         .map((a) => accountsById[a.id] ?? a)

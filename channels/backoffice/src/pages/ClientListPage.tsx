@@ -24,6 +24,8 @@ export default function ClientListPage() {
       setError(null);
     } catch (err) {
       // 失败必须可见：静默吞错会渲染成空表（"No data"），与"无数据"不可区分
+      // Failures must stay visible: silently swallowing errors would render
+      // an empty table ("No data"), indistinguishable from "no records".
       setError(apiErrorMessage(err, ERR.unknown));
     } finally {
       setLoading(false);

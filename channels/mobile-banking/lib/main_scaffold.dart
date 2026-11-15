@@ -7,6 +7,8 @@ import 'features/profile/profile_page.dart';
 import 'features/transactions/transactions_page.dart';
 
 /// 登录后的主脚手架——底部导航四页签（首页 / 明细 / 贷款 / 我的）。
+/// Post-login main scaffold — a bottom navigation bar with four tabs
+/// (Home / Transactions / Loans / Profile).
 class MainScaffold extends StatefulWidget {
   const MainScaffold({super.key});
 
@@ -31,6 +33,10 @@ class _MainScaffoldState extends State<MainScaffold> {
         children: [
           // 首页/明细用页签序号作 key——每次切回该页签重建并重新拉取
           // mock 内存态（转账/开户后的余额与新流水即时可见，对齐旅程 Step 8）。
+          // Home/Transactions use the tab index as their key — switching back
+          // to the tab rebuilds it and refetches the mock in-memory state
+          // (balances and new transactions show up immediately after
+          // transfers/openings, matching journey Step 8).
           KeyedSubtree(
             key: ValueKey('home-$_currentIndex'),
             child: HomePage(onNavigateTab: (i) => setState(() => _currentIndex = i)),

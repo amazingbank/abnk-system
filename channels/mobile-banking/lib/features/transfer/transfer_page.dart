@@ -14,6 +14,11 @@ import '../../data/models/account.dart';
 /// 转账页——本人账户间转账（金额 + 附言，提交后回显新余额）。
 ///
 /// 基线无证照拦截分支；403 语义经通用错误框架分发（AppExceptionPresenter）。
+/// Transfer page — transfers between the user's own accounts (amount + note;
+/// the new balance is echoed after submission).
+///
+/// The baseline has no identifier-gating branch; 403 semantics are dispatched
+/// through the generic error framework (AppExceptionPresenter).
 class TransferPage extends StatefulWidget {
   const TransferPage({super.key});
 

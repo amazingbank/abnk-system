@@ -10,6 +10,10 @@ import { interpolate, useLoanOps } from '@/i18n';
 /**
  * 贷款运营页（任务 P1.4）——（只读）审批/放款操作位：
  * POC 基线不提供写操作，按钮为禁用预埋位，P2.5 网关内部通道接入后启用。
+ * Loan operations page (task P1.4) — (read-only) approval/disbursement action
+ * slots: the POC baseline offers no write operations, so the buttons are
+ * disabled placeholders, to be enabled once the P2.5 gateway internal
+ * channel lands.
  */
 export default function LoanOpsPage() {
   const t = useLoanOps();
@@ -26,6 +30,8 @@ export default function LoanOpsPage() {
       })
       .catch((err) => {
         // 失败必须可见：静默吞错会渲染成空表（"No data"），与"无数据"不可区分
+        // Failures must stay visible: silently swallowing errors would render
+        // an empty table ("No data"), indistinguishable from "no records".
         setError(apiErrorMessage(err, ERR.unknown));
       })
       .finally(() => setLoading(false));

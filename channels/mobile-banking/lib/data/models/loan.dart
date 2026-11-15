@@ -12,6 +12,8 @@ library;
 import '../../l10n/app_localizations.dart';
 
 /// 消费贷产品（对客收敛字段——隐藏内部配置）。
+/// Consumer-loan product (customer-facing, trimmed fields — internal
+/// configuration stays hidden).
 class LoanProduct {
   const LoanProduct({
     required this.id,
@@ -58,6 +60,7 @@ String repaymentMethodLabel(AppLocalizations l10n, String repaymentMethod) =>
         : repaymentMethod;
 
 /// 定期存款产品。
+/// Fixed-deposit product.
 class FixedDepositProduct {
   const FixedDepositProduct({
     required this.id,
@@ -87,6 +90,7 @@ class FixedDepositProduct {
 }
 
 /// 贷款申请请求。
+/// Loan application request.
 class LoanApplicationRequest {
   const LoanApplicationRequest({
     required this.productId,
@@ -102,6 +106,7 @@ class LoanApplicationRequest {
 }
 
 /// 贷款申请结果。
+/// Loan application result.
 class LoanApplicationResult {
   const LoanApplicationResult({required this.loanId, required this.status});
 

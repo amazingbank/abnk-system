@@ -2,7 +2,11 @@ import { Tag } from 'antd';
 import type { IdentifierStatus } from '@/api';
 import { useClients } from '@/i18n';
 
-/** 证照到期状态标签（EXPIRED=brick 红 / VALID=sage 绿 / 未登记=中性） */
+/**
+ * 证照到期状态标签（EXPIRED=brick 红 / VALID=sage 绿 / 未登记=中性）
+ * Identifier expiry status tag (EXPIRED = brick red / VALID = sage green /
+ * unregistered = neutral).
+ */
 export default function IdentifierStatusTag({ status }: { status: IdentifierStatus | null }) {
   const t = useClients();
 

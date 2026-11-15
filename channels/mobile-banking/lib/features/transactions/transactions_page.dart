@@ -13,6 +13,12 @@ import '../../l10n/app_localizations.dart';
 ///
 /// [initialAccountId] 存在时为「从账户卡片进入」的定向视图；否则为页签
 /// 默认视图（取首个活期账户）。
+/// Transactions page — account selector plus the statement list (including
+/// the runningBalance column).
+///
+/// When [initialAccountId] is present this is the targeted view entered from
+/// an account card; otherwise it is the tab's default view (using the first
+/// savings account).
 class TransactionsPage extends StatefulWidget {
   const TransactionsPage({super.key, this.initialAccountId});
 

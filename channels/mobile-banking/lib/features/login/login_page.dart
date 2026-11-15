@@ -7,6 +7,9 @@ import '../../l10n/app_localizations.dart';
 
 /// 登录页——简化登录（用户名 + 密码）；指纹 / 安全键盘为纯视觉占位
 /// （范围外，POC 演示增量承接）。
+/// Login page — simplified sign-in (username + password); the fingerprint /
+/// secure keypad are purely visual placeholders (out of scope, carried as a
+/// POC demo increment).
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
@@ -75,6 +78,8 @@ class _LoginPageState extends State<LoginPage> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     // ASDM 品牌 logo（assets/brand/asdm-logo.png，SVG 矢量栅格化）
+                    // ASDM brand logo (assets/brand/asdm-logo.png, SVG vector
+                    // rasterized)
                     Image.asset(
                       'assets/brand/asdm-logo.png',
                       key: const Key('login-logo'),
@@ -165,6 +170,8 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     const SizedBox(height: 20),
                     // 指纹按钮——纯视觉占位（不接入 local_auth，POC 增量承接）。
+                    // Fingerprint button — a purely visual placeholder (no
+                    // local_auth integration; carried as a POC increment).
                     Tooltip(
                       message: l10n.loginFingerprintTooltip,
                       child: AbsorbPointer(

@@ -14,10 +14,16 @@ import '../transfer/transfer_page.dart';
 /// 首页——账户总览（活期余额合计 + 账户卡片 + 快捷操作 + 定期账户）。
 ///
 /// 显式不做：证照过期横幅（POC 演示增量，基线不预设业务分支）。
+/// Home page — account overview (total savings balance + account cards +
+/// quick actions + fixed deposits).
+///
+/// Explicitly out of scope: the identifier-expiry banner (a POC demo
+/// increment; the baseline ships no such business branch).
 class HomePage extends StatefulWidget {
   const HomePage({super.key, required this.onNavigateTab});
 
   /// 快捷操作切换主脚手架页签（明细 / 贷款）。
+  /// Quick actions switch the main scaffold's tab (Transactions / Loans).
   final ValueChanged<int> onNavigateTab;
 
   @override

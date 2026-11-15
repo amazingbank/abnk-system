@@ -29,6 +29,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // 默认源账户 11（¥10,000）→ 目标账户 12
+    // Default source account 11 (¥10,000) → target account 12
     await tester.enterText(find.byKey(const Key('transfer-amount')), '2500');
     await tester.enterText(find.byKey(const Key('transfer-note')), '测试转账');
     await tester.tap(find.byKey(const Key('transfer-submit')));

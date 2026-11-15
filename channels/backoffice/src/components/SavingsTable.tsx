@@ -3,7 +3,10 @@ import type { SavingsAccountSummary } from '@/api';
 import { formatMoney } from '@/utils/format';
 import { useClients } from '@/i18n';
 
-/** 活期账户表（客户详情页） */
+/**
+ * 活期账户表（客户详情页）
+ * Savings account table (client detail page).
+ */
 export default function SavingsTable({ accounts }: { accounts: SavingsAccountSummary[] }) {
   const t = useClients();
 

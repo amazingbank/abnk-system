@@ -2,6 +2,10 @@
  * ClientRepository 的 mock 实现（任务 P1.4）——数据来自
  * `mockData/clients.json`（P0.3 种子快照口径），模拟网络延迟；
  * 证照更新改内存副本并推导到期状态（回显由页面重读详情实现）。
+ * Mock implementation of ClientRepository (task P1.4) — data comes from
+ * `mockData/clients.json` (the P0.3 seed snapshot) with simulated network
+ * latency; identifier updates mutate the in-memory copy and re-derive the
+ * expiry status (the echo is achieved by the page reloading the detail).
  */
 
 import { ApiError, ERR } from '../errors';

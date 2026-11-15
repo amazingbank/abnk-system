@@ -14,6 +14,8 @@ import '../../l10n/app_localizations.dart';
 enum IdentityStatus { valid, expiringSoon, expired }
 
 /// 客户证照信息（只读；基线不做过期横幅/拦截，POC 增量承接）。
+/// Customer identifier information (read-only; the baseline ships no expiry
+/// banner/gating — carried as a POC increment).
 class IdentityInfo {
   const IdentityInfo({
     required this.documentTypeId,

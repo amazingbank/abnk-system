@@ -15,6 +15,10 @@ interface IdentifierFormValues {
  * 证照编辑表单（任务 P1.4）——expiry_date 录入 + mock 提交回显：
  * 提交走 clientRepository.updateClientIdentifier，成功后 onSaved 回调
  * 触发页面重读详情（回显新值）。
+ * Identifier edit form (task P1.4) — expiry_date entry with mock-submit echo:
+ * submission goes through clientRepository.updateClientIdentifier, and the
+ * onSaved callback then triggers a detail reload on the page (echoing the
+ * new value).
  */
 export default function IdentifierEditForm({
   detail,

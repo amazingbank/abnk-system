@@ -10,6 +10,8 @@ import '../../core/theme/app_theme.dart';
 import '../../data/models/loan.dart';
 
 /// 贷款页——消费贷产品展示（利率 / 期限 / 额度）+ 申请表单。
+/// Loans page — consumer-loan product display (interest rate / term /
+/// credit limit) plus the application form.
 class LoansPage extends StatefulWidget {
   const LoansPage({super.key});
 
