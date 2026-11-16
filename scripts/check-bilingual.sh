@@ -261,13 +261,22 @@ run_default() {
 # ---------------------------------------------------------------- front-matter 模式 | mode 2: front-matter
 
 # 路由规则与 Phase 5 注入脚本 add-frontmatter.py 同口径
-# Routing mirrors the Phase 5 injector add-frontmatter.py.
+# （docs/portal-content/* 为 Part04 任务 2.4 路由扩面——portal-content 分区
+# 自 Phase 2 起为数据契约组成部分，按 planning-doc profile 校验，与
+# docs/planning/abnk-design/* 同模式；Part04 Phase 1 对 index/ 的排除扩面
+# 为同族先例）。
+# Routing mirrors the Phase 5 injector add-frontmatter.py
+# (docs/portal-content/* was added by Part04 task 2.4 — the portal-content
+# partition has been part of the data contract since Phase 2 and is validated
+# under the planning-doc profile, same pattern as docs/planning/abnk-design/*;
+# Part04 Phase 1's exclusion of index/ is the sibling precedent).
 route_profile() {
   case "$1" in
     docs/README.md)                     echo "planning-doc" ;;
     docs/Sprints/v*/part*/*)             echo "sprint-doc" ;;
     sre/ReleaseNotes/*)                  echo "release-note" ;;
     docs/planning/abnk-design/*)         echo "planning-doc" ;;
+    docs/portal-content/*)              echo "planning-doc" ;;
     *)                                   echo "UNROUTED" ;;
   esac
 }
