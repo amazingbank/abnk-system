@@ -17,5 +17,6 @@
 | smoke | 每日定时 + 手动 | `tests/smoke/` 12 步冒烟 | Phase 2 首版 |
 | e2e | 定时 + 手动 | 官方 E2E 子集 + Playwright | Phase 3 |
 | compat-matrix | 定时 | multi-arch（amd64/arm64）构建 + 国产库兼容 job（ADR-007） | Phase 4 |
+| check-bilingual | 每次提交 | 脚本对 channels/{backoffice,mobile-banking} 触碰/增量源码注释双语检查（存量单语注释不追溯——Plan 总体口径；存量渐进策略随 CI 首版由用户拍板） | Part03 首版 |
 
 涉及数据改动的提交必带双租户测试用例（红线 R4，`tests/tenant-isolation/`）。
