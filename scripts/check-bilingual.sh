@@ -348,9 +348,12 @@ check_fm_file() {
 
 run_frontmatter() {
   local target="$1" md rel
-  # 创作树口径：排除 artifacts/（证据语言无关）与 modelB/（外部资料）
-  # Authoring-tree scope: prune artifacts/ (language-agnostic evidence) and modelB/.
-  find "$target" -type d \( -name artifacts -o -name modelB \) -prune -o \
+  # 创作树口径：排除 artifacts/（证据语言无关）与 modelB/（外部资料）与
+  # index/（生成器机器产物——Part04 引入，非创作 md，front-matter 无从注入）
+  # Authoring-tree scope: prune artifacts/ (language-agnostic evidence),
+  # modelB/ (external material) and index/ (machine-generated outputs,
+  # introduced by Part04 — not authored md, no front-matter applies).
+  find "$target" -type d \( -name artifacts -o -name modelB -o -name index \) -prune -o \
     -type f -name '*.md' -print \
   | while IFS= read -r md; do
       rel="${md#"$target"/}"
