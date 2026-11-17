@@ -1,9 +1,10 @@
 # ABNK 生产编排 — abnk-prod compose 栈（全栈七容器，P3.4 扩容）
 #
 # 生产环境 = 正式部署实例（abnk-vm001）。拓扑：**abnk-nginx 单入口**（唯一绑定
-# 宿主 80/443，TLS 终止 + 按 Host 分流，见 nginx-gateway.conf）+ 六后端容器
+# 宿主 80/443，TLS 终止 + 按 Host 分流，见 nginx-gateway.conf）+ 七后端容器
 # （website 官网 / gateway SCG 网关 / fineract 平台 / pg-platform 数据库 /
-# bo 运营后台 / mweb 手机银行 web）。
+# bo 运营后台 / mweb 手机银行 web / devportal 过程资产门户——Part04 Phase 4
+# 新增，dev.amazingbank.ai 静态直供）。
 #
 # ⚠️ 取代关系（P3.5 切换口径）：本文件的服务定义已并入并 **supersede**
 #    `compose-abnk-platform.yaml`（平台栈：abnk-pg-platform + abnk-fineract——
@@ -15,7 +16,7 @@
 #   - up/down 必须带 --env-file（服务器 ~/deploy/.env；本地演练用
 #     deploy/prod/env/abnk-fullstack.drill.env）
 #   - 一切运行时写入物（TLS 证书/日志/备份）归部署根，代码域随仓库
-#   - 五自建镜像 tag 必须显式注入（:? 硬失败闸，无缺省回退）；
+#   - 六自建镜像 tag 必须显式注入（:? 硬失败闸，无缺省回退）；
 #     pg 与 nginx 入口为钉版本基础镜像，无 tag 变量
 #
 # 用法一（服务器——所有制品在服务端构建，P3.5）：
@@ -194,6 +195,28 @@ services:
     container_name: abnk-mweb
     image: ${ABNK_MWEB_IMAGE:?ABNK_MWEB_IMAGE is required}
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost/ || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 10s
+
+  # ── Dev Portal（ASDM 过程资产渲染门户——dev.amazingbank.ai 静态直供） ───
+  # Dev Portal (ASDM process-asset rendering portal — static serving for
+  # dev.amazingbank.ai; Part04 Phase 4 adds the fifth subdomain on the entry)
+  abnk-devportal:
+    container_name: abnk-devportal
+    # 镜像 tag 由发版流程注入（ABNK_DEVPORTAL_IMAGE——无缺省回退；tag 源 =
+    # abnk-devportal 仓 package.json version，ghcr 公共包——Part04 D5 口径）
+    # Image tag injected per release (ABNK_DEVPORTAL_IMAGE — no default
+    # fallback; tag source = the abnk-devportal repo's package.json version,
+    # a public ghcr package — the Part04 D5 policy)
+    image: ${ABNK_DEVPORTAL_IMAGE:?ABNK_DEVPORTAL_IMAGE is required}
+    restart: unless-stopped
+    # 纯静态直供：不挂证书（TLS 终止在入口）、不映射宿主端口（同 bo/mweb 形态）
+    # Pure static serving: no cert mount (TLS terminates at the entry), no
+    # host port mapping (same shape as bo/mweb)
     healthcheck:
       test: ["CMD-SHELL", "wget -q --spider http://localhost/ || exit 1"]
       interval: 10s
